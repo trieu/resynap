@@ -39,7 +39,7 @@ def text_to_slides(extracted_text: str):
     gemini_model = genai.GenerativeModel(model_name=GEMINI_MODEL)
     model_config = genai.GenerationConfig(temperature=0.8)
     
-    context = "You are book reader than can summary book into slides in markdown."
+    context = "You are book reader. You can do book summary into slides in markdown."
     context = context + " Each slide must begins with '##'. Write summary slides for this content: \n "
     prompt = context + extracted_text
 
@@ -94,9 +94,9 @@ def write_text_to_file(text: str, filename="summary-slides.md"):
 
 # ---------------------------
 # Replace with your PDF file path
-pdf_path = "/home/thomas/Documents/Digital Marketing Foundations and Strategy, Fifth Edition ( etc.) (Z-Library).pdf"
-start_page = 389
-end_page = 416
+pdf_path = "/home/thomas/Documents/CDP/aws-in-action.pdf"
+start_page = 200
+end_page = 232
 
 # extract text form PDF file
 extracted_text = extract_text_from_pdf(pdf_path, start_page, end_page)
