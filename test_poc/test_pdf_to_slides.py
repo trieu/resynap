@@ -11,6 +11,11 @@ load_dotenv()
 
 GEMINI_MODEL = 'models/gemini-1.5-flash-latest'
 GOOGLE_GENAI_API_KEY = os.getenv("GOOGLE_GENAI_API_KEY")
+
+if GOOGLE_GENAI_API_KEY is None or len(GOOGLE_GENAI_API_KEY) == 0:
+    print('GOOGLE_GENAI_API_KEY is empty')
+    exit
+
 genai.configure(api_key=GOOGLE_GENAI_API_KEY)
 
 
@@ -37,7 +42,7 @@ def text_to_slides(extracted_text: str):
         slides_in_markdown (str): slides in markdown code
     """
     gemini_model = genai.GenerativeModel(model_name=GEMINI_MODEL)
-    model_config = genai.GenerationConfig(temperature=0.8)
+    model_config = genai.GenerationConfig(temperature=0.5)
     
     context = "You are book reader. You can do book summary into slides in markdown."
     context = context + " Each slide must begins with '##'. Write summary slides for this content: \n "
@@ -105,7 +110,7 @@ extracted_text = extract_text_from_pdf(pdf_path, start_page, end_page)
 slides_in_md = text_to_slides(extracted_text)
 
 # write to file or save into database
-write_text_to_file(slides_in_md)
+write_text_to_file(slides_in_md, filename="chapter8.md")
 
 print("\n -------------------------- ")
 print(slides_in_md)
