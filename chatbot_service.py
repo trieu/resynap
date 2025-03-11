@@ -204,8 +204,6 @@ def ask_question(context: str = '', answer_in_format: str = '', target_language:
         if len(answer_text) > 1:
             rs = ''
             if answer_in_format == 'html':
-                # format the answer in HTML
-                answer_text = answer_text.replace('[LEO_BOT]', '[LEO_BOT]<br/>')
                 # convert the answer in markdown into html 
                 # See https://www.devdungeon.com/content/convert-markdown-html-python
                 rs_html = markdown.markdown(answer_text, extensions=['fenced_code'])

@@ -79,7 +79,6 @@ def build_prompts_from_mindmap(mindmap_text):
             
             if indent_level == base_indent:  # Ensure only direct children of root
                 nodes.append(node)
-
     return nodes
 
 def mindmap_to_image(prompts: list):
@@ -102,15 +101,19 @@ def mindmap_to_image(prompts: list):
             )
         )
 
-        for i, generated_image in enumerate(response.generated_images):
-            image = Image.open(BytesIO(generated_image.image.image_bytes))
+        if response and response.generated_images:
+            for i, generated_image in enumerate(response.generated_images):
+                image = Image.open(BytesIO(generated_image.image.image_bytes))
 
-            # Save the image to the folder with a unique filename
-            image_filename = f"generated_image_{name}.jpg" 
-            image_path = os.path.join(output_folder, image_filename)
-            image.save(image_path)
-            print(f"Image saved to: {image_path}")
-            images.append(image_path)
+                # Ensure a unique filename
+                image_filename = f"generated_image_{name}_{i}.jpg" 
+                image_path = os.path.join(output_folder, image_filename)
+                image.save(image_path)
+                print(f"Image saved to: {image_path}")
+                images.append(image_path)
+        else:
+            print("No images generated.")
+
     return images
 
 
@@ -125,6 +128,8 @@ def text_to_filename(text: str, max_length: int = 255) -> str:
 # Example usage
 main_title = "Lazy orange cat in my kitchen with a cup of coffee"
 mindmap = generate_mindmap_and_prompts(main_title)
+
+
 prompts = build_prompts_from_mindmap(mindmap)
 
 print("Mindmap:")
