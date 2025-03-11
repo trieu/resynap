@@ -1,6 +1,11 @@
 # Qdrant DB
 qdrant_storage
 
+# AI temp data
+generated_images
+generated_videos
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

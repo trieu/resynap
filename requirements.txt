@@ -1,30 +1,48 @@
+# FastAPI and Web Dependencies
 fastapi>=0.110.0
+uvicorn
 jinja2
 python-multipart
-uvicorn
-asyncio
-pytest
-requests
 python-dotenv
+requests
 
+# Async and Database
+asyncpg
+sqlalchemy>=2.0.38
+alembic
+psycopg[binary]
+
+# Pydantic (for data validation)
+pydantic[email,timezone]>=2.5.0
+
+# Redis Task Queue
 redis>=5.1.1
 rq
 rq-dashboard
 rq-scheduler
 
+# Data Processing
 numpy>=1.26.4
 pandas>=2.2.2
-qdrant-client>=1.12.0
-python-arango
-fastembed
-
 Faker
+
+# Vector Search
+qdrant-client>=1.13.0
+fastembed
+sentence-transformers>=3.4.1
+
+# AI & ML
+transformers
+google-genai>=1.5.0
+google-cloud-translate>=3.15.3
+google-cloud-texttospeech
+
+# PDF & Markdown Handling
 markdown
 gdown
 pypdl
 pymupdf
 
-google-generativeai>=0.8.3
-google-cloud-translate>=3.15.3
-transformers
-sentence-transformers
+# Media Processing
+opencv-python
+moviepy
