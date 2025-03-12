@@ -3,8 +3,8 @@ import google.generativeai as genai
 import json
 
 GEMINI_MODEL = 'models/gemini-1.5-flash-latest'
-GOOGLE_GENAI_API_KEY = os.getenv("GOOGLE_GENAI_API_KEY")
-genai.configure(api_key=GOOGLE_GENAI_API_KEY)
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+genai.configure(api_key=GEMINI_API_KEY)
 
 # Create the model
 generation_config = {

@@ -10,13 +10,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 GEMINI_MODEL = 'models/gemini-1.5-flash-latest'
-GOOGLE_GENAI_API_KEY = os.getenv("GOOGLE_GENAI_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-if GOOGLE_GENAI_API_KEY is None or len(GOOGLE_GENAI_API_KEY) == 0:
-    print('GOOGLE_GENAI_API_KEY is empty')
+if GEMINI_API_KEY is None or len(GEMINI_API_KEY) == 0:
+    print('GEMINI_API_KEY is empty')
     exit
 
-genai.configure(api_key=GOOGLE_GENAI_API_KEY)
+genai.configure(api_key=GEMINI_API_KEY)
 
 
 def insert_separator_before_headings(text):

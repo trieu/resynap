@@ -30,11 +30,11 @@ load_dotenv(override=True)
 VERSION = "1.0.0"
 SERVICE_NAME = "RESYNAP CHATBOT VERSION:" + VERSION
 
-GOOGLE_GENAI_API_KEY = os.getenv("GOOGLE_GENAI_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 TEMPERATURE_SCORE = 0.86
 
 # init PaLM client as backup AI
-genai.configure(api_key=GOOGLE_GENAI_API_KEY)
+genai.configure(api_key=GEMINI_API_KEY)
 
 # default model names
 GEMINI_1_5_MODEL = 'models/gemini-1.5-flash-latest'
@@ -85,9 +85,9 @@ async def root(request: Request):
 
 @chatbot.get("/get-visitor-info", response_class=JSONResponse)
 async def get_visitor_info(visitor_id: str):
-    isReady = isinstance(GOOGLE_GENAI_API_KEY, str)
+    isReady = isinstance(GEMINI_API_KEY, str)
     if not isReady:        
-        return {"answer": "GOOGLE_GENAI_API_KEY is empty", "error_code": 501}
+        return {"answer": "GEMINI_API_KEY is empty", "error_code": 501}
     if len(visitor_id) == 0: 
         return {"answer": "visitor_id is empty ", "error": True, "error_code": 500}
     profile_id = REDIS_CLIENT.hget(visitor_id, 'profile_id')
