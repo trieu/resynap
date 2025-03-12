@@ -8,14 +8,8 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
-    <link
-    href="/resources/css/microlearning.css"
-    rel="stylesheet"
-  />
-    <link
-    href="/resources/css/quizz.css"
-    rel="stylesheet"
-  />
+    <link href="/resources/css/microlearning.css" rel="stylesheet" />
+    <link href="/resources/css/quizz.css" rel="stylesheet" />
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -26,9 +20,7 @@
       mermaid.initialize({ startOnLoad: true });
     </script>
 
-    <style>
-      
-    </style>
+    <style></style>
   </head>
   <body class="container py-5">
     <h1 class="text-center">Micro Learning Mindmap with AI</h1>
@@ -36,7 +28,6 @@
     <!-- Navigation Menu -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light" id="navbar">
       <div class="container-fluid">
-
         <button
           class="navbar-toggler"
           type="button"
@@ -51,16 +42,19 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav me-auto">
             <li class="nav-item">
-              <a class="nav-link active" href="#" id="login-menu">Interative Mindmap </a>
+              <a class="nav-link active" href="#" id="login-menu"
+                >Interative Mindmap
+              </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#" id="popular-menu">Popular Mindmaps</a>
+              <a class="nav-link" href="#" id="popular-menu"
+                >Popular Mindmaps</a
+              >
             </li>
             <li class="nav-item">
               <a class="nav-link" href="#" id="create-menu">Create a Mindmap</a>
             </li>
           </ul>
-          
         </div>
       </div>
     </nav>
@@ -81,28 +75,26 @@ Microlearning</textarea
       <textarea id="mindmap-code" class="form-control" rows="8">
         mindmap
         root((Microlearning))
-          Basics
-            Short Lessons
-            Focused Topics
-            Mobile-friendly
-          Benefits
-            Faster Learning
-            Higher Engagement
-            Better Retention
-          Formats
-            Videos
-            Infographics
-            Quizzes
-            Podcasts
-          Use Cases
-            Employee Training
-            Skill Development
-            Onboarding
-      
+          Cơ bản
+            Bài học ngắn
+            Chủ đề trọng tâm
+            Thân thiện với thiết bị di động
+          Lợi ích
+            Học nhanh hơn
+            Tương tác cao hơn
+            Nhớ lâu hơn
+          Định dạng
+              Short Video
+              Visual Mindmap
+              Mini Test
+              Flashcard
+          Trường hợp sử dụng
+              Đào tạo nhân viên
+              Phát triển kỹ năng
+              Phát triển bản thân
   </textarea
       >
     </div>
-
 
     <div class="mt-4 border p-3">
       <div class="controls">
@@ -131,134 +123,168 @@ Microlearning</textarea
       <div>
         <div class="ratio ratio-16x9">
           <video controls id="summary_video" style="display: none">
-            <source
-              src=""
-              type="video/mp4"
-            />
+            <source src="" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         </div>
       </div>
 
-      <hr>
-       <!-- Quizz will be rendered here -->
-       <h2 class="text-center">Quizz</h2>
-       <div id="quizz_container">
+      <hr />
+      <!-- Quizz will be rendered here -->
+      <h2 class="text-center">Quizz</h2>
+      <div id="quizz_container">
         <!-- Quizz BEGIN HTML -->
 
         <div class="question" id="question1">
-          <p>What is a key characteristic of microlearning?</p>
+          <p>Đặc điểm chính của Microlearning là gì?</p>
           <div class="options">
             <div class="option">
               <label>
-                <input type="radio" name="q1" value="a">A. Long, comprehensive courses</label>
+                <input type="radio" name="q1" value="a" />A. Bài học dài và toàn
+                diện</label
+              >
             </div>
             <div class="option">
               <label>
-                <input type="radio" name="q1" value="b">B. Short, focused lessons.</label>
+                <input type="radio" name="q1" value="b" />B. Bài học ngắn và tập
+                trung.</label
+              >
             </div>
             <div class="option">
               <label>
-                <input type="radio" name="q1" value="c">C. Covering a wide range of topics</label>
+                <input type="radio" name="q1" value="c" />C. Bao gồm nhiều chủ
+                đề khác nhau</label
+              >
             </div>
             <div class="option">
               <label>
-                <input type="radio" name="q1" value="d">D. Primarily designed for desktop use.</label>
+                <input type="radio" name="q1" value="d" />D. Chỉ dành cho thiết
+                bị máy tính để bàn.</label
+              >
             </div>
           </div>
         </div>
-      
+
         <div class="question" id="question2">
-          <p>Which of the following is a benefit of using microlearning?</p>
+          <p>Theo sơ đồ tư duy, lợi ích chính của Microlearning là gì?</p>
           <div class="options">
             <div class="option">
               <label>
-                <input type="radio" name="q2" value="a">A. Slower learning</label>
+                <input type="radio" name="q2" value="a" />A. Giảm tương
+                tác</label
+              >
             </div>
             <div class="option">
               <label>
-                <input type="radio" name="q2" value="b">B. Lower engagement.</label>
+                <input type="radio" name="q2" value="b" />B. Học chậm
+                hơn.</label
+              >
             </div>
             <div class="option">
               <label>
-                <input type="radio" name="q2" value="c">C. Faster Learning</label>
+                <input type="radio" name="q2" value="c" />C. Nhớ lâu hơn</label
+              >
             </div>
             <div class="option">
               <label>
-                <input type="radio" name="q2" value="d">D. Poorer retention.</label>
+                <input type="radio" name="q2" value="d" />D. Khối lượng thông
+                tin thấp hơn.</label
+              >
             </div>
           </div>
         </div>
-      
+
         <div class="question" id="question3">
-          <p>Which of these formats is commonly used in microlearning?</p>
+          <p>Đâu là một định dạng của Microlearning được liệt kê?</p>
           <div class="options">
             <div class="option">
               <label>
-                <input type="radio" name="q3" value="a">A. Textbooks</label>
+                <input type="radio" name="q3" value="a" />A. Sách giáo
+                khoa</label
+              >
             </div>
             <div class="option">
               <label>
-                <input type="radio" name="q3" value="b">B. Novels.</label>
+                <input type="radio" name="q3" value="b" />B. Visual
+                Mindmap.</label
+              >
             </div>
             <div class="option">
               <label>
-                <input type="radio" name="q3" value="c">C. Videos</label>
+                <input type="radio" name="q3" value="c" />C. Hội thảo</label
+              >
             </div>
             <div class="option">
               <label>
-                <input type="radio" name="q3" value="d">D. Research papers.</label>
+                <input type="radio" name="q3" value="d" />D. Bài nghiên
+                cứu.</label
+              >
             </div>
           </div>
         </div>
-      
+
         <div class="question" id="question4">
-          <p>In what area is microlearning often used?</p>
+          <p>
+            Trường hợp sử dụng phổ biến của Microlearning, được mô tả trong sơ
+            đồ tư duy, là gì?
+          </p>
           <div class="options">
             <div class="option">
               <label>
-                <input type="radio" name="q4" value="a">A. Rocket Science</label>
+                <input type="radio" name="q4" value="a" />A. Viết tiểu
+                thuyết</label
+              >
             </div>
             <div class="option">
               <label>
-                <input type="radio" name="q4" value="b">B. Brain Surgery.</label>
+                <input type="radio" name="q4" value="b" />B. Thiết kế kiến
+                trúc.</label
+              >
             </div>
             <div class="option">
               <label>
-                <input type="radio" name="q4" value="c">C. Employee Training</label>
+                <input type="radio" name="q4" value="c" />C. Đào tạo nhân
+                viên</label
+              >
             </div>
             <div class="option">
               <label>
-                <input type="radio" name="q4" value="d">D. Quantum Physics.</label>
+                <input type="radio" name="q4" value="d" />D. Thủ tục phẫu
+                thuật.</label
+              >
             </div>
           </div>
         </div>
-      
+
         <div class="question" id="question5">
-          <p>What does it mean for microlearning to be "mobile-friendly"?</p>
+          <p>
+            Dựa trên sơ đồ tư duy, tính thân thiện với thiết bị di động có được
+            coi là một đặc điểm chính của Microlearning không?
+          </p>
           <div class="options">
             <div class="option">
-              <label>
-                <input type="radio" name="q5" value="a">A. It requires a specific type of mobile phone.</label>
+              <label> <input type="radio" name="q5" value="a" />A. Có</label>
+            </div>
+            <div class="option">
+              <label> <input type="radio" name="q5" value="b" />B. Không</label>
             </div>
             <div class="option">
               <label>
-                <input type="radio" name="q5" value="b">B. It is designed to be easily accessed and consumed on mobile devices.</label>
+                <input type="radio" name="q5" value="c" />C. Chỉ dành cho định
+                dạng video</label
+              >
             </div>
             <div class="option">
               <label>
-                <input type="radio" name="q5" value="c">C. It is only available as a mobile app.</label>
-            </div>
-            <div class="option">
-              <label>
-                <input type="radio" name="q5" value="d">D. It is printed on small pieces of paper for easy carrying.</label>
+                <input type="radio" name="q5" value="d" />D. Chỉ dành cho các
+                bài kiểm tra.</label
+              >
             </div>
           </div>
         </div>
 
         <!-- Quizz END HTML -->
-       </div>
-
+      </div>
     </div>
 
     <script src="/resources/js/resynnap.microlearning.js" async></script>

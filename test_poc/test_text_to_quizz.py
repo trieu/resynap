@@ -38,24 +38,24 @@ just return raw html (no ```html) like this:
 The HTML is for  multiple choice quizz test for this mindmap: 
 
 mindmap
-          root((Microlearning))
-            Basics
-              Short Lessons
-              Focused Topics
-              Mobile-friendly
-            Benefits
-              Faster Learning
-              Higher Engagement
-              Better Retention
-            Formats
-              Videos
-              Infographics
-              Quizzes
-              Podcasts
-            Use Cases
-              Employee Training
-              Skill Development
-              Onboarding
+        root((Microlearning))
+          Cơ bản
+            Bài học ngắn
+            Chủ đề trọng tâm
+            Thân thiện với thiết bị di động
+          Lợi ích
+            Học nhanh hơn
+            Tương tác cao hơn
+            Nhớ lâu hơn
+          Định dạng
+              Short Video
+              Visual Mindmap
+              Mini Test
+              Flashcard
+          Trường hợp sử dụng
+              Đào tạo nhân viên
+              Phát triển kỹ năng
+              Phát triển bản thân
 
 '''
 
