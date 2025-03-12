@@ -15,7 +15,7 @@ var renderMindmap = function (mindmapCode) {
   $("#mermaid-container").html(`<pre class="mermaid">${mindmapCode}</pre>`);
   mermaid.run();
 
-  var video_src = "resources/generated_videos/generated_video_20250312_130414.mp4";
+  var video_src = "resources/generated_videos/generated_video_20250312_150209.mp4";
   $("#summary_video").attr("src", video_src).show()[0].play();
 };
 

@@ -102,4 +102,7 @@ def generate_video(main_title):
 
 # Example usage
 if __name__ == "__main__":
-    generate_video("Create a detailed guide on microlearning. Cover its basics, including short lessons, focused topics, and mobile-friendly design. Explain the benefits, such as faster learning, higher engagement, and better retention. Describe different formats like videos, infographics, quizzes, and podcasts. Finally, explore key use cases, including employee training, skill development, and onboarding")
+    
+    ideas = "Tạo một video minh họa về Microlearning với mindmap trực quan, trình bày các khái niệm chính như bài học ngắn, lợi ích, định dạng (short video, flashcard), và ứng dụng trong đào tạo nhân viên, phát triển kỹ năng, phát triển bản thân."
+
+    generate_video(ideas)
