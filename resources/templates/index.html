@@ -1,348 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Responsive Web App with Dark Mode and Handlebars</title>
-    <!-- Bootstrap CSS -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      type="text/css"
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    />
-    <!-- jQuery -->
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-    <!-- Handlebars.js -->
-    <script src="https://cdn.jsdelivr.net/npm/handlebars@4.7.8/dist/handlebars.min.js"></script>
-    <style>
-      body.dark-mode {
-        background-color: #212529;
-        color: #f8f9fa;
-      }
-      .navbar.dark-mode {
-        background-color: #343a40;
-      }
-      .card.dark-mode {
-        background-color: #343a40;
-        color: #f8f9fa;
-      }
-    </style>
-
-    <!-- Font awesome icon  -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    />
-
-    <!-- BotUI CSS and JS  -->
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/botui/0.3.9/botui.min.css"
-      rel="stylesheet"
-      type="text/css"
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    />
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/botui/0.3.9/botui-theme-default.css"
-      rel="stylesheet"
-      type="text/css"
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    />
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.14/vue.min.js"
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    ></script>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/botui/0.3.9/botui.min.js"
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    ></script>
-
-    <!-- LEO CHATBOT CSS -->
-    <link
-      href="https://leobot.leocdp.com/resources/css/leobot.css?_=1733660447"
-      rel="stylesheet"
-      media="all"
-    />
-  </head>
-  <body>
-    <!-- Navigation Menu -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light" id="navbar">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">
-          <img
-            src="https://resynap.com/resources/resynap-logo.png"
-            style="height: 50px"
-          />
-        </a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav me-auto">
-            <li class="nav-item">
-              <a class="nav-link active" href="#" id="login-menu">Login</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#" id="popular-menu">Popular Topics</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#" id="create-menu">Create a Topic</a>
-            </li>
-          </ul>
-          <button class="btn btn-outline-secondary" id="toggle-dark-mode">
-            Enable Dark Mode
-          </button>
-        </div>
-      </div>
-    </nav>
-
-    <div class="container-fluid text-center">
-      <div class="row mt-1">
-        <div class="col-8">
-          <!-- Content Area -->
-          <div class="container mt-2">
-            <div id="content">
-              <h4>Machine Learning and Generative AI for Marketing</h4>
-              <div
-                id="pdf_viewer"
-                style="margin: auto; width: 99%; height: 720px"
-              ></div>
-            </div>
-          </div>
-        </div>
-        <div class="col-4" style="border-left: 1px dashed black;">
-          <div class="container mt-2">
-            <h4 style="margin-top: 10px">
-              <i class="fa fa-commenting-o" aria-hidden="true"></i> ReSynap
-              ChatBot
-            </h4>
-            <div class="row">
-              <div id="LEO_ChatBot_Container_Loader" class="loader"></div>
-
-              <!-- BCP-47 language code https://en.wikipedia.org/wiki/IETF_language_tag  -->
-              <select
-                id="leobot_answer_in_language"
-                class="form-select"
-                style="display: none"
-              >
-                <option value="" selected="selected">
-                  Automatically detect the language according to question
-                </option>
-                <option value="en">Answer the question in English</option>
-                <option value="vi">Trả lời câu hỏi bằng tiếng Việt</option>
-                <option value="de">Beantworten Sie Fragen auf Deutsch</option>
-                <option value="fr">Répondez à la question en anglais</option>
-                <option value="es">Responde la pregunta en español</option>
-                <option value="ja">質問には日本語で答える</option>
-                <option value="zh">用中文回答问题</option>
-                <option value="ko">질문에 한국어로 답변하기</option>
-              </select>
-            </div>
-          </div>
-          <div
-            class="botui-app-container"
-            id="LEO_ChatBot_Container"
-            style="display: none"
-          >
-            <bot-ui></bot-ui>
-          </div>
-          <div id="leobot_info_box" class="alert alert-light" role="alert">
-            <i class="fa fa-info-circle" aria-hidden="true"></i>
-            This chatbot is developed by
-            <a target="_blank" href="https://www.facebook.com/dataism.one"
-              >Trieu Dataism</a
-            >
-            using Google Gemini-1.5-pro <br />
-          </div>
-          <!-- load all JS files  -->
-          <script
-            src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
-            crossorigin="anonymous"
-            referrerpolicy="no-referrer"
-          ></script>
-
-          <!-- LEO CHATBOT CONFIGS -->
-          <script>
-            const HOSTNAME = "leobot.leocdp.com";
-            const LEOBOT_DEV_MODE = "False" === "True";
-            const BASE_URL_LEOBOT =
-              location.protocol + "//" + HOSTNAME + "/ask";
-            const BASE_URL_GET_VISITOR_INFO =
-              location.protocol + "//" + HOSTNAME + "/get-visitor-info";
-            const CDP_TRACKING = true;
-          </script>
-          <script src="https://leobot.leocdp.com/resources/js/leocdp.chatbot.js?_=1733660447"></script>
-
-          <script>
-            $(document).ready(function () {
-              // ready to load
-              var obsjs =
-                location.protocol +
-                "//" +
-                HOSTNAME +
-                "/resources/js/leocdp.observer.js";
-              var host = location.hostname;
-              var okToLoad =
-                host === "leobot.leocdp.com" || host === "leobot.example.com";
-              // only load LEO Observer JS in the domain leocdp.com or example.com
-              if (CDP_TRACKING && okToLoad) {
-                $.getScript(obsjs);
-              } else {
-                window.startLeoChatBot("local_dev");
-                currentUserProfile.visitorId = "0";
-              }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mermaid.js Mindmap</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+        mermaid.initialize({ startOnLoad: true });
+        $(document).ready(function () {
+            $("#render-btn").click(function () {
+                let inputText = $("#mindmap-input").val();
+                $("#mermaid-container").html("<pre class='mermaid'>" + inputText + "</pre>");
+                mermaid.run();
             });
-          </script>
-        </div>
-      </div>
+        });
+    </script>
+</head>
+<body class="container py-5">
+    <h1 class="text-center">Mermaid.js Mindmap Renderer</h1>
+    <div class="mb-3">
+        <label for="mindmap-input" class="form-label">Enter Mermaid Mindmap Syntax:</label>
+        <textarea id="mindmap-input" class="form-control" rows="5">mindmap
+  root((Mindmap))
+    child1
+      grandchild1
+      grandchild2
+    child2
+      grandchild3</textarea>
     </div>
-
-    <!-- Handlebars Templates -->
-    <script id="popular-template" type="text/x-handlebars-template">
-      <div class="card p-6">
-        <h2>Popular Topics</h2>
-        <ul class="list-group">
-          {{#each topics}}
-            <li class="list-group-item">{{this}}</li>
-          {{/each}}
-        </ul>
-      </div>
-    </script>
-
-    <script id="create-template" type="text/x-handlebars-template">
-      <div class="card p-4">
-        <h2>Create a Topic</h2>
-        <form>
-          <div class="mb-3">
-            <label for="topic-title" class="form-label">Topic Title</label>
-            <input
-              type="text"
-              class="form-control"
-              id="topic-title"
-              placeholder="Enter topic title"
-            />
-          </div>
-          <div class="mb-3">
-            <label
-              for="topic-description"
-              class="form-label"
-            >Description</label>
-            <textarea
-              class="form-control"
-              id="topic-description"
-              rows="3"
-              placeholder="Enter topic description"
-            ></textarea>
-          </div>
-          <button
-            type="button"
-            class="btn btn-success"
-            id="submit-topic"
-          >Create</button>
-        </form>
-      </div>
-    </script>
-
-    <!-- Bootstrap JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
-      $(document).ready(function () {
-        // Sample topics data
-        let topics = ["Topic 1", "Topic 2", "Topic 3"];
-
-        // Compile Handlebars templates
-        const popularTemplate = Handlebars.compile(
-          $("#popular-template").html()
-        );
-        const createTemplate = Handlebars.compile($("#create-template").html());
-
-        // Render Popular Topics
-        $("#popular-menu").click(function () {
-          const popularHtml = popularTemplate({ topics });
-          $("#content").html(popularHtml);
-          applyDarkMode(); // Apply dark mode styles if active
-        });
-
-        // Render Create Topic
-        $("#create-menu").click(function () {
-          const createHtml = createTemplate();
-          $("#content").html(createHtml);
-          applyDarkMode();
-        });
-
-        // Add new topic dynamically
-        $(document).on("click", "#submit-topic", function () {
-          const newTopic = $("#topic-title").val();
-          if (newTopic) {
-            topics.push(newTopic);
-            alert("Topic added successfully!");
-            $("#popular-menu").trigger("click"); // Reload popular topics
-          } else {
-            alert("Please enter a topic title.");
-          }
-        });
-
-        // Toggle dark mode
-        $("#toggle-dark-mode").click(function () {
-          $("body").toggleClass("dark-mode");
-          $("#navbar").toggleClass("dark-mode");
-          $(".card").toggleClass("dark-mode");
-
-          if ($("body").hasClass("dark-mode")) {
-            $(this).text("Disable Dark Mode");
-          } else {
-            $(this).text("Enable Dark Mode");
-          }
-        });
-
-        // Apply dark mode to dynamic content
-        function applyDarkMode() {
-          if ($("body").hasClass("dark-mode")) {
-            $(".card").addClass("dark-mode");
-          }
-        }
-      });
-    </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/pdfobject@2.3.0/pdfobject.min.js"></script>
-    <script>
-      var ebookUrl =
-        "https://drive.google.com/file/d/1IQkQhW95p380AlpOsqMD8ydwUd5fKgWo/preview";
-      function loadEbookViewer(pdfUrl) {
-        var options = {
-          pdfOpenParams: {
-            pagemode: "thumbs",
-            navpanes: 0,
-            toolbar: 1,
-            statusbar: 1,
-            view: "FitH",
-          },
-        };
-
-        PDFObject.embed(pdfUrl, "#pdf_viewer", options);
-      }
-
-      if (PDFObject.supportsPDFs) {
-        loadEbookViewer(ebookUrl);
-      } else {
-        console.log("Boo, inline PDFs are not supported by this browser");
-      }
-    </script>
-  </body>
+    <button id="render-btn" class="btn btn-primary">Render Mindmap</button>
+    <div class="mt-4 border p-3" id="mermaid-container">
+        <pre class="mermaid">mindmap
+  root((Mindmap))
+    child1
+      grandchild1
+      grandchild2
+    child2
+      grandchild3</pre>
+    </div>
+</body>
 </html>

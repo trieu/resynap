@@ -14,14 +14,12 @@ QDRANT_PORT = int(os.getenv('QDRANT_PORT', 6333))  # default is 6333
 
 # Fetch the host and port from environment variables
 QDRANT_CLOUD_HOST = os.getenv('QDRANT_CLOUD_HOST', '')  # default is empty
-QDRANT_CLOUD_API_KEY = os.getenv(
-    'QDRANT_CLOUD_API_KEY', '')  # default is empty
+QDRANT_CLOUD_API_KEY = os.getenv('QDRANT_CLOUD_API_KEY', '')  # default is empty
 
 # Initialize QdrantClient with the loaded values
 qdrant_client = False
 if QDRANT_CLOUD_HOST != "" and QDRANT_CLOUD_API_KEY != "":
-    qdrant_client = QdrantClient(
-        host=QDRANT_CLOUD_HOST, api_key=QDRANT_CLOUD_API_KEY)
+    qdrant_client = QdrantClient(host=QDRANT_CLOUD_HOST, api_key=QDRANT_CLOUD_API_KEY)
     print('USING QDRANT CLOUD DB ' + QDRANT_CLOUD_HOST)
 else:
     qdrant_client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
