@@ -15,3 +15,7 @@
 .controls {
   margin: 10px 0;
 }
+.nav-link.active {
+  background-color: lavender; /* Change to your desired highlight color */
+  font-weight: bold; /* Make it stand out */
+}

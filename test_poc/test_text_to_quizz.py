@@ -11,7 +11,7 @@ gemini_text_model = genai.GenerativeModel(model_name=GEMINI_MODEL)
 
 
 prompt = ''' 
-just return raw html (no ```html) like this:
+In Vietnamese, just return raw html (no ```html) like this:
 
   <div class="question" id="question1">
     <p>{{question}}</p>
@@ -60,7 +60,7 @@ mindmap
 '''
 
 
-model_config = genai.GenerationConfig(temperature=0.2)
+model_config = genai.GenerationConfig(temperature=0.1)
 response = gemini_text_model.generate_content(prompt, generation_config=model_config)
 answer_text = response.text 
 
