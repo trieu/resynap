@@ -34,6 +34,7 @@ CONTENT_COLLECTION = "cdp_content"
 MODEL_NAME = 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2'
 VECTOR_MODEL = SentenceTransformer(MODEL_NAME)
 VECTOR_DIM_SIZE = VECTOR_MODEL.get_sentence_embedding_dimension()
+print('Load vector model:', MODEL_NAME, 'with dim:', VECTOR_DIM_SIZE)
 
 # vector size
 PROFILE_VECTOR_SIZE = VECTOR_DIM_SIZE
@@ -185,24 +186,29 @@ def add_vector_to_qdrant(collection_name: str, object_id, vector, payload):
 
 # Function to add profile to Qdrant
 def add_profile_to_qdrant(p: ProfileRequest):
-    profile_id = p.profile_id
-    profile_vector = build_profile_vector(
-        p.page_view_keywords, p.purchase_keywords, p.interest_keywords, p.journey_maps)
+    try: 
+        profile_id = p.profile_id
+        profile_vector = build_profile_vector(p.page_view_keywords, p.purchase_keywords, p.interest_keywords, p.journey_maps)
 
-    if profile_vector is None:
-        print(
-            f"Error: Could not generate a valid vector for profile {profile_id}.")
-        return
+        if profile_vector is None:
+            print(
+                f"Error: Could not generate a valid vector for profile {profile_id}.")
+            return
 
-    # Save profile vector to Qdrant
-    payload = {"profile_id": profile_id, "additional_info": p.additional_info}
-    payload['page_view_keywords'] = p.page_view_keywords
-    payload['purchase_keywords'] = p.purchase_keywords
-    payload['interest_keywords'] = p.interest_keywords
-    payload['journey_maps'] = p.journey_maps
-    add_vector_to_qdrant(PROFILE_COLLECTION, profile_id, profile_vector, payload)
-    print(f"Profile {profile_id} added to Qdrant")
-    return profile_id
+        # Save profile vector to Qdrant
+        payload = {"profile_id": profile_id, "additional_info": p.additional_info}
+        payload['page_view_keywords'] = p.page_view_keywords
+        payload['purchase_keywords'] = p.purchase_keywords
+        payload['interest_keywords'] = p.interest_keywords
+        payload['journey_maps'] = p.journey_maps
+        add_vector_to_qdrant(PROFILE_COLLECTION, profile_id, profile_vector, payload)
+        print(f"Profile {profile_id} added to Qdrant")
+        return profile_id
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+        
+    return ''
+
 
 
 # Function to add product to Qdrant

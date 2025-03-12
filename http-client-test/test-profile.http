@@ -1,3 +1,38 @@
+
+POST http://localhost:8000/add-profiles/ HTTP/1.1
+content-type: application/json
+Authorization: personalization_test
+
+[
+  {
+    "profile_id": "crm_1",
+    "page_view_keywords": [
+      "car",
+      "bike",
+      "accessories"
+    ],
+    "purchase_keywords": [
+      "helmet",
+      "gloves"
+    ],
+    "interest_keywords": [
+      "travel",
+      "photography",
+      "outdoors"
+    ],
+    "additional_info": {
+      "age": 28,
+      "location": "Germany"
+    },
+    "journey_maps": [
+      "da-lat",
+      "sapa",
+      "coffee-shop"
+    ]
+  }
+]
+
+
 ### save profiles
 
 POST http://localhost:8000/add-profiles/ HTTP/1.1

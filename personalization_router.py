@@ -6,6 +6,7 @@ import redis
 from personalization import add_profile_to_qdrant, add_product_to_qdrant, add_content_to_qdrant, recommend_products_for_profile
 
 import os
+import traceback
 
 # Fetch the host and port from environment variables
 REDIS_HOST = os.getenv('REDIS_HOST', "")  # default is 'localhost'
@@ -50,6 +51,7 @@ async def add_profile(profile: ProfileRequest):
         )
         return {"status": "Profile added successfully"}
     except Exception as e:
+        print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -63,10 +65,10 @@ async def add_profile(profile: ProfileRequest):
         in_journey_maps = profile.journey_maps
         rs = recommend_products_for_profile(profile_id, top_n, except_product_ids, in_journey_maps)
         if not rs:
-            raise HTTPException(
-                status_code=404, detail="Profile not found or no recommendations available")
+            raise HTTPException(status_code=404, detail="Profile not found or no recommendations available")
         return rs
     except Exception as e:
+        print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -79,8 +81,10 @@ async def add_profiles(profiles: List[ProfileRequest]):
             profile_id = add_profile_to_qdrant(profile)
             if profile_id:
                 c = c + 1
-        return {"status": c + " profiles added successfully"}
+                print(profile_id + " added successfully")
+        return {"status": str(c) + " profiles added successfully"}
     except Exception as e:
+        print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -91,6 +95,7 @@ async def add_product(product: ProductRequest):
         add_product_to_qdrant(product)
         return {"status": "Product added successfully"}
     except Exception as e:
+        print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -102,6 +107,7 @@ async def add_products(products: List[ProductRequest]):
             add_product_to_qdrant(product)
         return {"status": "All products added successfully"}
     except Exception as e:
+        print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -112,6 +118,7 @@ async def add_content(content: ContentRequest):
         add_content_to_qdrant(content)
         return {"status": "Content added successfully"}
     except Exception as e:
+        print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
     
     
@@ -123,6 +130,7 @@ async def add_contents(contents: List[ContentRequest]):
             add_content_to_qdrant(content)
         return {"status": "All contents added successfully"}
     except Exception as e:
+        print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -136,6 +144,7 @@ async def recommend(profile_id: str, top_n: int = 8, except_product_ids: str = "
                 status_code=404, detail="Profile not found or no recommendations available")
         return rs
     except Exception as e:
+        print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
 
