@@ -6,17 +6,18 @@ $(document).ready(function () {
 
     // call API to generate learning content
     const mindmapCode = $("#mindmap-code").val();
-    renderMindmap(mindmapCode)
-
+    renderMindmap(mindmapCode);
   });
 });
 
 var renderMindmap = function (mindmapCode) {
-    console.log(mindmapCode);
-    $("#mermaid-container").html(`<pre class="mermaid">${mindmapCode}</pre>`);
-    mermaid.run();
-}
+  console.log(mindmapCode);
+  $("#mermaid-container").html(`<pre class="mermaid">${mindmapCode}</pre>`);
+  mermaid.run();
 
+  var video_src = "resources/generated_videos/generated_video_20250312_130414.mp4";
+  $("#summary_video").attr("src", video_src).show()[0].play();
+};
 
 var setupMindmapController = function () {
   let scale = 1;
@@ -37,9 +38,8 @@ var setupMindmapController = function () {
   });
 
   setTimeout(function () {
-    $("#mermaid-container").show()
+    $("#mermaid-container").show();
     const mindmapCode = $("#mindmap-code").val();
-    renderMindmap(mindmapCode)
-  },1000);
-
+    renderMindmap(mindmapCode);
+  }, 1000);
 };

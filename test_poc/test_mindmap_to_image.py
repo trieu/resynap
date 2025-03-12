@@ -11,7 +11,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 # Create a folder to save images if it doesn't exist
-output_folder = "generated_images"
+output_folder = "resources/generated_images"
 if not os.path.exists(output_folder):
     os.makedirs(output_folder)
     

@@ -1,0 +1,82 @@
+.question {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+  }
+  
+  .question p {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  /* Options Styling */
+  .options {
+    margin-top: 10px;
+  }
+  
+  .option {
+    margin-bottom: 8px;
+  }
+  
+  .option label {
+    display: block; /* Ensures the label takes up the full width */
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .option label:hover {
+    background-color: #e9e9e9;
+  }
+  
+  .option input[type="radio"] {
+    margin-right: 8px;
+  }
+  
+  /* Selected Option Styling */
+  .option input[type="radio"]:checked + label { /* Target label *after* checked radio */
+    background-color: #d4edda; /* Light green for selected */
+    border-color: #c3e6cb;
+    color: #155724;
+    font-weight: bold;
+  }
+  
+  /*  Optional:  Style the radio button itself for better visibility */
+  /*  This is browser-dependent and can be tricky to get consistent */
+  input[type="radio"] {
+    appearance: none; /* Remove default radio button styling */
+    -webkit-appearance: none; /* For Safari */
+    -moz-appearance: none;    /* For Firefox */
+    width: 16px;
+    height: 16px;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    outline: none; /* Remove focus outline */
+    cursor: pointer;
+    vertical-align: middle; /* Align with text */
+    margin-right: 5px;
+    position: relative; /* For inner circle */
+  }
+  
+  input[type="radio"]:checked {
+    border: 1px solid #28a745; /* Green border when checked */
+    background-color: #fff; /* Keep background white */
+  }
+  
+  input[type="radio"]:checked::before {
+    content: ''; /* Add inner circle */
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    background-color: #28a745; /* Green inner circle */
+    border-radius: 50%;
+  }

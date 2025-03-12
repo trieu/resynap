@@ -83,7 +83,7 @@ def build_prompts_from_mindmap(mindmap_text):
 
 def mindmap_to_image(prompts: list):
     # Create a folder to save images if it doesn't exist
-    output_folder = "generated_images"
+    output_folder = "resources/generated_images"
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
      
@@ -127,8 +127,30 @@ def text_to_filename(text: str, max_length: int = 255) -> str:
 
 # Example usage
 main_title = "Lazy orange cat in my kitchen with a cup of coffee"
-mindmap = generate_mindmap_and_prompts(main_title)
+#mindmap = generate_mindmap_and_prompts(main_title)
 
+mindmap = '''
+        mindmap
+        root((Microlearning))
+          Basics
+            Short Lessons
+            Focused Topics
+            Mobile-friendly
+          Benefits
+            Faster Learning
+            Higher Engagement
+            Better Retention
+          Formats
+            Videos
+            Infographics
+            Quizzes
+            Podcasts
+          Use Cases
+            Employee Training
+            Skill Development
+            Onboarding
+      
+'''
 
 prompts = build_prompts_from_mindmap(mindmap)
 

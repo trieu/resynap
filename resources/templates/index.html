@@ -8,6 +8,15 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
+    <link
+    href="/resources/css/microlearning.css"
+    rel="stylesheet"
+  />
+    <link
+    href="/resources/css/quizz.css"
+    rel="stylesheet"
+  />
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -18,38 +27,58 @@
     </script>
 
     <style>
-      .mermaid-wrapper {
-        width: 100%;
-        height: 500px;
-        overflow: auto;
-        border: 1px solid #ddd;
-        position: relative;
-      }
-
-      #mermaid-container {
-        transform-origin: top left;
-        transition: transform 0.2s ease-in-out;
-      }
-
-      .controls {
-        margin: 10px 0;
-      }
+      
     </style>
   </head>
   <body class="container py-5">
-    <h1 class="text-center">Micro Learning Mindmap</h1>
-    <div class="mb-3">
-      <label for="mindmap-input" class="form-label fw-bold">Mindmap Input:</label>
-      <input
-        type="text"
-        id="mindmap-input"
-        class="form-control"
-        value="Microlearning"
-      />
-      <br>
+    <h1 class="text-center">Micro Learning Mindmap with AI</h1>
 
-      <label for="mindmap-code" class="form-label fw-bold"> Mindmap Code:</label>
-      <textarea id="mindmap-code" class="form-control" rows="10">
+    <!-- Navigation Menu -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light" id="navbar">
+      <div class="container-fluid">
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link active" href="#" id="login-menu">Interative Mindmap </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" id="popular-menu">Popular Mindmaps</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" id="create-menu">Create a Mindmap</a>
+            </li>
+          </ul>
+          
+        </div>
+      </div>
+    </nav>
+    <hr />
+
+    <div class="mb-3">
+      <label for="mindmap-input" class="form-label fw-bold"
+        >Ideas for Mindmap:</label
+      >
+      <textarea id="mindmap-input" class="form-control" rows="3">
+Microlearning</textarea
+      >
+      <br />
+
+      <label for="mindmap-code" class="form-label fw-bold">
+        Mindmap Code:</label
+      >
+      <textarea id="mindmap-code" class="form-control" rows="8">
         mindmap
         root((Microlearning))
           Basics
@@ -70,25 +99,168 @@
             Skill Development
             Onboarding
       
-  </textarea>
+  </textarea
+      >
     </div>
 
-    <hr>
 
     <div class="mt-4 border p-3">
       <div class="controls">
-        <button id="render-btn" class="btn btn-primary" style="margin-right: 10px">
+        <button
+          id="render-btn"
+          class="btn btn-primary"
+          style="margin-right: 10px"
+        >
           Generate Learning Content
         </button>
-        <button id="zoom-in" class="btn btn-info" >Zoom In</button>
+        <button id="zoom-in" class="btn btn-info">Zoom In</button>
         <button id="zoom-out" class="btn btn-info">Zoom Out</button>
       </div>
+      <hr />
+
       <!-- Mermaid diagram will be rendered here -->
-      <div class="mermaid-wrapper" >
-        <div id="mermaid-container" class="mermaid" style="display:none" ></div>
+      <h2 class="text-center">Learning Mindmap</h2>
+
+      <div class="mermaid-wrapper">
+        <div id="mermaid-container" class="mermaid" style="display: none"></div>
       </div>
+      <hr />
+
+      <!-- Video will be rendered here -->
+      <h2 class="text-center">Summary Video</h2>
+      <div>
+        <div class="ratio ratio-16x9">
+          <video controls id="summary_video" style="display: none">
+            <source
+              src=""
+              type="video/mp4"
+            />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </div>
+
+      <hr>
+       <!-- Quizz will be rendered here -->
+       <h2 class="text-center">Quizz</h2>
+       <div id="quizz_container">
+        <!-- Quizz BEGIN HTML -->
+
+        <div class="question" id="question1">
+          <p>What is a key characteristic of microlearning?</p>
+          <div class="options">
+            <div class="option">
+              <label>
+                <input type="radio" name="q1" value="a">A. Long, comprehensive courses</label>
+            </div>
+            <div class="option">
+              <label>
+                <input type="radio" name="q1" value="b">B. Short, focused lessons.</label>
+            </div>
+            <div class="option">
+              <label>
+                <input type="radio" name="q1" value="c">C. Covering a wide range of topics</label>
+            </div>
+            <div class="option">
+              <label>
+                <input type="radio" name="q1" value="d">D. Primarily designed for desktop use.</label>
+            </div>
+          </div>
+        </div>
+      
+        <div class="question" id="question2">
+          <p>Which of the following is a benefit of using microlearning?</p>
+          <div class="options">
+            <div class="option">
+              <label>
+                <input type="radio" name="q2" value="a">A. Slower learning</label>
+            </div>
+            <div class="option">
+              <label>
+                <input type="radio" name="q2" value="b">B. Lower engagement.</label>
+            </div>
+            <div class="option">
+              <label>
+                <input type="radio" name="q2" value="c">C. Faster Learning</label>
+            </div>
+            <div class="option">
+              <label>
+                <input type="radio" name="q2" value="d">D. Poorer retention.</label>
+            </div>
+          </div>
+        </div>
+      
+        <div class="question" id="question3">
+          <p>Which of these formats is commonly used in microlearning?</p>
+          <div class="options">
+            <div class="option">
+              <label>
+                <input type="radio" name="q3" value="a">A. Textbooks</label>
+            </div>
+            <div class="option">
+              <label>
+                <input type="radio" name="q3" value="b">B. Novels.</label>
+            </div>
+            <div class="option">
+              <label>
+                <input type="radio" name="q3" value="c">C. Videos</label>
+            </div>
+            <div class="option">
+              <label>
+                <input type="radio" name="q3" value="d">D. Research papers.</label>
+            </div>
+          </div>
+        </div>
+      
+        <div class="question" id="question4">
+          <p>In what area is microlearning often used?</p>
+          <div class="options">
+            <div class="option">
+              <label>
+                <input type="radio" name="q4" value="a">A. Rocket Science</label>
+            </div>
+            <div class="option">
+              <label>
+                <input type="radio" name="q4" value="b">B. Brain Surgery.</label>
+            </div>
+            <div class="option">
+              <label>
+                <input type="radio" name="q4" value="c">C. Employee Training</label>
+            </div>
+            <div class="option">
+              <label>
+                <input type="radio" name="q4" value="d">D. Quantum Physics.</label>
+            </div>
+          </div>
+        </div>
+      
+        <div class="question" id="question5">
+          <p>What does it mean for microlearning to be "mobile-friendly"?</p>
+          <div class="options">
+            <div class="option">
+              <label>
+                <input type="radio" name="q5" value="a">A. It requires a specific type of mobile phone.</label>
+            </div>
+            <div class="option">
+              <label>
+                <input type="radio" name="q5" value="b">B. It is designed to be easily accessed and consumed on mobile devices.</label>
+            </div>
+            <div class="option">
+              <label>
+                <input type="radio" name="q5" value="c">C. It is only available as a mobile app.</label>
+            </div>
+            <div class="option">
+              <label>
+                <input type="radio" name="q5" value="d">D. It is printed on small pieces of paper for easy carrying.</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quizz END HTML -->
+       </div>
+
     </div>
 
-    <script src="/resources/js/resynnap.microlearning.js" async ></script>
+    <script src="/resources/js/resynnap.microlearning.js" async></script>
   </body>
 </html>
