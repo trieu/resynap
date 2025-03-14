@@ -1,4 +1,4 @@
-from moviepy import ImageClip, concatenate_videoclips, TextClip
+from moviepy import ImageClip, concatenate_videoclips, TextClip, VideoFileClip, AudioFileClip
 from PIL import Image
 from google.genai import types, Client
 from io import BytesIO
@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
+
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 # Usegemini-2.0-flash for fast mindmap generation
 GEMINI_MODEL_ID = "gemini-2.0-flash"
@@ -91,14 +92,16 @@ def generate_video(main_title):
     image_clips = generate_images(prompts)
     
     title_clip = create_text_clip(main_title, 5)
+    
     summary_clip = create_text_clip("Thank you for watching!", 5)
     
     video_clips = [title_clip] + image_clips + [summary_clip]
     final_video = concatenate_videoclips(video_clips, method="compose")
-    final_video.write_videofile(video_filename, fps=24)
+    final_video.write_videofile(video_filename, fps=24, audio_codec='aac')
     
     print(f"Video saved to: {video_filename}")
     return video_filename
+
 
 # Example usage
 if __name__ == "__main__":
