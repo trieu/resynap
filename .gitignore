@@ -1,6 +1,9 @@
 # Qdrant DB
 qdrant_storage
 
+#Airflow 
+airflow_home
+
 # AI temp data
 generated_images
 generated_videos

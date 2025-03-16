@@ -9,8 +9,8 @@ import os
 import traceback
 
 # Fetch the host and port from environment variables
-REDIS_HOST = os.getenv('REDIS_HOST', "")  # default is 'localhost'
-REDIS_PORT = int(os.getenv('REDIS_PORT', 0))  # default is 6379
+REDIS_HOST = os.getenv('REDIS_HOST', "localhost")  # default is 'localhost'
+REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))  # default is 6379
 DEFAULT_AUTHORIZATION_KEY = os.getenv('DEFAULT_AUTHORIZATION_KEY', "")  # default is empty
 
 # Initialize Redis connection
