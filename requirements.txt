@@ -8,7 +8,7 @@ requests
 
 # Async and Database
 asyncpg
-sqlalchemy>=2.0.38
+sqlalchemy>=1.4.54
 alembic
 psycopg[binary]
 
@@ -18,13 +18,15 @@ pydantic[email,timezone]>=2.5.0
 # Redis Task Queue
 redis>=5.1.1
 rq
-rq-dashboard
 rq-scheduler
 
 # Data Processing
 numpy>=1.26.4
 pandas>=2.2.2
-Faker
+pendulum>=3.0.0
+apache-airflow>=2.10.5
+alembic>=1.15.1
+
 
 # Vector Search
 qdrant-client>=1.13.0
@@ -39,10 +41,10 @@ google-cloud-texttospeech
 
 # PDF & Markdown Handling
 markdown
-gdown
 pypdl
+gdown
 pymupdf
 
 # Media Processing
-opencv-python
+opencv-python-headless
 moviepy
