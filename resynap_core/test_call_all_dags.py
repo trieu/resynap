@@ -14,8 +14,10 @@ if __name__ == "__main__":
     }
     
     response = airflow.trigger_dag(dag_id, params)
+    print('\n trigger_dag  ' + dag_id)
     print(response)
 
     # Get DAG status
     status = airflow.get_dag_status(dag_id)
+    print('\n get_dag_status  ' + dag_id)
     print(status)

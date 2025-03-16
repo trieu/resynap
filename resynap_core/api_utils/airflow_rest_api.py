@@ -12,6 +12,8 @@ AIRFLOW_PASSWORD = os.getenv("AIRFLOW_PASSWORD")
 
 
 class AirflowAPI:
+    """Airflow REST API client."""
+    
     def __init__(self, base_url=AIRFLOW_BASE_URL, username=AIRFLOW_USERNAME, password=AIRFLOW_PASSWORD):
         """Initialize Airflow API client."""
         self.base_url = base_url
@@ -28,16 +30,16 @@ class AirflowAPI:
         print('trigger_url ' + trigger_url)
         payload = {"conf": conf or {}}
 
-        response = requests.post(
-            trigger_url, auth=self.auth, headers=self.headers, data=json.dumps(payload))
+        # Send POST request to trigger the DAG
+        response = requests.post(trigger_url, auth=self.auth, headers=self.headers, data=json.dumps(payload))
         return self._handle_response(response)
 
     def get_dag_status(self, dag_id):
         """Fetch the status of the DAG."""
         status_url = f"{self.base_url}/dags/{dag_id}"
 
-        response = requests.get(
-            status_url, auth=self.auth, headers=self.headers)
+        # Send GET request to fetch the DAG status
+        response = requests.get(status_url, auth=self.auth, headers=self.headers)
         return self._handle_response(response)
 
     def _handle_response(self, response):

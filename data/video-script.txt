@@ -1,0 +1,7 @@
+text # This is your day # 00:00:00 - 00:00:05 >>
+image # /home/trieu/Pictures/a_photo_with_4_cats_a.jpeg # 00:00:06 - 00:00:15 >>
+
+text # best wish for you # 00:00:15 - 00:00:20 >>
+image # /home/trieu/Pictures/a_photo_with_4_cats_b.jpeg # 00:00:20 - 00:00:30 >>
+
+audio # /home/trieu/sounds/motivational-day.mp3 # 00:00:00 - 00:00:30
