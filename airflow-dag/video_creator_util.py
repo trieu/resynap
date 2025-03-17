@@ -30,12 +30,13 @@ class VideoGenerator:
 
     def parse_script(self):
         """Parses the script content and extracts segments."""
-        
+        # split to lines for script parsing
         lines = self.script_content.split(">>")
-
+        
         for line in lines:
-            match = re.match(
-                r"(text|image|audio) # (.*?) # (\d+):(\d+):(\d+) - (\d+):(\d+):(\d+)", line.strip())
+            regex = r"(text|image|audio) # (.*?) # (\d+):(\d+):(\d+) - (\d+):(\d+):(\d+)"
+            match = re.match(regex, line.strip())
+            # split to lines for script parsing
             if match:
                 type_, content, h1, m1, s1, h2, m2, s2 = match.groups()
                 start = int(h1) * 3600 + int(m1) * 60 + int(s1)
