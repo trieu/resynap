@@ -8,8 +8,9 @@ airflow_home
 generated_images
 generated_videos
 
-# video
+# video and audio
 *.mp4
+*.mp3
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

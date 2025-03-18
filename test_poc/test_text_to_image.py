@@ -7,7 +7,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-IMAGE_MODEL_ID = os.getenv("IMAGE_MODEL_ID")
+GEMINI_IMAGE_MODEL_ID = os.getenv("GEMINI_IMAGE_MODEL_ID")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # Create a genai client
@@ -39,7 +39,7 @@ for profile in profiles:
     print(the_prompt)
 
     response = client.models.generate_images(
-        model=IMAGE_MODEL_ID,
+        model=GEMINI_IMAGE_MODEL_ID,
         prompt=the_prompt,
         config=types.GenerateImagesConfig(
             number_of_images=1,
