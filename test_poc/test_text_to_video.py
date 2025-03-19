@@ -106,6 +106,5 @@ def generate_video(main_title):
 # Example usage
 if __name__ == "__main__":
     
-    ideas = "Tạo một video minh họa về Microlearning với mindmap trực quan, trình bày các khái niệm chính như bài học ngắn, lợi ích, định dạng (short video, flashcard), và ứng dụng trong đào tạo nhân viên, phát triển kỹ năng, phát triển bản thân."
-
-    generate_video(ideas)
+    main_title = "LLM AI-Agents for Customer Personalisation in Retail Marketing (B2B & B2C) "
+    generate_video(main_title)

@@ -7,7 +7,7 @@ init_db_personalization()
 
 from personalization_router import api_personalization
 VERSION_API = "0.0.1"
-SERVICE_NAME = "LEO Personalization Engine API"
+SERVICE_NAME = "Personalization Engine API"
 
 # default
 @api_personalization.get("/")

@@ -1,5 +1,9 @@
 from dotenv import load_dotenv
 import os
+
+# Load the .env file and override any existing environment variables
+load_dotenv(override=True)
+
 import time
 
 
@@ -24,8 +28,7 @@ import google.generativeai as genai
 from google.cloud import translate_v2 as translate
 import pprint
 
-# Load the .env file and override any existing environment variables
-load_dotenv(override=True)
+
 
 VERSION = "1.0.0"
 SERVICE_NAME = "RESYNAP CHATBOT VERSION:" + VERSION
@@ -179,7 +182,7 @@ def format_string_for_md_slides(rs):
     rs = rs.replace('##','## ')
     return rs
 
-# the main function to ask LEO
+# the main function to ask chatbot
 def ask_question(context: str = '', answer_in_format: str = '', target_language: str = '', question: str = 'Hi', temperature_score = TEMPERATURE_SCORE ) -> str:
     
     response = ""

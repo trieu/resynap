@@ -21,38 +21,70 @@ class TextToSpeechConverter:
             return None
 
     def get_voice_params(self, language_code, gender):
-        """Gets voice parameters based on the language code and gender."""
-        
+        """Gets voice parameters based on the language code and gender, prioritizing naturalness.
+
+        Args:
+            language_code: A short language code (e.g., "en", "vi").
+            gender: "male", "female", or any other string for neutral.
+
+        Returns:
+            A dictionary containing voice parameters suitable for Google Cloud Text-to-Speech.
+        """
+
         # Map short language code to Google Cloud-supported voice locales
         language_map = {
             "en": "en-US",
-            "vi": "vi-VN"
+            "vi": "vi-VN",
+            "fr": "fr-FR",  # Example: French
+            # Add more language mappings as needed
         }
-        
+
         locale = language_map.get(language_code, "en-US")  # Default to English
 
-        if gender.lower() == 'female':
-            ssml_gender = texttospeech.SsmlVoiceGender.FEMALE
-            voice_name = {
-                "en-US": "en-US-Wavenet-F",
-                "vi-VN": "vi-VN-Wavenet-A"
-            }.get(locale, "en-US-Wavenet-F")
-                
-        elif gender.lower() == 'male':
-            ssml_gender = texttospeech.SsmlVoiceGender.MALE
-            voice_name = {
-                "en-US": "en-US-Wavenet-D",
-                "vi-VN": "vi-VN-Wavenet-B"
-            }.get(locale, "en-US-Wavenet-D")
+        # Prioritize Neural2 voices for enhanced naturalness, then Wavenet, then standard.
+        # Adapt this list to the most current and highest quality voices available in Google Cloud Text-to-Speech.  Check the documentation!
+        voice_options = {
+            "en-US": {
+                "female": ["en-US-Neural2-F", "en-US-Wavenet-F", "en-US-Standard-F"],
+                "male":   ["en-US-Neural2-D", "en-US-Wavenet-D", "en-US-Standard-D"],
+                "neutral": ["en-US-Neural2-D", "en-US-Wavenet-D", "en-US-Standard-D"]  # Or another suitable neutral voice
+            },
+            "vi-VN": {
+                "female": ["vi-VN-Neural2-A", "vi-VN-Standard-A"],  # Vietnamese has fewer Neural2 options
+                "male":   ["vi-VN-Wavenet-D", "vi-VN-Standard-B"],  # Vietnamese has fewer Neural2 options
+                "neutral": ["vi-VN-Wavenet-D", "vi-VN-Standard-B"]
+            },
+            "fr-FR": {  # Example for French
+                "female": ["fr-FR-Neural2-C", "fr-FR-Wavenet-C", "fr-FR-Standard-C"],
+                "male":   ["fr-FR-Neural2-D", "fr-FR-Wavenet-D", "fr-FR-Standard-D"],
+                "neutral":["fr-FR-Neural2-D", "fr-FR-Wavenet-D", "fr-FR-Standard-D"]
+            },
+            # Add more locales and voice options as needed, checking Google Cloud documentation for available voices.
+        }
+
+        gender_lower = gender.lower()
+        if gender_lower in ("male", "female"):
+            ssml_gender = texttospeech.SsmlVoiceGender.MALE if gender_lower == "male" else texttospeech.SsmlVoiceGender.FEMALE
         else:
             ssml_gender = texttospeech.SsmlVoiceGender.NEUTRAL
-            voice_name = "en-US-Neural2-D"  # General fallback
+
+        # Select the voice: try Neural2, then Wavenet, then Standard.
+        try:
+            voice_name = voice_options[locale][gender_lower][0]  # Try Neural2 first
+        except KeyError:
+            # If no specific gendered voice is found, try a neutral option
+            try:
+                voice_name = voice_options[locale]["neutral"][0]
+                ssml_gender = texttospeech.SsmlVoiceGender.NEUTRAL # Ensure gender is neutral
+            except KeyError:  # Handle cases where even a neutral voice is missing
+                voice_name = "en-US-Neural2-D" # Fallback to US English Neural2, male (common default)
+                locale = "en-US"
+                ssml_gender = texttospeech.SsmlVoiceGender.NEUTRAL
 
         print(f"Detected language: {locale}, gender: {ssml_gender.name}, using voice: {voice_name}")
-
         return {"name": voice_name, "gender": ssml_gender, "language_code": locale}
 
-    def synthesize_speech(self, text, gender="female", output_file="output.mp3", audio_encoding=texttospeech.AudioEncoding.MP3):
+    def synthesize_speech(self, text, output_file="output.mp3", speaking_rate=1.0, pitch=0.0, gender="neutral", audio_encoding=texttospeech.AudioEncoding.MP3):
         """Synthesizes speech from the given text with language detection."""
         language_code = self.detect_language(text)
         if not language_code:
@@ -74,10 +106,12 @@ class TextToSpeechConverter:
             )
 
             audio_config = texttospeech.AudioConfig(
-                audio_encoding=audio_encoding
+                audio_encoding=audio_encoding,
+                speaking_rate=speaking_rate,  # Adjust speaking rate for more naturalness
+                pitch=pitch  # Adjust pitch for more naturalness
             )
 
-            print(f"Using voice: {voice.name}, Language: {voice.language_code}, Gender: {voice.ssml_gender.name}")
+            print(f"Using voice: {voice.name}, Language: {voice.language_code}, Gender: {voice.ssml_gender.name}, Speaking Rate: {speaking_rate}, Pitch: {pitch}")
             response = self.tts_client.synthesize_speech(
                 input=synthesis_input, voice=voice, audio_config=audio_config
             )
@@ -95,14 +129,26 @@ if __name__ == "__main__":
     credentials_path = None  # Or "path/to/your/credentials.json"
     converter = TextToSpeechConverter(credentials_path)
 
+    vn_text = '''
+    KHÔNG KHÍ TẠI NHÀ VĂN HÓA THANH NIÊN NGAY LÚC NÀY ĐANG DẦN TRỞ NÊN SÔI ĐỘNG HƠN VỚI NGÀY HỘI GIẤC MƠ LỌ LEM! ✨
+👑 Cả nhà ơi, hãy cùng các bé nhà mình đến ngay Ngày hội để cùng hòa mình vào không gian cổ tích, nơi các bé được hóa thân thành công chúa, hoàng tử và tận hưởng vô vàn hoạt động thú vị!
+💖 Cùng PNJ lan tỏa yêu thương, tiếp thêm động lực để các em nhỏ tự tin theo đuổi ước mơ!
+📍 Địa điểm: Sân 4A Nhà Văn hóa Thanh niên, số 4 Phạm Ngọc Thạch, Quận 1, TP.HCM
+⏰ Thời gian: Đang diễn ra – ĐỪNG BỎ LỠ!
+🚀 Còn chờ gì nữa? ĐẾN NGAY và cùng nhau tạo nên những khoảnh khắc đáng nhớ với các bé nhà mình nào! 🎉🎭💫
+📸PNJers nào đang có mặt ở đây, khoe với ad ảnh check in của gia đình mình vào đây nhé! 🤩
+📌 Thông tin thêm về dự án Giấc Mơ Lọ Lem tại: https://www.pnj.com.vn/giac-mo-lo-lem.html
+    '''
+
     texts_to_synthesize = [
         "Xin chào, đây là văn bản tiếng Việt.",
-        "Hello, this is English text."
+        "Hello, this is English text.",
+        vn_text
     ]
 
     for i, text in enumerate(texts_to_synthesize):
         output_file = f"output_{i}.mp3"
-        if converter.synthesize_speech(text, "male", output_file):
+        if converter.synthesize_speech(text, output_file, 0.9, 0.7, 'female'):
             print(f"Text-to-speech conversion for '{text}' successful.")
         else:
             print(f"Text-to-speech conversion for '{text}' failed.")

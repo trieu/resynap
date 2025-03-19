@@ -138,7 +138,7 @@ var askTheEmailOfUser = function (name) {
           LeoObserverProxy.updateProfileBySession(profileData);
         }
 
-        var a = "Hi " +  name + ", LEO is creating a new account for you. Please wait for 5 seconds...";
+        var a = "Hi " +  name + ", system is creating a new account for you. Please wait for 5 seconds...";
         leoBotShowAnswer(a, 5000);
       } else {
         leoBotShowError(email + " is not a valid email", function () {

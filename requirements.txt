@@ -1,9 +1,11 @@
 
-# FastAPI and Web Dependencies
+# FastAPI and Core Web Dependencies
 fastapi>=0.115.11
 uvicorn
 jinja2
 python-multipart
+
+# Utility and Configuration
 python-dotenv
 requests
 
@@ -22,6 +24,7 @@ rq
 rq-scheduler
 
 # Data Processing
+unidecode
 numpy>=1.26.4
 pandas>=2.2.2
 pendulum>=3.0.0
@@ -39,10 +42,12 @@ google-cloud-translate>=3.15.3
 google-cloud-texttospeech
 langdetect>=1.0.9
 
-# PDF & Markdown Handling
+# PDF & Markdown Handling & Google Sheets
 markdown
 pypdl
 gdown
+oauth2client
+gspread
 pymupdf
 
 # Media Processing
