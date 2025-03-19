@@ -1,4 +1,3 @@
-
 # FastAPI and Core Web Dependencies
 fastapi>=0.115.11
 uvicorn
@@ -20,8 +19,7 @@ pydantic[email,timezone]>=2.5.0
 
 # Redis Task Queue
 redis>=5.1.1
-rq
-rq-scheduler
+schedule
 
 # Data Processing
 unidecode

@@ -3,6 +3,32 @@ from google.cloud import texttospeech
 from google.cloud import translate_v2 as translate
 from langdetect import detect, LangDetectException
 
+LANGUAGE_MAPPING = {
+    "en": "English",
+    "vi": "Vietnamese",
+    "fr": "French",
+    "es": "Spanish",
+    "de": "German",
+    "zh-cn": "Chinese (Simplified)",
+    "zh-tw": "Chinese (Traditional)",
+    "ja": "Japanese",
+    "ko": "Korean",
+    "ru": "Russian"
+}
+
+def detect_language(text):
+    """Detects the language code of the given text."""
+    try:
+        return detect(text)
+    except LangDetectException:
+        return 'en'
+
+def get_language_name(text):
+    """Detects the language and returns its full name."""
+    lang_code = detect_language(text)
+    return LANGUAGE_MAPPING.get(lang_code, "English")
+
+
 class TextToSpeechConverter:
     """Converts text to speech using Google Cloud Text-to-Speech API with language detection."""
 
@@ -13,12 +39,7 @@ class TextToSpeechConverter:
         self.tts_client = texttospeech.TextToSpeechClient()
         self.translate_client = translate.Client()
 
-    def detect_language(self, text):
-        """Detects the language of the given text."""
-        try:
-            return detect(text)
-        except LangDetectException:
-            return None
+
 
     def get_voice_params(self, language_code, gender):
         """Gets voice parameters based on the language code and gender, prioritizing naturalness.
@@ -86,7 +107,7 @@ class TextToSpeechConverter:
 
     def synthesize_speech(self, text, output_file="output.mp3", speaking_rate=1.0, pitch=0.0, gender="neutral", audio_encoding=texttospeech.AudioEncoding.MP3):
         """Synthesizes speech from the given text with language detection."""
-        language_code = self.detect_language(text)
+        language_code = detect_language(text)
         if not language_code:
             print("Could not detect language. Using default English voice.")
             language_code = "en"
@@ -129,21 +150,10 @@ if __name__ == "__main__":
     credentials_path = None  # Or "path/to/your/credentials.json"
     converter = TextToSpeechConverter(credentials_path)
 
-    vn_text = '''
-    KHÔNG KHÍ TẠI NHÀ VĂN HÓA THANH NIÊN NGAY LÚC NÀY ĐANG DẦN TRỞ NÊN SÔI ĐỘNG HƠN VỚI NGÀY HỘI GIẤC MƠ LỌ LEM! ✨
-👑 Cả nhà ơi, hãy cùng các bé nhà mình đến ngay Ngày hội để cùng hòa mình vào không gian cổ tích, nơi các bé được hóa thân thành công chúa, hoàng tử và tận hưởng vô vàn hoạt động thú vị!
-💖 Cùng PNJ lan tỏa yêu thương, tiếp thêm động lực để các em nhỏ tự tin theo đuổi ước mơ!
-📍 Địa điểm: Sân 4A Nhà Văn hóa Thanh niên, số 4 Phạm Ngọc Thạch, Quận 1, TP.HCM
-⏰ Thời gian: Đang diễn ra – ĐỪNG BỎ LỠ!
-🚀 Còn chờ gì nữa? ĐẾN NGAY và cùng nhau tạo nên những khoảnh khắc đáng nhớ với các bé nhà mình nào! 🎉🎭💫
-📸PNJers nào đang có mặt ở đây, khoe với ad ảnh check in của gia đình mình vào đây nhé! 🤩
-📌 Thông tin thêm về dự án Giấc Mơ Lọ Lem tại: https://www.pnj.com.vn/giac-mo-lo-lem.html
-    '''
 
     texts_to_synthesize = [
         "Xin chào, đây là văn bản tiếng Việt.",
-        "Hello, this is English text.",
-        vn_text
+        "Hello, this is English text."
     ]
 
     for i, text in enumerate(texts_to_synthesize):

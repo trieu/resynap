@@ -8,10 +8,10 @@ import os
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv()
+load_dotenv(override=True)
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-# Usegemini-2.0-flash for fast mindmap generation
+# Use gemini-2.0-flash for fast mindmap generation
 GEMINI_MODEL_ID = "gemini-2.0-flash"
 
 genai_client = Client(api_key=GEMINI_API_KEY)

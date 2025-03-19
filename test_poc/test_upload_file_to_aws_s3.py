@@ -63,8 +63,9 @@ def upload_audio_to_s3(file_path, s3_key):
         return None
 
 # Example Usage
-file_path = "/home/trieu/projects/resynap/resources/generated_videos/video-with-sounds.mp4"  # Replace with your actual file path
-s3_key = "test/video-with-sounds.mp4"  # Define the path inside the S3 bucket
+if __name__ == "__main__":
+    file_path = "/home/trieu/projects/resynap/resources/generated_videos/video-with-sounds.mp4"  # Replace with your actual file path
+    s3_key = "test/video-with-sounds.mp4"  # Define the path inside the S3 bucket
 
-public_url = upload_audio_to_s3(file_path, s3_key)
-print("Public URL:", public_url if public_url else "Upload failed.")
+    public_url = upload_audio_to_s3(file_path, s3_key)
+    print("Public URL:", public_url if public_url else "Upload failed.")
