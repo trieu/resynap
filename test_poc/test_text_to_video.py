@@ -18,6 +18,9 @@ GEMINI_MODEL_ID = "gemini-2.0-flash"
 
 genai_client = Client(api_key=GEMINI_API_KEY)
 
+# default background music path
+DEFAULT_MUSIC_PATH = "/home/trieu/sounds/guitar-melodies-for-dreamy-vibes.mp3"
+
 # Configuration
 OUTPUT_IMAGE_FOLDER = "resources/generated_images"
 OUTPUT_VIDEO_FOLDER = "resources/generated_videos"
@@ -103,9 +106,8 @@ def generate_video(name, description, audio_path) -> str:
     audio_voice = AudioFileClip(audio_path)
     
     # Load the audio file for background music
-    background_music_path = "/home/trieu/Music/joe-hisaishi-summer.mp3"
-    audio_music = AudioFileClip(background_music_path)
-    audio_music = audio_music.with_effects([afx.MultiplyStereoVolume(left=0.2, right=0.2)])  # Reduce music volume to 30%
+    audio_music = AudioFileClip(DEFAULT_MUSIC_PATH)
+    audio_music = audio_music.with_effects([afx.MultiplyStereoVolume(left=0.3, right=0.3)])  # Reduce music volume to 30%
 
     # Merge by overlaying both audios
     final_audio = CompositeAudioClip([audio_voice, audio_music])
