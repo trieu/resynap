@@ -1,6 +1,8 @@
 import boto3
 import os
 import sys
+import unidecode
+import re
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -61,6 +63,17 @@ def upload_audio_to_s3(file_path, s3_key):
     except Exception as e:
         print(f"❌ Error uploading file: {e}")
         return None
+
+def normalize_to_url_friendly(text):
+    # Convert Unicode characters to ASCII (e.g., "Nhân viên" -> "Nhan vien")
+    text = unidecode.unidecode(text)
+    # Convert to lowercase
+    text = text.lower()
+    # Replace spaces and special characters with hyphens
+    text = re.sub(r'[^a-z0-9]+', '-', text)
+    # Remove leading and trailing hyphens
+    text = text.strip('-')
+    return text
 
 # Example Usage
 if __name__ == "__main__":

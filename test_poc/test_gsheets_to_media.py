@@ -3,14 +3,12 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import os
 import schedule
-import unidecode
-import re
 import time
 
 # Import core functions
 from test_text_to_speech import TextToSpeechConverter
 from test_ideas_to_audio_script import generate_audio_script
-from test_upload_file_to_aws_s3 import upload_audio_to_s3
+from test_upload_file_to_aws_s3 import upload_audio_to_s3, normalize_to_url_friendly
 
 load_dotenv(override=True)
 
@@ -54,18 +52,6 @@ def generate_video_URL(name, description):
     file_name = normalize_to_url_friendly(name)
     # TODO - Implement video generation logic
     return ""
-
-
-def normalize_to_url_friendly(text):
-    # Convert Unicode characters to ASCII (e.g., "Nhân viên" -> "Nhan vien")
-    text = unidecode.unidecode(text)
-    # Convert to lowercase
-    text = text.lower()
-    # Replace spaces and special characters with hyphens
-    text = re.sub(r'[^a-z0-9]+', '-', text)
-    # Remove leading and trailing hyphens
-    text = text.strip('-')
-    return text
 
 
 def process_for_group():
