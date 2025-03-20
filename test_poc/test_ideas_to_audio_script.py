@@ -27,15 +27,13 @@ def generate_audio_script(name, description, type="group", gender="neutral"):
             
         # Generate audio script based on the description
         prompt = f"""
-            Generate a speech content based on the given description: "{description}".  
-            The content should be tailored for {type} named "{name}", gender "{gender}" and must be written exclusively in the language "{language_name}".  
-            Just return text for AI can convert to audio file.
+            Please respond to the following prompt without including any explicit instructions or meta-instructions in your response:
+            Generate a speech content for text-to-speech engine, so it can convert from text to audio, using the given description: "{description}".  
+            The content should be tailored for {type} named "{name}", gender "{gender}" and must be written exclusively in the language "{language_name}".             
         """
         
         generate_content_config = types.GenerateContentConfig(
             temperature=0.5,
-            top_p=0.95,
-            top_k=40,
             max_output_tokens=8192,
             response_mime_type="text/plain",
         )
@@ -50,6 +48,6 @@ def generate_audio_script(name, description, type="group", gender="neutral"):
 if __name__ == "__main__":
     # Example usage
     name = "Triều"
-    description = "Chúc mừng sinh nhật năm 40 tuổi"
-    audio_script = generate_audio_script(name, description, type="project")
+    description = "Chúc mừng sinh nhật"
+    audio_script = generate_audio_script(name, description, type="person")
     print(audio_script)
