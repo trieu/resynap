@@ -13,7 +13,7 @@ AWS_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 AWS_SESSION_TOKEN = os.getenv("AWS_SESSION_TOKEN")
 AWS_REGION = os.getenv("AWS_REGION", "us-east-1")  # Default to us-east-1 if not set
-BUCKET_NAME = "media-personalization"
+AWS_S3_BUCKET_FOT_GENAI = os.getenv("AWS_S3_BUCKET_FOT_GENAI")
 
 # Function to check if AWS credentials are set
 def check_aws_credentials():
@@ -31,7 +31,7 @@ s3 = boto3.client(
     region_name=AWS_REGION,
     aws_access_key_id=AWS_ACCESS_KEY,
     aws_secret_access_key=AWS_SECRET_KEY,
-    aws_session_token=AWS_SESSION_TOKEN,
+    #aws_session_token=AWS_SESSION_TOKEN,
 )
 
 def upload_audio_to_s3(file_path, s3_key):
@@ -51,13 +51,13 @@ def upload_audio_to_s3(file_path, s3_key):
         # Upload the file with public-read ACL
         s3.upload_file(
             file_path,
-            BUCKET_NAME,
+            AWS_S3_BUCKET_FOT_GENAI,
             s3_key,
             ExtraArgs={"ACL": "public-read", "ContentType": "audio/mpeg"},
         )
 
         # Construct the public URL
-        public_url = f"https://{BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/{s3_key}"
+        public_url = f"https://{AWS_S3_BUCKET_FOT_GENAI}.s3.{AWS_REGION}.amazonaws.com/{s3_key}"
         print(f"✅ File uploaded successfully: {public_url}")
         return public_url
     except Exception as e:

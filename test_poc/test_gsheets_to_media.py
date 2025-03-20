@@ -7,7 +7,8 @@ import time
 
 # Import core functions
 from test_text_to_speech import TextToSpeechConverter
-from test_ideas_to_audio_script import generate_audio_script
+from test_ideas_to_audio_script import generate_audio_script, generate_video_title
+from test_text_to_video import generate_video
 from test_upload_file_to_aws_s3 import upload_audio_to_s3, normalize_to_url_friendly
 
 load_dotenv(override=True)
@@ -29,12 +30,16 @@ gc = gspread.authorize(creds)
 GOOGLE_SHEET_URL_FOR_AI_AGENT = os.getenv("GOOGLE_SHEET_URL_FOR_AI_AGENT")
 sh = gc.open_by_url(GOOGLE_SHEET_URL_FOR_AI_AGENT)
 
-
+#  Generate audio URL
 def generate_audio_URL(name, audio_script):
     file_name = normalize_to_url_friendly(name)
-    converter = TextToSpeechConverter()
     output_file = f"output_{file_name}.mp3"
-    if converter.synthesize_speech(audio_script, output_file, 0.9, 0.7, 'female'):
+    
+    # Generate audio file
+    converter = TextToSpeechConverter()
+    
+    # Synthesize speech
+    if converter.synthesize_speech(audio_script, output_file, 0.99, 0.8, 'female'):
         print(f"Text-to-speech conversion for '{output_file}' successful.")
     else:
         print(f"Text-to-speech conversion for '{output_file}' failed.")
@@ -45,13 +50,25 @@ def generate_audio_URL(name, audio_script):
     public_url = upload_audio_to_s3(file_path, s3_key)
     print("Public URL:", public_url if public_url else "Upload failed.")
     
-    return public_url
+    return file_path, public_url
 
 
-def generate_video_URL(name, description):
+# Generate video URL
+def generate_video_URL(name, description, localfile):
     file_name = normalize_to_url_friendly(name)
-    # TODO - Implement video generation logic
-    return ""
+    
+    # Generate video title
+    video_url = generate_video(name, description, localfile)
+    print(f"Video URL: {video_url}")
+    
+    file_path = "./" + video_url  # Replace with your actual file path
+    
+    s3_key = f"video/{file_name}.mp4"
+    
+    public_url = upload_audio_to_s3(file_path, s3_key)
+    print("Public URL:", public_url if public_url else "Upload failed.")
+    
+    return public_url
 
 
 def process_for_group():
@@ -82,11 +99,11 @@ def process_for_group():
                 worksheet.update_acell(f"D{i}", audio_script)  
 
             # Generate audio URL
-            audio_url = generate_audio_URL(name, audio_script)
+            localfile, audio_url = generate_audio_URL(name, audio_script)
             worksheet.update_acell(f"E{i}", audio_url)  # Update Audio URL
             
             # Generate video URL
-            video_url = generate_video_URL(name, description)
+            video_url = generate_video_URL(name, description, localfile)
             worksheet.update_acell(f"F{i}", video_url)  # Update Video URL
 
             # processing is done
@@ -123,11 +140,11 @@ def process_for_personal_profile():
                 worksheet.update_acell(f"D{i}", audio_script)
 
             # Generate audio URL
-            audio_url = generate_audio_URL(name, audio_script)
+            localfile, audio_url = generate_audio_URL(name, audio_script)
             worksheet.update_acell(f"E{i}", audio_url)  # Update Audio URL
             
             # Generate video URL
-            video_url = generate_video_URL(name, description)
+            video_url = generate_video_URL(name, description, localfile)
             worksheet.update_acell(f"F{i}", video_url)  # Update Video URL
 
             # processing is done
