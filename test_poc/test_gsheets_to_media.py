@@ -88,7 +88,7 @@ def process_for_group():
             audio_script = row[audio_script_index].strip()
             
             # processing is started
-            worksheet.format(f"E{i}:F{i}", {'textFormat': {'bold': True,"fontSize": 16}})
+            worksheet.format(f"E{i}:F{i}", {'textFormat': {'bold': False,"fontSize": 18}})
 
             worksheet.update_acell(f"E{i}", PROCESSING)  # Update Audio URL
             worksheet.update_acell(f"F{i}", PROCESSING)  # Update Video URL
@@ -99,17 +99,20 @@ def process_for_group():
                 worksheet.update_acell(f"D{i}", audio_script)  
 
             # Generate audio URL
-            localfile, audio_url = generate_audio_URL(name, audio_script)
-            worksheet.update_acell(f"E{i}", audio_url)  # Update Audio URL
-            
+            audio_file, audio_url = generate_audio_URL(name, audio_script)
+            # Update Audio URL
+            worksheet.format(f"E{i}", {'textFormat': {'bold': True,"fontSize": 15}})
+            worksheet.update_acell(f"E{i}", f'=HYPERLINK("{audio_url}", "Audio URL")')
+
             # Generate video URL
-            video_url = generate_video_URL(name, description, localfile)
-            worksheet.update_acell(f"F{i}", video_url)  # Update Video URL
+            video_url = generate_video_URL(name, description, audio_file)
+            # Update Video URL
+            worksheet.format(f"F{i}", {'textFormat': {'bold': True,"fontSize": 15}})
+            worksheet.update_acell(f"F{i}", f'=HYPERLINK("{video_url}", "Video URL")')
+
 
             # processing is done
             worksheet.update_acell(f"A{i}", GEN_BY_AI)  # Update Status
-            worksheet.format(f"E{i}:F{i}", {'textFormat': {'bold': False,"fontSize": 10}})
-
             print(f"process_for_group row {i}")
 
 
@@ -141,19 +144,23 @@ def process_for_personal_profile():
                 worksheet.update_acell(f"D{i}", PROCESSING)
                 audio_script = generate_audio_script(name, description, "person")
                 worksheet.update_acell(f"D{i}", audio_script)
-
-            # Generate audio URL
-            localfile, audio_url = generate_audio_URL(name, audio_script)
-            worksheet.update_acell(f"E{i}", audio_url)  # Update Audio URL
+            
+             # Generate audio URL
+            audio_file, audio_url = generate_audio_URL(name, audio_script)
+            # Update Audio URL
+            worksheet.format(f"E{i}", {'textFormat': {'bold': True,"fontSize": 15}})
+            worksheet.update_acell(f"E{i}", f'=HYPERLINK("{audio_url}", "Audio URL")')
             
             # Generate video URL
-            video_url = generate_video_URL(name, description, localfile)
-            worksheet.update_acell(f"F{i}", video_url)  # Update Video URL
+            video_url = generate_video_URL(name, description, audio_file)
+            # Update Video URL
+            worksheet.format(f"F{i}", {'textFormat': {'bold': True,"fontSize": 15}})
+            worksheet.update_acell(f"F{i}", f'=HYPERLINK("{video_url}", "Video URL")')
 
             # processing is done
             worksheet.update_acell(f"A{i}", GEN_BY_AI)  # Update Status
-
             print(f"process_for_personal_profile row {i}")
+
 
 
 if __name__ == "__main__":
@@ -164,4 +171,5 @@ if __name__ == "__main__":
     print("Scheduled jobs. Running scheduler...")
     while True:
         schedule.run_pending()
-        time.sleep(1)  # Sleep for a short interval to avoid busy-waiting
+        # Sleep for a short interval to avoid busy-waiting
+        time.sleep(2)  
