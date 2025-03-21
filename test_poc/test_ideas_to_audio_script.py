@@ -63,14 +63,13 @@ def generate_video_title(name, description):
             
         # Constructing the prompt to generate a short, engaging video title
         prompt = (
-            f"Please respond to the following prompt without including any explicit instructions or meta-instructions in your response:\n"
-            f"Generate a short and engaging video title in {language_name} based on the following description. "
-            f"The title must be less than {max_length} words, compelling, and relevant to the content:\n"
-            f"Description: {description}"
+            f"Do not including any explicit instructions, any options or meta-instructions in your response:\n"
+            f"Generate only 1 short and engaging video title in {language_name} based on the following description. "
+            f"The title must be less than {max_length} words, compelling, and relevant to the content: {description}"
         )
         
         generate_content_config = types.GenerateContentConfig(
-            temperature=0.42,
+            temperature=0.35,
             max_output_tokens=100,  # Keeping it short and concise
             response_mime_type="text/plain",
         )
