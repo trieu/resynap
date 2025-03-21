@@ -54,3 +54,7 @@ pymupdf
 # Media Processing
 opencv-python-headless
 moviepy
+
+# Data Visualization
+pynarrative
+ipython

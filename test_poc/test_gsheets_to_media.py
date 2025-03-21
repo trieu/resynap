@@ -141,9 +141,11 @@ def process_for_personal_profile():
             
              # Update Audio Script
             if len(audio_script) == 0:
+                worksheet.format(f"D{i}", {'textFormat': {'bold': True,"fontSize": 15}})
                 worksheet.update_acell(f"D{i}", PROCESSING)
                 audio_script = generate_audio_script(name, description, "person")
                 worksheet.update_acell(f"D{i}", audio_script)
+                worksheet.format(f"D{i}", {'textFormat': {'bold': False,"fontSize": 10}})
             
              # Generate audio URL
             audio_file, audio_url = generate_audio_URL(name, audio_script)
