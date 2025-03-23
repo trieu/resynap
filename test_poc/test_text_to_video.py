@@ -19,7 +19,7 @@ GEMINI_MODEL_ID = "gemini-2.0-flash"
 genai_client = Client(api_key=GEMINI_API_KEY)
 
 # default background music path
-DEFAULT_MUSIC_PATH = "/home/trieu/sounds/guitar-melodies-for-dreamy-vibes.mp3"
+DEFAULT_MUSIC_PATH = "./resources/audio/johnnie_holiday.mp3"
 
 # Configuration
 OUTPUT_IMAGE_FOLDER = "resources/generated_images"
@@ -145,7 +145,7 @@ if __name__ == "__main__":
         2) Môi trường làm việc
         3)  Giới thiệu các sản phẩm của phòng CNTT
     '''
-    audio_path = "/home/trieu/sounds/audio_trieu.mp3"
+    audio_path = "./resources/audio/johnnie_holiday.mp3"
     
     video_url = generate_video(name, description, audio_path)
     print(f"Video URL: {video_url}")

@@ -7,7 +7,7 @@ import time
 
 # Import core functions
 from test_text_to_speech import TextToSpeechConverter
-from test_ideas_to_audio_script import generate_audio_script, generate_video_title
+from test_ideas_to_audio_script import generate_audio_script
 from test_text_to_video import generate_video
 from test_upload_file_to_aws_s3 import upload_file_to_s3, normalize_to_url_friendly
 
@@ -141,11 +141,11 @@ def process_for_personal_profile():
             
              # Update Audio Script
             if len(audio_script) == 0:
-                worksheet.format(f"D{i}", {'textFormat': {'bold': True,"fontSize": 15}})
+                # Generate audio script
                 worksheet.update_acell(f"D{i}", PROCESSING)
                 audio_script = generate_audio_script(name, description, "person")
                 worksheet.update_acell(f"D{i}", audio_script)
-                worksheet.format(f"D{i}", {'textFormat': {'bold': False,"fontSize": 10}})
+
             
              # Generate audio URL
             audio_file, audio_url = generate_audio_URL(name, audio_script)
