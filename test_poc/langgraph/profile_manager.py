@@ -1,5 +1,5 @@
 from typing import List, Dict, Optional
-from sqlalchemy import ForeignKey, JSON, Table, Column, String
+from sqlalchemy import ForeignKey, JSON, Table, Column, String, Integer
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.dialects.postgresql import insert
@@ -16,29 +16,19 @@ logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
 load_dotenv()
 
 # Database setup
-from sqlalchemy.engine.url import URL
-
 PG_HOST = os.getenv("PG_HOST", "localhost")
 PG_PORT = os.getenv("PG_PORT", "5433")
 PG_DATABASE = os.getenv("PG_DATABASE", "customer360")
 PG_USER = os.getenv("PG_USER", "postgres")
 PG_PASSWORD = os.getenv("PG_PASSWORD", "")
 
-DATABASE_URL = URL.create(
-    drivername="postgresql+asyncpg",
-    username=PG_USER,
-    password=PG_PASSWORD,
-    host=PG_HOST,
-    port=PG_PORT,
-    database=PG_DATABASE,
-)
-
+DATABASE_URL = f"postgresql+asyncpg://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DATABASE}"
 engine = create_async_engine(DATABASE_URL)
 async_session_maker = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
 
 Base = declarative_base()
 
-
+# Association Table for Many-to-Many relationship
 profile_product_association = Table(
     'profile_product_association', Base.metadata,
     Column('profile_id', String, ForeignKey('profiles.profile_id'), primary_key=True),
@@ -49,32 +39,28 @@ profile_product_association = Table(
 class Profile(Base):
     __tablename__ = 'profiles'
 
-    profile_id: Column[str] = Column(String, primary_key=True)
-    page_view_keywords: Column[Optional[List[str]]] = Column(JSON)
-    purchase_keywords: Column[Optional[List[str]]] = Column(JSON)
-    interest_keywords: Column[Optional[List[str]]] = Column(JSON)
-    additional_info: Column[Optional[Dict]] = Column(JSON)
-    max_recommendation_size: Column[int] = Column(default=8)
-    except_product_ids: Column[Optional[List[str]]] = Column(JSON)
-    journey_maps: Column[Optional[List[str]]] = Column(JSON)
+    profile_id = Column(String, primary_key=True)
+    page_view_keywords = Column(JSON, nullable=True)
+    purchase_keywords = Column(JSON, nullable=True)
+    interest_keywords = Column(JSON, nullable=True)
+    additional_info = Column(JSON, nullable=True)
+    max_recommendation_size = Column(Integer, default=8)
+    except_product_ids = Column(JSON, nullable=True)
+    journey_maps = Column(JSON, nullable=True)
 
-    linked_products: Column[List["Product"]] = relationship(
-       "Product", secondary=profile_product_association, back_populates="linked_profiles"
-    )
+    linked_products = relationship("Product", secondary=profile_product_association, back_populates="linked_profiles")
 
 class Product(Base):
     __tablename__ = 'products'
 
-    product_id: Column[str] = Column(String, primary_key=True)
-    product_name: Column[str] = Column(String, nullable=False)
-    product_category: Column[str] = Column(String, nullable=False)
-    product_keywords: Column[Optional[List[str]]] = Column(JSON)
-    additional_info: Column[Optional[Dict]] = Column(JSON)
-    journey_maps: Column[Optional[List[str]]] = Column(JSON)
+    product_id = Column(String, primary_key=True)
+    product_name = Column(String, nullable=False)
+    product_category = Column(String, nullable=False)
+    product_keywords = Column(JSON, nullable=True)
+    additional_info = Column(JSON, nullable=True)
+    journey_maps = Column(JSON, nullable=True)
 
-    linked_profiles: Column[List["Profile"]] = relationship(
-       "Profile", secondary=profile_product_association, back_populates="linked_products"
-    )
+    linked_profiles = relationship("Profile", secondary=profile_product_association, back_populates="linked_products")
 
 class ProfileRequest(BaseModel):
     profile_id: str
@@ -100,14 +86,15 @@ class Customer360:
 
     async def add_profile(self, profile: ProfileRequest):
         try:
+            profile_data = profile.model_dump()
             existing_profile = await self.session.get(Profile, profile.profile_id)
-            profile_data = profile.model_dump()  # Pydantic v2 fix
             if existing_profile:
                 for key, value in profile_data.items():
                     setattr(existing_profile, key, value)
             else:
                 new_profile = Profile(**profile_data)
                 self.session.add(new_profile)
+            print(profile_data)
             await self.session.commit()
         except Exception as e:
             logging.error(f"Error adding profile: {e}")
@@ -116,14 +103,15 @@ class Customer360:
 
     async def add_product(self, product: ProductRequest):
         try:
+            product_data = product.model_dump()
             existing_product = await self.session.get(Product, product.product_id)
-            product_data = product.model_dump()  # Pydantic v2 fix
             if existing_product:
                 for key, value in product_data.items():
                     setattr(existing_product, key, value)
             else:
                 new_product = Product(**product_data)
                 self.session.add(new_product)
+            print(product_data)
             await self.session.commit()
         except Exception as e:
             logging.error(f"Error adding product: {e}")
@@ -148,64 +136,57 @@ class Customer360:
     async def get_profile_360(self, profile_id: str) -> Optional[Dict]:
         try:
             profile = await self.session.get(Profile, profile_id)
-            if not profile:
-                return None
-            return profile.__dict__
+            return profile.__dict__ if profile else None
         except Exception as e:
             logging.error(f"Error getting profile 360: {e}")
             raise
 
-### sample data testing
-
-async def main():
+async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
+
+
+async def save_profile(profile: ProfileRequest):
+    async with async_session_maker() as session:
+        async with session.begin():  # Ensures transaction management
+            customer360 = Customer360(session=session)
+            await customer360.add_profile(profile)  # Ensure this method commits changes
+    
+    print(f"Profile {profile.profile_id} saved successfully!")
+
+
+
+async def main():
+    await init_db()
+    
+    await save_profile(ProfileRequest(profile_id="P6", page_view_keywords=["electronics"], purchase_keywords=["iPhone"],
+                interest_keywords=["technology"], additional_info={"age": 40, "location": "Saigon"}))
+    
+
+    await add_sample_data()
+
+async def add_sample_data():
     async with async_session_maker() as session:
         customer360 = Customer360(session=session)
-
-        # Sample profiles
-        profiles = [
-            ProfileRequest(
-                profile_id=f"P{i}",
-                page_view_keywords=["electronics", "smartphones", "gadgets"] if i % 2 == 0 else ["fashion", "clothing"],
-                purchase_keywords=["iPhone", "Samsung"] if i % 2 == 0 else ["Nike", "Adidas"],
-                interest_keywords=["technology", "gadgets"] if i % 2 == 0 else ["fitness", "outdoors"],
-                additional_info={"age": 25 + i, "location": "City" + str(i)},
-                except_product_ids=[f"X{i}", f"Y{i+1}"],
-                journey_maps=[f"map{i}", f"map{i+1}"]
-            ) for i in range(1, 6)
-        ]
-
-        # Sample products
-        products = [
-            ProductRequest(
-                product_id=f"PR{i}",
-                product_name=f"Product {i}",
-                product_category="Electronics" if i % 2 == 0 else "Fashion",
-                product_keywords=["tech", "AI"] if i % 2 == 0 else ["style", "comfort"],
-                additional_info={"brand": "BrandX" if i % 2 == 0 else "BrandY"},
-                journey_maps=[f"journey{i}"]
-            ) for i in range(1, 6)
-        ]
-
-        # Add profiles and products
+        
+        profiles = [ProfileRequest(profile_id=f"P{i}", page_view_keywords=["electronics"] if i % 2 == 0 else ["fashion"],
+                    purchase_keywords=["iPhone"] if i % 2 == 0 else ["Nike"],
+                    interest_keywords=["technology"] if i % 2 == 0 else ["fitness"],
+                    additional_info={"age": 25 + i, "location": "City" + str(i)}) for i in range(1, 6)]
+        
+        products = [ProductRequest(product_id=f"PR{i}", product_name=f"Product {i}",
+                    product_category="Electronics" if i % 2 == 0 else "Fashion") for i in range(1, 6)]
+        
         for profile in profiles:
             await customer360.add_profile(profile)
-            print("profile " + profile.profile_id + " added")
         
-
         for product in products:
             await customer360.add_product(product)
-            print("product " + product.product_id + " added")
-
-        # Link profiles to products
+        
         for i in range(1, 6):
-            profile_id = f"P{i}"
-            product_id = f"PR{i}"
-            relationship_type = "bought" if i % 2 == 0 else "interested"
-            await customer360.link_profile_to_product(profile_id, product_id, relationship_type)
-            print(f"linked profile {profile_id} to product {product_id}")
+            await customer360.link_profile_to_product(f"P{i}", f"PR{i}", "bought" if i % 2 == 0 else "interested")
 
 if __name__ == "__main__":
     asyncio.run(main())
+    
