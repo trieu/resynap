@@ -4,7 +4,7 @@ import numpy as np
 from qdrant_client import QdrantClient
 from qdrant_client.models import PointStruct, SearchParams
 from qdrant_client.http.models import Distance, VectorParams
-from langgraph_ai import State, embedding_model
+from langgraph_ai import ConversationState, embedding_model
 
 # Fetch the host and port from environment variables
 QDRANT_HOST = os.getenv('QDRANT_HOST', 'localhost')  # Default to localhost
@@ -15,7 +15,7 @@ class AgentRoleManager:
     
     def __init__(self):
         self.qdrant_client = QdrantClient(QDRANT_HOST, port=QDRANT_PORT)
-        self.collection_name = "agent_roles"
+        self.collection_name = "om_agent_roles"
 
         # Ensure collection exists in Qdrant
         if self.collection_name not in self.qdrant_client.get_collections().collections:
@@ -44,7 +44,7 @@ class AgentRoleManager:
 
         self.qdrant_client.upsert(collection_name=self.collection_name, points=points)
 
-    def determine_agent_role(self, state: State) -> State:
+    def determine_agent_role(self, state: ConversationState) -> ConversationState:
         """Uses Qdrant to determine the best-matching agent role based on user_message."""
         user_embedding = embedding_model.encode(state.user_message, convert_to_tensor=True).tolist()
 
@@ -77,7 +77,7 @@ def test_agent_role_detection():
     ]
     
     for user_message, expected_role in test_cases:
-        state = State(user_id="test", user_message=user_message)
+        state = ConversationState(user_id="test", user_message=user_message)
         state = agent_role_manager.determine_agent_role(state)
         assert state.agent_role == expected_role, f"Expected {expected_role}, got {state.agent_role}"
 

@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  qdrant:
+    image: qdrant/qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - ./qdrant_storage:/qdrant/storage:z
+    restart: unless-stopped
+    environment:
+      - QDRANT_STORAGE_PATH=/qdrant/storage
+      - QDRANT_LOG_LEVEL=INFO
+      - QDRANT_LOG_FILE=/qdrant/storage/qdrant.log
+      - QDRANT_HTTP_PORT=6333
+      - QDRANT_GRPC_PORT=6334
+      - QDRANT_STORAGE_ENGINE=rocksdb
+      - QDRANT_STORAGE_ENGINE_PATH=/qdrant/storage/rocksdb
+      - QDRANT_STORAGE_ENGINE_ROCKSDB_PATH=/qdrant/storage/rocksdb
+      - QDRANT_STORAGE_ENGINE_ROCKSDB_WRITE_BUFFER_SIZE=67108864
+      - QDRANT_STORAGE_ENGINE_ROCKSDB_MAX_WRITE_BUFFER_NUMBER=3
+      - QDRANT_STORAGE_ENGINE_ROCKSDB_TARGET_FILE_SIZE_BASE=67108864
+      - QDRANT_STORAGE_ENGINE_ROCKSDB_MAX_BACKGROUND_COMPACTIONS=2
+      - QDRANT_STORAGE_ENGINE_ROCKSDB_MAX_BACKGROUND_FLUSHES=2
+  

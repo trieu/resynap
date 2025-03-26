@@ -1,4 +1,4 @@
-from langgraph_ai import DatabaseManager, State 
+from langgraph_ai import DatabaseManager, ConversationState 
 from google import genai
 import os
 from dotenv import load_dotenv
@@ -18,22 +18,22 @@ db_manager = DatabaseManager()
 
 # Psychology expert training data
 training_data = [
-            State("", "", "Psychologist", "journey_stress", "office_consultation",
+            ConversationState("", "", "Psychologist", "journey_stress", "office_consultation",
                   "Tôi luôn cảm thấy lo lắng.", "Hãy thử bài tập thở sâu."),
 
-            State("", "", "Psychologist", "journey_relationship", "therapy_session",
+            ConversationState("", "", "Psychologist", "journey_relationship", "therapy_session",
                   "Làm thế nào để xử lý mâu thuẫn trong mối quan hệ?", "Lắng nghe một cách chủ động trước khi trả lời."),
 
-            State("", "", "Psychologist", "journey_sleep", "online_chat",
+            ConversationState("", "", "Psychologist", "journey_sleep", "online_chat",
                   "Tôi không thể ngủ vào ban đêm.", "Tránh sử dụng màn hình điện thoại 1 giờ trước khi ngủ."),
 
-            State("", "", "Psychologist", "journey_self_confidence", "coaching",
+            ConversationState("", "", "Psychologist", "journey_self_confidence", "coaching",
                   "Tôi gặp khó khăn với sự tự tin.", "Hãy thực hành khẳng định bản thân hàng ngày."),
 
-            State("", "", "Psychologist", "journey_motivation", "mentorship",
+            ConversationState("", "", "Psychologist", "journey_motivation", "mentorship",
                   "Làm thế nào để tôi luôn có động lực?", "Đặt ra mục tiêu nhỏ và dễ đạt được, sau đó tự thưởng cho mình."),
         
-            State("", "", "HR", "journey_new_employee", "mentorship",
+            ConversationState("", "", "HR", "journey_new_employee", "mentorship",
                   "Các bước cho nhân viên mới ở công ty ra sao?", "Hãy giới thiệu văn hóa công ty và các quy trình làm việc cơ bản."),
         ]
 
@@ -69,8 +69,12 @@ def search_with_ai_agent(GEMINI_MODEL_ID, genai_client, user_input):
         mindmap = mindmap_response.text
         print("\n mindmap ", mindmap)
 
-user_input = "Tôi lo lắng về tương lai"
-search_with_ai_agent(GEMINI_MODEL_ID, genai_client, user_input)
+def main():
+      user_input = "Tôi lo lắng về tương lai"
+      search_with_ai_agent(GEMINI_MODEL_ID, genai_client, user_input)
 
-user_input = "Tôi là nhân viên mới, tôi cần hướng dẫn"
-search_with_ai_agent(GEMINI_MODEL_ID, genai_client, user_input)
+      user_input = "Tôi là nhân viên mới, tôi cần hướng dẫn"
+      search_with_ai_agent(GEMINI_MODEL_ID, genai_client, user_input)
+      
+if __name__ == "__main__":
+   main()
