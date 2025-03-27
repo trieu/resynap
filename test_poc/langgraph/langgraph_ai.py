@@ -37,7 +37,7 @@ class ConversationState:
 * Agent Role: Which type of agent is interacting (e.g., support, info, sales).
 * Journey Context: Where the user is in their overall interaction journey (journey_id).
 * Touchpoint Information: The specific interaction point (touchpoint_id).
-* Context: 
+* Context:  is the background information that helps make the conversation relevant and personalized. It includes past messages, user preferences, session details (like time and device), and any extra data from other systems. It also tracks the user’s intent and sentiment to ensure clear and helpful responses.
 * Response: the agent's reply or action.
 
 This data class is used to store and pass around the conversation state in the AI workflow."""
