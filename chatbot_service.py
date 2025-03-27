@@ -10,7 +10,6 @@ import time
 from typing import Optional
 from pydantic import BaseModel, Field
 
-DEFAULT_TEMPERATURE_SCORE = 1.0
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -36,21 +35,23 @@ SERVICE_NAME = "RESYNAP CHATBOT VERSION:" + VERSION
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 TEMPERATURE_SCORE = 0.86
 
-# init PaLM client as backup AI
+# init Google AI 
 genai.configure(api_key=GEMINI_API_KEY)
 
 # default model names
-GEMINI_1_5_MODEL = 'models/gemini-1.5-flash-latest'
-GEMINI_1_5_PRO_MODEL = 'models/gemini-1.5-pro-latest'
+GEMINI_TEXT_MODEL_ID = os.getenv("GEMINI_TEXT_MODEL_ID")
+DEFAULT_TEMPERATURE_SCORE = 1.0
 
 CHATBOT_DEV_MODE = os.getenv("CHATBOT_DEV_MODE") == "true"
 CHATBOT_HOSTNAME = os.getenv("CHATBOT_HOSTNAME")
+CHATBOT_NAME = os.getenv("CHATBOT_NAME")
+
+# Redis Configuration
 REDIS_HOST = os.getenv("REDIS_HOST")
 REDIS_PORT = os.getenv("REDIS_PORT")
 
-
-print("CHATBOT_HOSTNAME " + CHATBOT_HOSTNAME)
-print("CHATBOT_DEV_MODE " + str(CHATBOT_DEV_MODE))
+# print out the configuration
+print(f"CHATBOT_NAME: {CHATBOT_NAME} CHATBOT_HOSTNAME {CHATBOT_HOSTNAME} CHATBOT_DEV_MODE {CHATBOT_DEV_MODE}")
 
 # Redis Client to get User Session
 REDIS_CLIENT = Redis(host=REDIS_HOST,  port=REDIS_PORT, decode_responses=True)
@@ -82,8 +83,13 @@ async def ping():
 @chatbot.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     ts = int(time.time())
-    data = {"request": request, "CHATBOT_HOSTNAME": CHATBOT_HOSTNAME, "CHATBOT_DEV_MODE": CHATBOT_DEV_MODE, 'timestamp': ts}
-    return templates.TemplateResponse("index.html", data)
+    data = {
+            "request": request,  'timestamp': ts,
+            "CHATBOT_HOSTNAME": CHATBOT_HOSTNAME, 
+            "CHATBOT_DEV_MODE": CHATBOT_DEV_MODE, 
+            'CHATBOT_NAME': CHATBOT_NAME            
+            }
+    return templates.TemplateResponse("chatbot.html", data)
 
 
 @chatbot.get("/get-visitor-info", response_class=JSONResponse)
@@ -192,7 +198,7 @@ def ask_question(context: str = '', answer_in_format: str = '', target_language:
     answer_text = 'No answer!'
     try:
         # call to Google Gemini APi
-        gemini_text_model = genai.GenerativeModel(model_name=GEMINI_1_5_MODEL)
+        gemini_text_model = genai.GenerativeModel(model_name=GEMINI_TEXT_MODEL_ID)
         model_config = genai.GenerationConfig(temperature=temperature_score)
         response = gemini_text_model.generate_content(prompt_text, generation_config=model_config)
         answer_text = response.text    

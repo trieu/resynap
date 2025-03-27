@@ -80,9 +80,8 @@ var leoBotShowAnswer = function (answerInHtml, delay) {
           $(this).attr("target", "_blank");
           var href = $(this).attr("href");
           if (href.indexOf("google.com") < 0) {
-            href =
-              "https://www.google.com/search?q=" +
-              encodeURIComponent($(this).text());
+            var q = encodeURIComponent($(this).text());
+            href = "https://www.google.com/search?q=" + q;
           }
           $(this).attr("href", href);
         });
@@ -134,11 +133,14 @@ var askTheEmailOfUser = function (name) {
           firstName: name,
           email: email,
         };
-        if(window.CDP_TRACKING === true) {
+        if (window.CDP_TRACKING === true) {
           LeoObserverProxy.updateProfileBySession(profileData);
         }
 
-        var a = "Hi " +  name + ", system is creating a new account for you. Please wait for 5 seconds...";
+        var a =
+          "Hi " +
+          name +
+          ", system is creating a new account for you. Please wait for 5 seconds...";
         leoBotShowAnswer(a, 5000);
       } else {
         leoBotShowError(email + " is not a valid email", function () {
@@ -188,7 +190,7 @@ var sendQuestionToLeoAI = function (context, question) {
         var eventData = { question: question, answer: sAnswer };
         LeoObserver.recordEventAskQuestion(eventData);
       } else {
-        console.log("SKIP LeoObserver.recordEventAskQuestion")
+        console.log("SKIP LeoObserver.recordEventAskQuestion");
       }
     };
 
@@ -248,3 +250,15 @@ var startLeoChatBot = function (visitorId) {
   $("#LEO_ChatBot_Container, #leobot_answer_in_language").show();
   initLeoChatBot("leobot_website", visitorId);
 };
+
+$(document).ready(function () {
+  // ready to load
+  var obsjs = location.protocol + "//" + CHATBOT_HOSTNAME + "/resources/js/leocdp.observer.js";
+
+  if (CDP_TRACKING) {
+    $.getScript(obsjs);
+  } else {
+    window.startLeoChatBot("local_dev");
+    currentUserProfile.visitorId = "0";
+  }
+});
