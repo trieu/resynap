@@ -4,12 +4,10 @@ import os
 # Load the .env file and override any existing environment variables
 load_dotenv(override=True)
 
+import uuid
 import time
-
-
 from typing import Optional
 from pydantic import BaseModel, Field
-
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -64,6 +62,44 @@ chatbot.mount("/resources", StaticFiles(directory=FOLDER_RESOURCES), name="resou
 templates = Jinja2Templates(directory=FOLDER_TEMPLATES)
 
 # Data models
+
+# Sample menu items, TODO load from ArangoDB
+
+
+menu_items = [
+    {
+        "id": str(uuid.uuid4()),  # Generate a unique UUID string
+        **item
+    }
+    for item in [
+        {"name": "HR Support", "active": False, "private": True, "decode_key": "a1b2c3"},
+        {"name": "Stress Management", "active": False, "private": True, "decode_key": "x9y8z7"},
+        {"name": "Sales Report 2025", "active": True, "private": False, "decode_key": ""},
+        {"name": "Customer Feedback Analysis 2025", "active": False, "private": False, "decode_key": ""},
+        {"name": "AI Research Discussion", "active": False, "private": True, "decode_key": "d4e5f6"},
+        {"name": "Marketing Trends 2024", "active": False, "private": False, "decode_key": ""},
+        {"name": "Employee Well-being", "active": False, "private": True, "decode_key": "g7h8i9"},
+        {"name": "Tech Innovations", "active": False, "private": False, "decode_key": ""},
+        {"name": "Customer Support AI", "active": False, "private": True, "decode_key": "j1k2l3"},
+        {"name": "Competitive Analysis", "active": False, "private": False, "decode_key": ""}
+    ]
+]
+
+
+# Language options, BCP-47 language code https://en.wikipedia.org/wiki/IETF_language_tag 
+# TODO load from ArangoDB
+target_languages = [
+    {"code": "", "label": "Automatically detect the language according to question", "selected": True},
+    {"code": "en", "label": "Answer the question in English", "selected": False},
+    {"code": "vi", "label": "Trả lời câu hỏi bằng tiếng Việt", "selected": False},
+    {"code": "de", "label": "Beantworten Sie Fragen auf Deutsch", "selected": False},
+    {"code": "fr", "label": "Répondez à la question en français", "selected": False},
+    {"code": "es", "label": "Responde la pregunta en español", "selected": False},
+    {"code": "ja", "label": "質問には日本語で答える", "selected": False},
+    {"code": "zh", "label": "用中文回答问题", "selected": False},
+    {"code": "ko", "label": "질문에 한국어로 답변하기", "selected": False}
+]
+
 class Message(BaseModel):
     answer_in_language: Optional[str] = Field("en") # default is English
     answer_in_format: str = Field("html", description="the format of answer")
@@ -84,7 +120,7 @@ async def ping():
 async def root(request: Request):
     ts = int(time.time())
     data = {
-            "request": request,  'timestamp': ts,
+            "request": request, 'timestamp': ts, "target_languages": target_languages, "menu_items": menu_items, 
             "CHATBOT_HOSTNAME": CHATBOT_HOSTNAME, 
             "CHATBOT_DEV_MODE": CHATBOT_DEV_MODE, 
             'CHATBOT_NAME': CHATBOT_NAME            
@@ -123,7 +159,7 @@ async def ask(msg: Message):
         if profile_id is None or len(profile_id) == 0: 
             return {"answer": "Not found any profile in CDP", "error": True, "error_code": 404}
     
-    leobot_ready = is_visitor_ready(visitor_id)
+    chatbot_ready = is_visitor_ready(visitor_id)
     question = msg.question
     prompt = msg.prompt
     lang_of_question = msg.answer_in_language
@@ -138,7 +174,7 @@ async def ask(msg: Message):
     print("visitor_id: " + visitor_id)
     print("profile_id: "+profile_id)
 
-    if leobot_ready:        
+    if chatbot_ready:        
         if lang_of_question == "" :
             lang_of_question = detect_language(question)        
              
@@ -151,7 +187,11 @@ async def ask(msg: Message):
             question_in_english = translate_text(prompt, 'en')
             
         # translate if need
-        answer = ask_question(context, format, lang_of_question, question_in_english, temperature_score)
+        if "report" in question_in_english.lower():
+            # TODO create report in iframe
+            answer = '<iframe id="custom_report_iframe" src="https://superset.datatest.ch/superset/dashboard/10/?standalone=true" width="100%" style="" height="1280px" frameborder="0"></iframe>' 
+        else:
+            answer = ask_question(context, format, lang_of_question, question_in_english, temperature_score)
         print("answer " + answer)
         data = {"question": question,
                 "answer": answer, "visitor_id": visitor_id, "error_code": 0}

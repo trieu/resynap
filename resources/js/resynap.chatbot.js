@@ -9,7 +9,32 @@ function getBotUI() {
   return window.leoBotUI;
 }
 
+function isMobile() {
+  return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+window.nodeIdChatSession = 'chat_sessions_in_pc'
+if (isMobile()) {
+  console.log("User is on a mobile device");
+  window.nodeIdChatSession = 'chat_sessions_in_mb'
+} else {
+  console.log("User is on a PC");
+}
+
+function setActiveChatSession(id){
+  var node = $('#' + window.nodeIdChatSession)
+  node.find('a').removeClass('active');
+  node.find('#' + id).addClass('active');
+}
+
+function loadSelectedChatSession(node){
+  var sessionId = $(node).attr('id');
+  setActiveChatSession(sessionId);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 function loadChatSession(context, visitorId, okCallback) {
+
   window.leoBotContext = context;
   window.currentProfile.visitorId = visitorId;
   window.leoBotUI = new BotUI("chatbot_container");
@@ -32,7 +57,7 @@ function loadChatSession(context, visitorId, okCallback) {
     } else if (e === 404) {
       askForContactInfo(visitorId);
     } else {
-      leoBotShowError(a, leoBotPromptQuestion);
+      leoBotShowError(a);
     }
   });
 
@@ -43,9 +68,9 @@ function loadChatSession(context, visitorId, okCallback) {
 
 var showChatbotUI = function (displayName) {
   var msg = "Hi " + displayName + ", you may ask me for anything";
-  var msgObj = { content: msg, cssClass: "leobot-answer" };
+  var msgObj = { content: msg, cssClass: "chatbot_answer" };
   getBotUI().message.removeAll();
-  getBotUI().message.bot(msgObj).then(leoBotPromptQuestion);
+  getBotUI().message.bot(msgObj);
 };
 
 var leoBotPromptQuestion = function (delay) {
@@ -68,7 +93,7 @@ var leoBotShowAnswer = function (answerInHtml, delay) {
   getBotUI()
     .message.add({
       human: false,
-      cssClass: "leobot-answer",
+      cssClass: "chatbot_answer",
       content: answerInHtml,
       type: "html",
     })
@@ -86,13 +111,7 @@ var leoBotShowAnswer = function (answerInHtml, delay) {
           $(this).attr("href", href);
         });
 
-      delay =
-        typeof delay === "number"
-          ? delay
-          : answerInHtml.length > 200
-          ? 6000
-          : 1800;
-      leoBotPromptQuestion(delay);
+
     });
 };
 
@@ -112,6 +131,7 @@ function isEmailValid(email) {
     /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return regex.test(email);
 }
+
 
 var askTheEmailOfUser = function (name) {
   getBotUI()
@@ -205,13 +225,13 @@ var sendQuestionToLeoAI = function (context, question) {
         } else if (error_code === 404) {
           askForContactInfo();
         } else {
-          leoBotShowError(answer, leoBotPromptQuestion);
+          leoBotShowError(answer);
         }
       };
 
       var payload = { prompt: question, question: question };
       payload["visitor_id"] = currentProfile.visitorId;
-      payload["answer_in_language"] = $("#leobot_answer_in_language").val();
+      payload["answer_in_language"] = $("#chatbot_target_language").val();
       payload["answer_in_format"] = "html";
       payload["context"] = "I am a smart chatbot with AI capabilities.";
       callPostApi(BASE_URL_LEOBOT, payload, serverCallback);
@@ -222,7 +242,17 @@ var sendQuestionToLeoAI = function (context, question) {
 
 var showChatBotLoader = function () {
   return getBotUI().message.add({ loading: true, content: "" });
-};
+}
+
+var showChatMessage = function(msg, callback) {
+	getBotUI().message.add({
+		human: true,
+		cssClass: 'chatbot-info',
+		content: msg
+	}).then(function() {
+		if(typeof callback === 'function') callback()
+	});
+}
 
 var callPostApi = function (urlStr, data, okCallback, errorCallback) {
   $.ajax({
@@ -247,9 +277,18 @@ var callPostApi = function (urlStr, data, okCallback, errorCallback) {
 var startChatbot = function (visitorId) {
   currentProfile.visitorId = visitorId;
   $("#chatbot_container_loader").hide();
-  $("#chatbot_container, #leobot_answer_in_language").show();
+  $("#chatbot_container, #chatbot_target_language").show();
   loadChatSession("leobot_website", visitorId);
 };
+
+function sendToChatbot(){
+  var msg = $('#chatbot_input').val().trim()
+  if(msg.length > 1){
+    sendQuestionToLeoAI("ask", msg );
+    showChatMessage(msg);
+    $('#chatbot_input').val('')
+  }
+}
 
  // ready to load tracking script for long-term memory
 $(document).ready(function () {

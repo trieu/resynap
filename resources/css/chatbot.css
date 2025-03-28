@@ -27,7 +27,7 @@
   color: #000 !important;
 }
 
-div.leobot-answer .botui-message-content {
+div.chatbot_answer .botui-message-content {
   color: #000 !important;
 }
 
@@ -121,4 +121,15 @@ div.leobot-question .botui-message-content {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.nav-link.active {
+  background-color: #007bff; /* Bootstrap primary blue */
+  color: white !important;   /* Ensure text is visible */
+  border-radius: 5px;        /* Optional: smooth corners */
+  padding: 10px 15px;        /* Optional: adjust padding */
+}
+
+.botui-message-content.html{
+  width: 100%!important;
 }

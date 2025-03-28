@@ -70,56 +70,56 @@
         </h1>
     </div>
 
-          <!-- Sidebar (Hidden on Mobile) -->
+    <!-- Sidebar (Hidden on Mobile) -->
     <nav id="sidebar" class="sidebar d-none d-md-block">
-        <ul class="nav flex-column">
-          <li class="nav-item">
-            <a class="nav-link active" href="#">Dashboard</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Orders</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Products</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Customers</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Reports</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Integrations</a>
-          </li>
+        <ul class="nav flex-column" id="chat_sessions_in_pc">
+            {% for item in menu_items %}
+            <li class="nav-item">
+                <a id="{{ item.id }}" class="nav-link {% if item.active %}active{% endif %}" 
+                    title="{{ item.name }}"
+                    onclick="loadSelectedChatSession(this)" href="#chat_session_{{ item.id }}" >
+                    {% if item.private %}
+                        <i class="fas fa-lock"></i> <!-- Private session icon -->
+                    {% else %}
+                        <i class="fas fa-globe"></i> <!-- Public session icon -->
+                    {% endif %}
+                    {{ item.name }}
+                </a>
+            </li>
+            {% endfor %}
         </ul>
     </nav>
 
     <!-- Main Content -->
-    <main class="main-content">
-        <div class="container text-center" style="display:none">
+    <main class="main-content d-flex flex-column vh-100">
+        <!-- target languages -->
+        <div class="container text-center" >
             <div class="row">
-                <div id="chatbot_container_loader" class="loader" ></div>
-                <!-- BCP-47 language code https://en.wikipedia.org/wiki/IETF_language_tag  -->
-                <select id="leobot_answer_in_language" class="form-select" style="display:none" >
-                    <option value="" selected="selected"> Automatically detect the language according to question </option>
-                    <option value="en" > Answer the question in English </option>
-                    <option value="vi"> Trả lời câu hỏi bằng tiếng Việt </option>
-                    <option value="de"> Beantworten Sie Fragen auf Deutsch </option>
-                    <option value="fr"> Répondez à la question en anglais </option>
-                    <option value="es"> Responde la pregunta en español </option>
-                    <option value="ja"> 質問には日本語で答える </option>
-                    <option value="zh"> 用中文回答问题 </option>
-                    <option value="ko"> 질문에 한국어로 답변하기 </option>
+                <select id="chatbot_target_language" class="form-select" style="display:none" >
+                    {% for lang in target_languages %}
+                    <option value="{{ lang.code }}" {% if lang.selected %}selected="selected"{% endif %}>
+                        {{ lang.label }}
+                    </option>
+                    {% endfor %}
                 </select>
             </div>
         </div>
-        <div class="botui-app-container" id="chatbot_container" style="display:none" >
+
+        <!-- MAIN CHATBOT UI -->
+        <div class="botui-app-container flex-grow-1 d-flex flex-column overflow-auto" id="chatbot_container" style="display:none" >
             <bot-ui></bot-ui>
         </div>
 
-        <div id="chatbot_info_box" class="alert alert-light" role="alert" style="display:none" >
-            <i class="fa fa-info-circle" aria-hidden="true"></i>
-            CHATBOT DEV MODE: {{ CHATBOT_DEV_MODE }} <br>
+        <!-- FIXED INPUT AREA -->
+        <div class="chat-input-container p-2 bg-white border-top">
+            <div class="row g-2">
+                <div class="col-10">
+                    <textarea id="chatbot_input" class="form-control" rows="3" placeholder="Type your message..." style="resize: none;"></textarea>
+                </div>
+                <div class="col-2 d-grid">
+                    <button id="sendBtn" class="btn btn-primary" onclick="sendToChatbot()" >Send</button>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -130,25 +130,21 @@
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
         </div>
         <div class="offcanvas-body">
-            <ul class="nav flex-column">
+            <ul class="nav flex-column" id="chat_sessions_in_mb" >
+                {% for item in menu_items %}
                 <li class="nav-item">
-                <a class="nav-link active" href="#">Dashboard</a>
+                    <a id="{{ item.id }}" class="nav-link {% if item.active %}active{% endif %}" 
+                        title="{{ item.name }}"
+                        onclick="loadSelectedChatSession(this)" href="#chat_session_{{ item.id }}" >
+                        {% if item.private %}
+                            <i class="fas fa-lock"></i> <!-- Private session icon -->
+                        {% else %}
+                            <i class="fas fa-globe"></i> <!-- Public session icon -->
+                        {% endif %}
+                        {{ item.name }}
+                    </a>
                 </li>
-                <li class="nav-item">
-                <a class="nav-link" href="#">Orders</a>
-                </li>
-                <li class="nav-item">
-                <a class="nav-link" href="#">Products</a>
-                </li>
-                <li class="nav-item">
-                <a class="nav-link" href="#">Customers</a>
-                </li>
-                <li class="nav-item">
-                <a class="nav-link" href="#">Reports</a>
-                </li>
-                <li class="nav-item">
-                <a class="nav-link" href="#">Integrations</a>
-                </li>
+                {% endfor %}
             </ul>
         </div>
     </div>
@@ -168,9 +164,7 @@
         window.loadInitTracking = function(){
            // local DEV server
            if (CHATBOT_DEV_MODE) {
-               console.log('CHATBOT_DEV_MODE: ', CHATBOT_DEV_MODE);
-               $('#chatbot_info_box').show();
-           
+               console.log('CHATBOT_DEV_MODE: ', CHATBOT_DEV_MODE);           
                
                window.leoObserverId = "3PTSSCP1IK8gPhzrWIq8hy";
                window.leoObserverLogDomain = "obs.example.com";
