@@ -4,7 +4,7 @@ window.leoBotUI = false;
 window.leoBotContext = false;
 function getBotUI() {
   if (window.leoBotUI === false) {
-    window.leoBotUI = new BotUI("LEO_ChatBot_Container");
+    window.leoBotUI = new BotUI("chatbot_container");
   }
   return window.leoBotUI;
 }
@@ -12,7 +12,7 @@ function getBotUI() {
 function initLeoChatBot(context, visitorId, okCallback) {
   window.leoBotContext = context;
   window.currentUserProfile.visitorId = visitorId;
-  window.leoBotUI = new BotUI("LEO_ChatBot_Container");
+  window.leoBotUI = new BotUI("chatbot_container");
 
   var url =
     BASE_URL_GET_VISITOR_INFO +
@@ -247,7 +247,7 @@ var callPostApi = function (urlStr, data, okCallback, errorCallback) {
 var startLeoChatBot = function (visitorId) {
   currentUserProfile.visitorId = visitorId;
   $("#LEO_ChatBot_Container_Loader").hide();
-  $("#LEO_ChatBot_Container, #leobot_answer_in_language").show();
+  $("#chatbot_container, #leobot_answer_in_language").show();
   initLeoChatBot("leobot_website", visitorId);
 };
 
