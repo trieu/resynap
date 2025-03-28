@@ -105,8 +105,7 @@ class DatabaseManager:
     
     def store_training_data(self, agent_role, journey_id, touchpoint_id, context, response):
         """Stores training data for AI learning."""
-        embedding = embedding_model.encode(
-            context, convert_to_tensor=True).tolist()
+        embedding = embedding_model.encode(context, convert_to_tensor=True).tolist()
         training_id = str(uuid.uuid4())
 
         self.qdrant_client.upsert(

@@ -142,8 +142,8 @@ function leoObserverProxyReady(session) {
     if (typeof window.synchLeoCdpToGA4 === "function") {
       window.synchLeoCdpToGA4(vid);
     }
-    if (typeof window.startLeoChatBot === "function") {
-      window.startLeoChatBot(vid);
+    if (typeof window.startChatbot === "function") {
+      window.startChatbot(vid);
     }
   });
 }

@@ -132,7 +132,7 @@
               ChatBot
             </h4>
             <div class="row">
-              <div id="LEO_ChatBot_Container_Loader" class="loader"></div>
+              <div id="chatbot_container_loader" class="loader"></div>
 
               <!-- BCP-47 language code https://en.wikipedia.org/wiki/IETF_language_tag  -->
               <select
@@ -203,8 +203,8 @@
               if (CDP_TRACKING && okToLoad) {
                 $.getScript(obsjs);
               } else {
-                window.startLeoChatBot("local_dev");
-                currentUserProfile.visitorId = "0";
+                window.startChatbot("local_dev");
+                currentProfile.visitorId = "0";
               }
             });
           </script>

@@ -1,4 +1,4 @@
-var currentUserProfile = { visitorId: "", displayName: "good friend" };
+var currentProfile = { visitorId: "", displayName: "good friend" };
 
 window.leoBotUI = false;
 window.leoBotContext = false;
@@ -9,9 +9,9 @@ function getBotUI() {
   return window.leoBotUI;
 }
 
-function initLeoChatBot(context, visitorId, okCallback) {
+function loadChatSession(context, visitorId, okCallback) {
   window.leoBotContext = context;
-  window.currentUserProfile.visitorId = visitorId;
+  window.currentProfile.visitorId = visitorId;
   window.leoBotUI = new BotUI("chatbot_container");
 
   var url =
@@ -25,10 +25,10 @@ function initLeoChatBot(context, visitorId, okCallback) {
     var a = data.answer;
     console.log(data);
     if (e === 0) {
-      var n = currentUserProfile.displayName;
+      var n = currentProfile.displayName;
       n = a.length > 0 ? a : n;
-      currentUserProfile.displayName = n;
-      showLeoChatBot(currentUserProfile.displayName);
+      currentProfile.displayName = n;
+      showChatbotUI(currentProfile.displayName);
     } else if (e === 404) {
       askForContactInfo(visitorId);
     } else {
@@ -41,7 +41,7 @@ function initLeoChatBot(context, visitorId, okCallback) {
   }
 }
 
-var showLeoChatBot = function (displayName) {
+var showChatbotUI = function (displayName) {
   var msg = "Hi " + displayName + ", you may ask me for anything";
   var msgObj = { content: msg, cssClass: "leobot-answer" };
   getBotUI().message.removeAll();
@@ -200,7 +200,7 @@ var sendQuestionToLeoAI = function (context, question) {
         var error_code = data.error_code;
         var answer = data.answer;
         if (error_code === 0) {
-          currentUserProfile.displayName = data.name;
+          currentProfile.displayName = data.name;
           processAnswer(answer);
         } else if (error_code === 404) {
           askForContactInfo();
@@ -210,7 +210,7 @@ var sendQuestionToLeoAI = function (context, question) {
       };
 
       var payload = { prompt: question, question: question };
-      payload["visitor_id"] = currentUserProfile.visitorId;
+      payload["visitor_id"] = currentProfile.visitorId;
       payload["answer_in_language"] = $("#leobot_answer_in_language").val();
       payload["answer_in_format"] = "html";
       payload["context"] = "I am a smart chatbot with AI capabilities.";
@@ -244,21 +244,20 @@ var callPostApi = function (urlStr, data, okCallback, errorCallback) {
   });
 };
 
-var startLeoChatBot = function (visitorId) {
-  currentUserProfile.visitorId = visitorId;
-  $("#LEO_ChatBot_Container_Loader").hide();
+var startChatbot = function (visitorId) {
+  currentProfile.visitorId = visitorId;
+  $("#chatbot_container_loader").hide();
   $("#chatbot_container, #leobot_answer_in_language").show();
-  initLeoChatBot("leobot_website", visitorId);
+  loadChatSession("leobot_website", visitorId);
 };
 
+ // ready to load tracking script for long-term memory
 $(document).ready(function () {
-  // ready to load
   var obsjs = location.protocol + "//" + CHATBOT_HOSTNAME + "/resources/js/leocdp.observer.js";
-
   if (CDP_TRACKING) {
     $.getScript(obsjs);
   } else {
-    window.startLeoChatBot("local_dev");
-    currentUserProfile.visitorId = "0";
+    window.startChatbot("local_dev");
+    currentProfile.visitorId = "0";
   }
 });
