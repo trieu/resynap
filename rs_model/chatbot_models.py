@@ -18,6 +18,7 @@ from google.cloud import translate_v2 as translate
 import pprint
 from rs_model.language_utils import get_language_name
 
+from rs_model.langgraph.langgraph_ai import submit_message_to_agent
 
 # default model names
 GEMINI_TEXT_MODEL_ID = os.getenv("GEMINI_TEXT_MODEL_ID")
@@ -159,10 +160,14 @@ def ask_question(prompt_text:str, answer_in_format: str, temperature_score = TEM
     answer_text = ''
     try:
         # call to Google Gemini APi
-        gemini_text_model = genai.GenerativeModel(model_name=GEMINI_TEXT_MODEL_ID)
-        model_config = genai.GenerationConfig(temperature=temperature_score)
-        response = gemini_text_model.generate_content(prompt_text, generation_config=model_config)
-        answer_text = response.text    
+        #gemini_text_model = genai.GenerativeModel(model_name=GEMINI_TEXT_MODEL_ID)
+        #model_config = genai.GenerationConfig(temperature=temperature_score)
+        #response = gemini_text_model.generate_content(prompt_text, generation_config=model_config)
+        #answer_text = response.text    
+        
+        final_state =  submit_message_to_agent(prompt_text)
+        answer_text = final_state.response
+        
         if answer_text:
             answer_text = markdown.markdown(answer_text)
     except Exception as error:

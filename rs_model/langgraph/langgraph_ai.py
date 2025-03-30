@@ -132,7 +132,6 @@ class DatabaseManager:
             search_params=SearchParams(hnsw_ef=128, exact=True)
         )
         return search_results
-    
    
 
 
@@ -211,26 +210,43 @@ class LangGraphAI:
         state.response = response.text if response else "Xin lỗi, tôi không thể tạo câu trả lời."
         return state.to_dict()
 
-def main():
+agent_system_loaded = False
+agent_system = None  # Declare as global to ensure accessibility
 
-    # Initialize system
-    db_manager = DatabaseManager()
-    ai_system = LangGraphAI(db_manager)
+def init_ai_system():
+    global agent_system, agent_system_loaded  # Use global to persist changes
+    if not agent_system_loaded:
+        # Initialize system
+        db_manager = DatabaseManager()
+        agent_system = LangGraphAI(db_manager)
+        agent_system_loaded = True  # Update flag
+    return agent_system
+        
 
+def submit_message_to_agent(user_id: str, msg:str):
+
+   
     # Create an initial state
-    initial_state = ConversationState(user_id=str(uuid.uuid4()), user_message="Tôi không thể ngủ vào ban đêm")
+    initial_state = ConversationState(user_id=user_id, user_message=msg)
 
     # Run LangGraph workflow
-    final_state_dict = ai_system.workflow.invoke(initial_state.to_dict()) 
+    agent_system = init_ai_system()
+    final_state_dict = agent_system.workflow.invoke(initial_state.to_dict()) 
 
     # Convert back to ConversationState object
     final_state = ConversationState.from_dict(final_state_dict)
 
+    return final_state
+   
+
+if __name__ == "__main__":
+    
+    user_id = str(uuid.uuid4())
+    msg = "Tôi không thể ngủ vào ban đêm"
+    final_state =  submit_message_to_agent(user_id, msg)
+   
     # Output AI's response
     print(f"User: {final_state.user_message}")
     print(f"AI Response: {final_state.response}")
 
     print(f"AI Agent Role: {final_state.agent_role}")
-
-if __name__ == "__main__":
-   main()
