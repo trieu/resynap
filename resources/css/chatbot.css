@@ -31,7 +31,7 @@ div.chatbot_answer .botui-message-content {
   color: #000 !important;
 }
 
-div.leobot-error .botui-message-content {
+div.chatbot-error .botui-message-content {
   color: red !important;
   border: 1px solid red;
 }

@@ -10,31 +10,46 @@ function getBotUI() {
 }
 
 function isMobile() {
-  return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  return navigator.userAgent.match(/Mobi|Android|iPhone|iPad|iPod/i) !== null;
 }
 
-window.nodeIdChatSession = 'chat_sessions_in_pc'
+function isEmailValid(email) {
+  if (typeof email !== 'string') {
+    return false; // Handle non-string inputs
+  }
+
+  const trimmedEmail = email.trim();
+
+  if (!trimmedEmail) {
+    return false; // Handle empty or whitespace-only strings
+  }
+
+  const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+  return regex.test(trimmedEmail);
+}
+
+window.nodeIdChatSession = "chat_sessions_in_pc";
 if (isMobile()) {
   console.log("User is on a mobile device");
-  window.nodeIdChatSession = 'chat_sessions_in_mb'
+  window.nodeIdChatSession = "chat_sessions_in_mb";
 } else {
   console.log("User is on a PC");
 }
 
-function setActiveChatSession(id){
-  var node = $('#' + window.nodeIdChatSession)
-  node.find('a').removeClass('active');
-  node.find('#' + id).addClass('active');
+function setActiveChatSession(id) {
+  var node = $("#" + window.nodeIdChatSession);
+  node.find("a").removeClass("active");
+  node.find("#" + id).addClass("active");
 }
 
-function loadSelectedChatSession(node){
-  var sessionId = $(node).attr('id');
+function loadSelectedChatSession(node) {
+  var sessionId = $(node).attr("id");
   setActiveChatSession(sessionId);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function loadChatSession(context, visitorId, okCallback) {
-
   window.leoBotContext = context;
   window.currentProfile.visitorId = visitorId;
   window.leoBotUI = new BotUI("chatbot_container");
@@ -57,7 +72,7 @@ function loadChatSession(context, visitorId, okCallback) {
     } else if (e === 404) {
       askForContactInfo(visitorId);
     } else {
-      leoBotShowError(a);
+      chatbotShowError(a);
     }
   });
 
@@ -110,27 +125,20 @@ var leoBotShowAnswer = function (answerInHtml, delay) {
           }
           $(this).attr("href", href);
         });
-
-
     });
 };
 
-var leoBotShowError = function (error, nextAction) {
+var chatbotShowError = function (error, nextAction) {
   getBotUI()
     .message.add({
       human: false,
-      cssClass: "leobot-error",
+      cssClass: "chatbot-error",
       content: error,
       type: "html",
     })
     .then(nextAction || function () {});
 };
 
-function isEmailValid(email) {
-  const regex =
-    /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  return regex.test(email);
-}
 
 
 var askTheEmailOfUser = function (name) {
@@ -163,7 +171,7 @@ var askTheEmailOfUser = function (name) {
           ", system is creating a new account for you. Please wait for 5 seconds...";
         leoBotShowAnswer(a, 5000);
       } else {
-        leoBotShowError(email + " is not a valid email", function () {
+        chatbotShowError(email + " is not a valid email", function () {
           askTheEmailOfUser(name);
         });
       }
@@ -225,15 +233,16 @@ var sendQuestionToLeoAI = function (context, question) {
         } else if (error_code === 404) {
           askForContactInfo();
         } else {
-          leoBotShowError(answer);
+          chatbotShowError(answer);
         }
       };
 
-      var payload = { prompt: question, question: question };
+      var payload = {};
+      payload["question"] = question;
       payload["visitor_id"] = currentProfile.visitorId;
       payload["answer_in_language"] = $("#chatbot_target_language").val();
-      payload["answer_in_format"] = "html";
-      payload["context"] = "I am a smart chatbot with AI capabilities.";
+      payload["answer_in_format"] = "text";
+      payload["context"] = "Your name is Alice, a smart personal assistant";
       callPostApi(BASE_URL_LEOBOT, payload, serverCallback);
     };
     showChatBotLoader().then(callServer);
@@ -242,17 +251,19 @@ var sendQuestionToLeoAI = function (context, question) {
 
 var showChatBotLoader = function () {
   return getBotUI().message.add({ loading: true, content: "" });
-}
+};
 
-var showChatMessage = function(msg, callback) {
-	getBotUI().message.add({
-		human: true,
-		cssClass: 'chatbot-info',
-		content: msg
-	}).then(function() {
-		if(typeof callback === 'function') callback()
-	});
-}
+var showChatMessage = function (msg, callback) {
+  getBotUI()
+    .message.add({
+      human: true,
+      cssClass: "chatbot-info",
+      content: msg,
+    })
+    .then(function () {
+      if (typeof callback === "function") callback();
+    });
+};
 
 var callPostApi = function (urlStr, data, okCallback, errorCallback) {
   $.ajax({
@@ -281,16 +292,25 @@ var startChatbot = function (visitorId) {
   loadChatSession("leobot_website", visitorId);
 };
 
-function sendToChatbot(){
-  var msg = $('#chatbot_input').val().trim()
-  if(msg.length > 1){
-    sendQuestionToLeoAI("ask", msg );
+function sendToChatbot() {
+  var msg = $("#chatbot_input").val().trim();
+  if (msg.length > 1) {
+    sendQuestionToLeoAI("ask", msg);
     showChatMessage(msg);
-    $('#chatbot_input').val('')
+    $("#chatbot_input").val("");
   }
 }
 
- // ready to load tracking script for long-term memory
+function detectEnterKeyInChatbotInput() {
+  $("#chatbot_input").keypress(function (event) {
+    if ((event.key === "Enter" || event.keyCode === 13) && !event.shiftKey && !event.ctrlKey) {
+      event.preventDefault(); // Prevent default newline behavior in textareas
+      sendToChatbot();
+    }
+  });
+}
+
+// ready to load tracking script for long-term memory
 $(document).ready(function () {
   var obsjs = location.protocol + "//" + CHATBOT_HOSTNAME + "/resources/js/leocdp.observer.js";
   if (CDP_TRACKING) {
@@ -299,4 +319,6 @@ $(document).ready(function () {
     window.startChatbot("local_dev");
     currentProfile.visitorId = "0";
   }
+
+  detectEnterKeyInChatbotInput()
 });
