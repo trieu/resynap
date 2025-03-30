@@ -100,7 +100,7 @@ var leoBotPromptQuestion = function (delay) {
       },
     })
     .then(function (res) {
-      sendQuestionToLeoAI("ask", res.value);
+      sendMessageToAgent("ask", res.value);
     });
 };
 
@@ -206,7 +206,7 @@ var askForContactInfo = function (visitor_id) {
     .then(askTheNameOfUser);
 };
 
-var sendQuestionToLeoAI = function (context, question) {
+var sendMessageToAgent = function (context, question) {
   if (question.length > 1 && question !== "exit") {
     var processAnswer = function (answer) {
       if ("ask" === context) {
@@ -243,7 +243,7 @@ var sendQuestionToLeoAI = function (context, question) {
       payload["answer_in_language"] = $("#chatbot_target_language").val();
       payload["answer_in_format"] = "text";
       payload["context"] = "Your name is Alice, a smart personal assistant";
-      callPostApi(BASE_URL_LEOBOT, payload, serverCallback);
+      callPostApi(BASE_URL_API, payload, serverCallback);
     };
     showChatBotLoader().then(callServer);
   }
@@ -295,7 +295,7 @@ var startChatbot = function (visitorId) {
 function sendToChatbot() {
   var msg = $("#chatbot_input").val().trim();
   if (msg.length > 1) {
-    sendQuestionToLeoAI("ask", msg);
+    sendMessageToAgent("ask", msg);
     showChatMessage(msg);
     $("#chatbot_input").val("");
   }

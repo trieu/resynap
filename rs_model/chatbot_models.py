@@ -163,6 +163,8 @@ def ask_question(prompt_text:str, answer_in_format: str, temperature_score = TEM
         model_config = genai.GenerationConfig(temperature=temperature_score)
         response = gemini_text_model.generate_content(prompt_text, generation_config=model_config)
         answer_text = response.text    
+        if answer_text:
+            answer_text = markdown.markdown(answer_text)
     except Exception as error:
         print("An exception occurred:", error)
         answer_text = ''

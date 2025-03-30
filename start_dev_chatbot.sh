@@ -7,4 +7,4 @@ source $SOURCE_PATH
 sleep 1
 
 # Start the FastAPI app using uvicorn
-uvicorn chatbot_service:chatbot --reload --env-file .env --host 0.0.0.0 --port 8888 
+uvicorn chatbot_service:chatbot --reload --env-file .env --host 0.0.0.0 --port 9999 
