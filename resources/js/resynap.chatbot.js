@@ -238,11 +238,13 @@ var sendMessageToAgent = function (context, question) {
       };
 
       var payload = {};
+
       payload["question"] = question;
       payload["visitor_id"] = currentProfile.visitorId;
-      payload["answer_in_language"] = $("#chatbot_target_language").val();
+      payload["persona_name"] = $("#chatbot_persona_name").val();
       payload["answer_in_format"] = "text";
-      payload["context"] = "Your name is Alice, a smart personal assistant";
+      // TODO 
+
       callPostApi(BASE_URL_API, payload, serverCallback);
     };
     showChatBotLoader().then(callServer);
@@ -288,7 +290,7 @@ var callPostApi = function (urlStr, data, okCallback, errorCallback) {
 var startChatbot = function (visitorId) {
   currentProfile.visitorId = visitorId;
   $("#chatbot_container_loader").hide();
-  $("#chatbot_container, #chatbot_target_language").show();
+  $("#chatbot_container, #chatbot_persona_name").show();
   loadChatSession("leobot_website", visitorId);
 };
 

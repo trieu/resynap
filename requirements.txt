@@ -26,6 +26,7 @@ unidecode
 numpy>=1.26.4
 pandas>=2.2.2
 pendulum>=3.0.0
+thefuzz
 
 # Vector Search
 qdrant-client>=1.13.0

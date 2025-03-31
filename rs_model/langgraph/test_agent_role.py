@@ -77,7 +77,7 @@ def test_agent_role_detection():
     ]
     
     for user_message, expected_role in test_cases:
-        state = ConversationState(user_id="test", user_message=user_message)
+        state = ConversationState(profile_id="test", user_message=user_message)
         state = agent_role_manager.determine_agent_role(state)
         assert state.agent_role == expected_role, f"Expected {expected_role}, got {state.agent_role}"
 

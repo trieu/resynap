@@ -66,7 +66,7 @@
   
         <!-- Header Section -->
         <h1 class="header-title">
-          <i class="fa fa-commenting-o" aria-hidden="true"></i> {{CHATBOT_NAME}}
+            <a href="/" style="text-decoration:none" > <i class="fa fa-commenting-o" aria-hidden="true"></i> {{CHATBOT_NAME}} </a>
         </h1>
     </div>
 
@@ -92,16 +92,22 @@
 
     <!-- Main Content -->
     <main class="main-content d-flex flex-column vh-100">
-        <!-- target languages -->
+
+        <!-- AI Persona -->
         <div class="container text-center" >
-            <div class="row">
-                <select id="chatbot_target_language" class="form-select" style="display:none" >
-                    {% for lang in target_languages %}
-                    <option value="{{ lang.code }}" {% if lang.selected %}selected="selected"{% endif %}>
-                        {{ lang.label }}
-                    </option>
-                    {% endfor %}
-                </select>
+            <div class="row g-2">
+                <div class="col-2">
+                    Buddy Persona
+                </div>
+                <div class="col-10 d-grid">
+                    <select id="chatbot_persona_name" class="form-select" style="display:none" >
+                        {% for lang in persona_name_list %}
+                        <option value="{{ lang.code }}" {% if lang.selected %}selected="selected"{% endif %}>
+                            {{ lang.label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>               
             </div>
         </div>
 

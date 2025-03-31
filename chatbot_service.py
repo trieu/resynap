@@ -1,8 +1,6 @@
 from rs_model.chatbot_models import (
-    menu_items, target_languages, Message, is_gemini_model_ready, ask_question, generate_report
+    menu_items, persona_name_list, Message, is_gemini_model_ready, generate_report
 )
-
-
 
 import asyncio
 import os
@@ -14,6 +12,11 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, PlainTextResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+
+import markdown
+from rs_model.langgraph.conversation_models import ConversationState, UserConversationState
+from rs_model.language_utils import get_language_name
+from rs_model.langgraph.langgraph_ai import submit_message_to_agent
 
 # Load environment variables
 load_dotenv(override=True)
@@ -65,7 +68,7 @@ class ChatbotService:
         data = {
             "request": request,
             "timestamp": ts,
-            "target_languages": target_languages,
+            "persona_name_list": persona_name_list,
             "menu_items": menu_items,
             "CHATBOT_HOSTNAME": self.hostname,
             "CHATBOT_DEV_MODE": self.dev_mode,
@@ -95,6 +98,7 @@ class ChatbotService:
         if not visitor_id:
             return {"answer": "visitor_id is empty", "error": True, "error_code": 500}
         
+        # mapping from visitor_id to profile_id
         if self.dev_mode:
             profile_id = "0"
         else:
@@ -108,26 +112,18 @@ class ChatbotService:
         if len(question) > 1000:
             return {"answer": "Your input must be less than 1000 characters!", "error": True, "error_code": 510}
         
-        # FIXME load from arangoDB
-        user_profile = {"Name": "John Doe", "Interests": "AI, Marketing"}
-        ext_context = "Consider recent AI trends."
-        
-        prompt_text = msg.build_prompt(user_profile=user_profile, ext_context=ext_context)
-        
         print("visitor_id: ", visitor_id)
         print("profile_id: ", profile_id)
-        print(f"prompt_text: \n {prompt_text}")
         
-        if chatbot_ready:
-            
-            answer_in_format = msg.answer_in_format
-            temperature_score = msg.temperature_score
-            
+        if chatbot_ready:   
+            # set profile_id 
+            msg.profile_id = profile_id         
             if "report" in question.lower():
                 answer = generate_report(question)
             else:
-                answer = ask_question(prompt_text, answer_in_format, temperature_score)
-            
+                answer = ask_question(msg)
+                
+            # return the answer
             print(f"answer: {answer}")
             return {"question": question, "answer": answer, "visitor_id": visitor_id, "error_code": 0}
         
@@ -138,6 +134,28 @@ class ChatbotService:
         self.app.get("/", response_class=HTMLResponse)(self.root)
         self.app.get("/get-visitor-info", response_class=JSONResponse)(self.get_visitor_info)
         self.app.post("/ask", response_class=JSONResponse)(self.ask)
+
+# the main function to ask chatbot
+def ask_question(msg: Message) -> str:
+    answer_text = ''
+    try:
+        # call to Google Gemini APi
+        #gemini_text_model = genai.GenerativeModel(model_name=GEMINI_TEXT_MODEL_ID)
+        #model_config = genai.GenerationConfig(temperature=temperature_score)
+        #response = gemini_text_model.generate_content(prompt_text, generation_config=model_config)
+        #answer_text = response.text    
+        
+        final_state =  submit_message_to_agent(msg)
+        answer_text = final_state.response
+        
+        if answer_text:
+            answer_text = markdown.markdown(answer_text)
+    except Exception as error:
+        print("An exception occurred:", error)
+        answer_text = ''
+
+    # done
+    return str(answer_text)   
 
 # Initialize chatbot service
 chatbot_service = ChatbotService()
