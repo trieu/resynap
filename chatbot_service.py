@@ -1,5 +1,5 @@
 from rs_model.chatbot_models import (
-    menu_items, persona_name_list, Message, is_gemini_model_ready, generate_report
+    menu_items, persona_agent_list, Message, is_gemini_model_ready, generate_report
 )
 
 import asyncio
@@ -14,8 +14,6 @@ from fastapi.responses import HTMLResponse, PlainTextResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 import markdown
-from rs_model.langgraph.conversation_models import ConversationState, UserConversationState
-from rs_model.language_utils import get_language_name
 from rs_model.langgraph.langgraph_ai import submit_message_to_agent
 
 # Load environment variables
@@ -68,7 +66,7 @@ class ChatbotService:
         data = {
             "request": request,
             "timestamp": ts,
-            "persona_name_list": persona_name_list,
+            "persona_agent_list": persona_agent_list,
             "menu_items": menu_items,
             "CHATBOT_HOSTNAME": self.hostname,
             "CHATBOT_DEV_MODE": self.dev_mode,
@@ -139,16 +137,12 @@ class ChatbotService:
 def ask_question(msg: Message) -> str:
     answer_text = ''
     try:
-        # call to Google Gemini APi
-        #gemini_text_model = genai.GenerativeModel(model_name=GEMINI_TEXT_MODEL_ID)
-        #model_config = genai.GenerationConfig(temperature=temperature_score)
-        #response = gemini_text_model.generate_content(prompt_text, generation_config=model_config)
-        #answer_text = response.text    
-        
+        # call to AI agent
         final_state =  submit_message_to_agent(msg)
-        answer_text = final_state.response
-        
+        answer_text = final_state.response   
+             
         if answer_text:
+            # format markdown to HTML 
             answer_text = markdown.markdown(answer_text)
     except Exception as error:
         print("An exception occurred:", error)
@@ -157,6 +151,6 @@ def ask_question(msg: Message) -> str:
     # done
     return str(answer_text)   
 
-# Initialize chatbot service
+# Initialize chatbot service as Fast API instance
 chatbot_service = ChatbotService()
 chatbot = chatbot_service.app

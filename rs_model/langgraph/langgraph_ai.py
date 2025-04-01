@@ -35,6 +35,8 @@ COLLECTION_AGENT_ROLES = "om_agent_roles"
 COLLECTION_AGENT_CONVERSATION = "om_agent_conversations"
 COLLECTION_USER_CONVERSATION = "om_user_conversations"
 
+# 
+MIN_CONTEXT_TO_SAVE = 2
 
 def to_embedding_vector(s: str):
     """Converts a string into an embedding vector using the SentenceTransformer model.
@@ -121,24 +123,22 @@ class DatabaseManager:
             state (UserConversationState): The UserConversationState object containing the data to be saved.
         """
         
-        if  len(state.user_message) > 2:
+        if  len(state.user_message) > MIN_CONTEXT_TO_SAVE:
             try:       
                 prompt_text = f"""
-                    Extract the context description from the following text. 
-                    Focus on the description that to enrich user profile and personal traits
-                    Must provide a comma-separated list of context descriptions without explanations.
+                    Extract context keywords from the following text. 
+                    Must focus on the keywords that to enrich user profile and personal traits
+                    Must provide a comma-separated list of keywords (maximum 6 keywords) without explanations.
 
                 Text: "{state.user_message}"
-                Context's descriptions:
+                Keywords:
                 """
-                
-                print(prompt_text)
                 response = gemini_model.generate_content(prompt_text)
                 state.context = response.text if response and response.text else ""
             except Exception as e:  # Catch Gemini API errors
                 print(f"Error generating response from Gemini: {e}")
                 
-        if  len(state.context) > 2:
+        if  len(state.context) > MIN_CONTEXT_TO_SAVE:
             print(f"=> Context to vectorize from AI model: {state.context}")        
             embedding = to_embedding_vector(state.context)
             conversation_id = str(uuid.uuid4())
@@ -222,23 +222,25 @@ class LangGraphAI:
 
     def _setup_workflow(self):
         """Defines the AI workflow graph."""
-        self.workflow.add_node("determine_agent_role", self.determine_agent_role)
+        
+        # define agent nodes 
+        self.workflow.add_node("detect_ai_persona", self.detect_ai_persona)
         self.workflow.add_node("retrieve_context", self.retrieve_context)
         self.workflow.add_node("generate_response", self.generate_response)
 
         # Define workflow transitions
-        self.workflow.add_edge("determine_agent_role", "retrieve_context")
+        self.workflow.add_edge("detect_ai_persona", "retrieve_context")
         self.workflow.add_edge("retrieve_context", "generate_response")
 
         #  Set entry point for the workflow
-        self.workflow.set_entry_point("determine_agent_role")
+        self.workflow.set_entry_point("detect_ai_persona")
 
         #  Compile the workflow properly
         self.workflow = self.workflow.compile()
 
     # 🔹 Hàm xác định vai trò của agent từ ngữ cảnh của người dùng
 
-    def determine_agent_role(self, state_dict) :
+    def detect_ai_persona(self, state_dict) :
         """Determines the appropriate agent role based on the user's message using Qdrant.
 
         Args:
@@ -296,18 +298,17 @@ class LangGraphAI:
         for result in search_results:
             context = result.payload["context"]
             if len(context) > 0:
-                
-                keywords_list = list(map(str.strip, context.split(", ")))
-                print(f"  keywords_list {keywords_list}")
-                contexts.append(remove_similar_keywords(keywords_list))
+            
+                print(f"  context {context}")
+                contexts.append(context)
         
         state.user_profile = user_profile
         
         # Extract keywords from the text
         #
-        unique_keywords = remove_similar_keywords(contexts)
+        #unique_keywords = remove_similar_keywords(contexts)
         
-        state.context = ", ".join(unique_keywords)
+        state.context = ", ".join(contexts)
         return state.to_dict()
 
     def generate_response(self, state_dict) :

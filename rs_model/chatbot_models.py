@@ -2,6 +2,8 @@ import time
 from dotenv import load_dotenv
 import os
 
+from rs_model.language_utils import VIETNAMESE
+
 # Load the .env file and override any existing environment variables
 load_dotenv(override=True)
 
@@ -13,9 +15,7 @@ from typing import Optional, Dict
 # use Google AI
 import google.generativeai as genai
 
-# need Google translate to convert input into English
-from google.cloud import translate_v2 as translate
-import pprint
+
 
 from rs_model.langgraph.conversation_models import UserConversationState
 
@@ -39,7 +39,7 @@ class Message(BaseModel):
         print(msg.build_prompt(user_profile=user_profile, ext_context="Consider recent AI trends."))
     """
     
-    answer_in_language: str = Field("English")  # Default is English
+    answer_in_language: str = Field(VIETNAMESE)  # Default is VIETNAMESE
     answer_in_format: str = Field("html", description="The format of answer")
     context: str = Field("You are a creative chatbot.", description="The context of question")
     question: str = Field("", description="The question for Q&A")
@@ -102,56 +102,20 @@ menu_items = [
 
 
 # TODO load from ArangoDB
-persona_name_list = [
-    {"code": "chatbot", "label": "Chatbot", "selected": True},
-    {"code": "psychologist", "label": "Psychologist", "selected": False},
-    {"code": "teacher", "label": "Teacher", "selected": False},
-    {"code": "coach", "label": "Coach", "selected": False},
-    {"code": "customer_support", "label": "Customer Support", "selected": False},
-    {"code": "financial_advisor", "label": "Financial Advisor", "selected": False},
-    {"code": "fitness_trainer", "label": "Fitness Trainer", "selected": False},
-    {"code": "doctor", "label": "Doctor", "selected": False},
-    {"code": "lawyer", "label": "Lawyer", "selected": False},
-    {"code": "career_counselor", "label": "Career Counselor", "selected": False},
-    {"code": "sales_assistant", "label": "Sales Assistant", "selected": False},
-    {"code": "marketing_consultant", "label": "Marketing Consultant", "selected": False},
-    {"code": "virtual_assistant", "label": "Virtual Assistant", "selected": False},
-    {"code": "project_manager", "label": "Project Manager", "selected": False},
-    {"code": "product_recommendation", "label": "Product Recommendation", "selected": False},
-    {"code": "travel_agent", "label": "Travel Agent", "selected": False},
-    {"code": "therapist", "label": "Therapist", "selected": False},
-    {"code": "personal_stylist", "label": "Personal Stylist", "selected": False},
-    {"code": "language_tutor", "label": "Language Tutor", "selected": False},
-    {"code": "stock_market_analyst", "label": "Stock Market Analyst", "selected": False}
+persona_agent_list = [
+    {"code": "chatbot", "label": "Trợ lý chuyện trò thân thiện", "description": "Một AI trò chuyện đa năng.", "gender": "neutral", "selected": True},
+    {"code": "psychologist", "label": "Anh tư vấn tâm lý đáng tin", "description": "Hỗ trợ và tư vấn sức khỏe tinh thần.", "gender": "male", "selected": False},
+    {"code": "teacher", "label": "Cô giáo tận tâm", "description": "Cung cấp hướng dẫn và kiến thức giáo dục.", "gender": "female", "selected": False},
+    {"code": "coach", "label": "Huấn luyện viên nhiệt huyết", "description": "Tạo động lực và hướng dẫn người dùng đạt mục tiêu.", "gender": "male", "selected": False},
+    {"code": "customer_support", "label": "Chuyên viên hỗ trợ siêu nhanh", "description": "Hỗ trợ khách hàng với sản phẩm hoặc dịch vụ.", "gender": "neutral", "selected": False},
+    {"code": "financial_advisor", "label": "Cố vấn tài chính uy tín", "description": "Tư vấn về kế hoạch tài chính và đầu tư.", "gender": "male", "selected": False},
+    {"code": "fitness_trainer", "label": "PT thể hình nghiêm khắc mà vui tính", "description": "Cung cấp kế hoạch tập luyện và lời khuyên về thể hình.", "gender": "male", "selected": False},
+    {"code": "doctor", "label": "Bác sĩ online đáng tin cậy", "description": "Cung cấp thông tin và tư vấn y tế tổng quát.", "gender": "neutral", "selected": False},
+    {"code": "lawyer", "label": "Luật sư cố vấn chắc chắn", "description": "Cung cấp thông tin và hướng dẫn pháp lý.", "gender": "male", "selected": False},
+    {"code": "career_counselor", "label": "Chuyên viên hướng nghiệp sáng suốt", "description": "Hỗ trợ lập kế hoạch và phát triển sự nghiệp.", "gender": "female", "selected": False},
 ]
 
 
-# detect language
-def detect_language(text: str) -> str:
-    if text == "" or text is None:
-        return "en"
-    if isinstance(text, bytes):
-        text = text.decode("utf-8")
-    result = translate.Client().detect_language(text)
-    print(result)
-    if result['confidence'] > 0.9 :
-        return result['language']
-    else : 
-        return "en"
-    
-# Translates text into the target language.
-def translate_text(text: str, target: str) -> dict:
-    if text == "" or text is None:
-        return ""
-    if isinstance(text, bytes):
-        text = text.decode("utf-8")
-    result = translate.Client().translate(text, target_language=target)
-    return result['translatedText']
-
-def format_string_for_md_slides(rs):
-    rs = rs.replace('<br/>','\n')
-    rs = rs.replace('##','## ')
-    return rs
 
 def generate_report(question: str) -> str:
     # TODO create report in iframe

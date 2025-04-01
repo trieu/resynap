@@ -55,7 +55,7 @@ class UserConversationState(ConversationState):
 This data class is used to store and pass around the conversation state in the AI workflow when user send a message """
 
     ext_context: str = ""
-    answer_in_language: str = "English"
+    answer_in_language: str = "Vietnamese"
     answer_in_format: str = "text"
     persona_name: str = "chatbot"
     session_id: str = ""
@@ -98,7 +98,7 @@ This data class is used to store and pass around the conversation state in the A
         Instruction to answer:
         - Just return answer in {self.answer_in_language} in simple language
         - Format the answer as {self.answer_in_format}
-        - Must the answer must using user profile to support the context: {self.context} . {additional_context}
+        - Build conversation's context from keywords: {self.context} . {additional_context}
         
         Your job is answering this message:
         {self.user_message}

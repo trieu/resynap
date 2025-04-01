@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AI Buddy</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(180deg,rgb(255, 255, 255),rgb(232, 189, 250));
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .chat-container {
+            width: 100%;
+        }
+        .chat-box {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .message-input {
+            border-radius: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        .offcanvas {
+            max-width: 320px;
+        }
+        .profile-pic {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+        .menu-item:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        .settings-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container chat-container">
+        <!-- Top Right Settings Button -->
+        <button class="settings-btn" data-bs-toggle="offcanvas" data-bs-target="#settingsPanel">
+            <i class="bi bi-gear"></i>
+        </button>
+
+        <div class="text-center">
+            <h3 class="text-black">
+                <i class="bi bi-robot"></i> AI Buddy
+            </h3>
+        </div>
+
+        <!-- Greeting Section -->
+        <div class="mt-3">
+            <h2 class="fw-bold">Xin chào, Minh Hạnh!</h2>
+            <p class="fs-5 text-muted">Tôi có thể giúp gì cho bạn?</p>
+            <p class="text-muted">Bạn có thể hỏi tôi về bất kỳ lĩnh vực nào. Hoặc chúng ta có thể tâm sự dưới chế độ ẩn danh. Bắt đầu nào!</p>
+            <div class="d-flex justify-content-center gap-2">
+                <button class="btn btn-light rounded-pill px-4">HR</button>
+                <button class="btn btn-light rounded-pill px-4">Marketing</button>
+                <button class="btn btn-light rounded-pill px-4">IT</button>
+                <button class="btn btn-light rounded-pill px-4">Hành chính</button>
+            </div>
+        </div>
+
+        <!-- Message Input -->
+        <div class="input-group mt-4">
+            <input type="text" class="form-control message-input" placeholder="Hãy gửi tin nhắn cho tôi...">
+            <button class="btn btn-outline-secondary"><i class="bi bi-paperclip"></i></button>
+            <button class="btn btn-outline-secondary"><i class="bi bi-send"></i></button>
+        </div>
+
+        <!-- Anonymous Mode Toggle -->
+        <div class="mt-3">
+            <button class="btn btn-outline-light">
+                <i class="bi bi-eye-slash"></i> Bật chế độ ẩn danh
+            </button>
+        </div>
+    </div>
+
+    <!-- Offcanvas Sidebar for Settings -->
+    <div class="offcanvas offcanvas-end" id="settingsPanel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">Cài đặt</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div class="text-center">
+                <img src="https://via.placeholder.com/60" class="profile-pic">
+                <h6 class="mt-2">Anh Tuấn Tí Tởn</h6>
+            </div>
+            <hr>
+            <div class="menu-item">
+                <i class="bi bi-person me-2"></i> Chọn Buddy của bạn
+            </div>
+            <div class="menu-item">
+                <i class="bi bi-eye-slash me-2"></i> Bật chế độ ẩn danh
+            </div>
+            <hr>
+            <h6>Đã lưu</h6>
+            <div class="menu-item"><i class="bi bi-journal-text me-2"></i> Cách xử lý khi đồng nghiệp hay to tiếng</div>
+            <div class="menu-item"><i class="bi bi-journal-text me-2"></i> Công việc trở nên quá nhàm chán</div>
+            <div class="menu-item"><i class="bi bi-journal-text me-2"></i> Stressful vì không được sếp quan tâm</div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

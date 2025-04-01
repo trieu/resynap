@@ -101,7 +101,7 @@
                 </div>
                 <div class="col-10 d-grid">
                     <select id="chatbot_persona_name" class="form-select" style="display:none" >
-                        {% for lang in persona_name_list %}
+                        {% for lang in persona_agent_list %}
                         <option value="{{ lang.code }}" {% if lang.selected %}selected="selected"{% endif %}>
                             {{ lang.label }}
                         </option>
