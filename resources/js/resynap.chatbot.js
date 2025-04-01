@@ -68,7 +68,7 @@ function loadChatSession(context, visitorId, okCallback) {
       var n = currentProfile.displayName;
       n = a.length > 0 ? a : n;
       currentProfile.displayName = n;
-      showChatbotUI(currentProfile.displayName);
+      newChatbotSession(currentProfile.displayName);
     } else if (e === 404) {
       askForContactInfo(visitorId);
     } else {
@@ -81,11 +81,14 @@ function loadChatSession(context, visitorId, okCallback) {
   }
 }
 
-var showChatbotUI = function (displayName) {
-  var msg = "Hi " + displayName + ", you may ask me for anything";
-  var msgObj = { content: msg, cssClass: "chatbot_answer" };
+var newChatbotSession = function (displayName) {
   getBotUI().message.removeAll();
-  getBotUI().message.bot(msgObj);
+  if(window.sayHelloToUser && displayName){
+    window.sayHelloToUser(displayName);
+  }else{
+    // skip
+    window.sayHelloToUser('người lạ');
+  }
 };
 
 var leoBotPromptQuestion = function (delay) {

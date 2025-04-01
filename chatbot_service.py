@@ -72,7 +72,11 @@ class ChatbotService:
             "CHATBOT_DEV_MODE": self.dev_mode,
             "CHATBOT_NAME": self.name,
         }
-        return self.templates.TemplateResponse("chatbot.html", data)
+        return self.templates.TemplateResponse(self.get_default_chatbot_template(), data)
+
+    def get_default_chatbot_template(self):
+        #return "chatbot.html"
+        return 'ai-buddy.html'
     
     async def get_visitor_info(self, visitor_id: str):
         if not is_gemini_model_ready():

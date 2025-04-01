@@ -1,6 +1,5 @@
 from langdetect import detect, LangDetectException
-from thefuzz import fuzz
-from thefuzz import process
+from rapidfuzz import fuzz  # Faster alternative to fuzzywuzzy
 
 # need Google translate to convert input into English
 from google.cloud import translate_v2 as translate
@@ -34,12 +33,15 @@ def get_language_name(text):
     return LANGUAGE_MAPPING.get(lang_code, VIETNAMESE)
 
 
-def remove_similar_keywords(keywords, threshold=80):
-    unique = []
+def remove_similar_keywords(keywords: list[str], threshold: int = 80) -> list[str]:
+    unique_keywords = []
+    
     for keyword in keywords:
-        if not any(fuzz.ratio(keyword, existing) > threshold for existing in unique):
-            unique.append(keyword)
-    return unique
+        keyword_lower = keyword.lower().strip()  # Normalize case and strip spaces
+        if not any(fuzz.partial_ratio(keyword_lower, existing) > threshold for existing in unique_keywords):
+            unique_keywords.append(keyword_lower)
+    
+    return unique_keywords
 
 
 

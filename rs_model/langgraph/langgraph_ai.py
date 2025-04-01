@@ -77,7 +77,6 @@ class DatabaseManager:
 
         # Get existing collections
         existing_collections = [col.name for col in self.qdrant_client.get_collections().collections]
-
         if cl_name not in existing_collections:
             self.qdrant_client.create_collection(
                 collection_name=cl_name,
@@ -89,9 +88,11 @@ class DatabaseManager:
         else:
             print(f"⚠️ Collection `{cl_name}` already exists. Skipping creation.")
 
+
     def get_qdrant_client(self):
         """Returns the Qdrant client instance."""
         return self.qdrant_client
+    
     
     def save_conversation_state(self, state: ConversationState):
         """Saves the conversation state to the Qdrant vector database.
@@ -116,20 +117,21 @@ class DatabaseManager:
             })]
         )
         
+        
     def save_user_conversation_state(self, state: UserConversationState):
         """Saves the user conversation state to the Qdrant vector database.
 
         Args:
             state (UserConversationState): The UserConversationState object containing the data to be saved.
         """
-        
         if  len(state.user_message) > MIN_CONTEXT_TO_SAVE:
             try:       
                 prompt_text = f"""
                     Extract context keywords from the following text. 
                     Must focus on the keywords that to enrich user profile and personal traits
-                    Must provide a comma-separated list of keywords (maximum 6 keywords) without explanations.
-
+                    Must provide a comma-separated list of keywords () without explanations.
+                    The list has maximum 10 keywords.
+                    
                 Text: "{state.user_message}"
                 Keywords:
                 """
@@ -147,6 +149,7 @@ class DatabaseManager:
                 collection_name=COLLECTION_USER_CONVERSATION,
                 points=[PointStruct(id=conversation_id, vector=embedding, payload=state.build_payload())]
             )
+
 
     def load_conversation_state(self, context: str, limit=2):
         """Searches for relevant conversation context in the Qdrant vector database.
@@ -171,6 +174,7 @@ class DatabaseManager:
             )
             return search_results
         return []
+    
     
     def load_user_conversation_state(self, profile_id: str, user_message: str, limit=10):
         """Searches for relevant user conversation context in the Qdrant vector database.
@@ -288,6 +292,7 @@ class LangGraphAI:
         
         # TODO Use load user profile from db_manager
         user_profile = {"Name": "Thomas", "Interests": "AI, Marketing, Psychology"}
+        state.user_profile = user_profile
         
         # Use load user conversation state from db_manager
         search_results = self.db_manager.load_user_conversation_state(state.profile_id, state.user_message)
@@ -297,18 +302,16 @@ class LangGraphAI:
         contexts = []
         for result in search_results:
             context = result.payload["context"]
-            if len(context) > 0:
-            
-                print(f"  context {context}")
+            if len(context) > 0: 
+                context = context.replace("\n", "").replace("\r", "")           
+                print(f"context {context}")
                 contexts.append(context)
-        
-        state.user_profile = user_profile
         
         # Extract keywords from the text
         #
-        #unique_keywords = remove_similar_keywords(contexts)
+        unique_keywords = remove_similar_keywords(contexts)
         
-        state.context = ", ".join(contexts)
+        state.context = ", ".join(unique_keywords)
         return state.to_dict()
 
     def generate_response(self, state_dict) :
