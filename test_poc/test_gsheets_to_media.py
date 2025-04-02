@@ -17,14 +17,14 @@ GEN_BY_AI = "generated-by-ai"
 PROCESSING = "PROCESSING DATA ..."
 
 # Path to service account JSON file
-SERVICE_ACCOUNT_FILE = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON")
+
 GOOGLE_SHEET_URL_FOR_AI_AGENT = os.getenv("GOOGLE_SHEET_URL_FOR_AI_AGENT")
 
 # Set up authentication
+SERVICE_ACCOUNT_FILE = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON")
 scope = ["https://spreadsheets.google.com/feeds",
          "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name(
-    SERVICE_ACCOUNT_FILE, scope)
+creds = ServiceAccountCredentials.from_json_keyfile_name(SERVICE_ACCOUNT_FILE, scope)
 
 # Open the Google Sheet for the AI agent
 google_sheet = gspread.authorize(creds).open_by_url(GOOGLE_SHEET_URL_FOR_AI_AGENT)
