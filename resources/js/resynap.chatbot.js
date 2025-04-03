@@ -81,13 +81,10 @@ function loadChatSession(context, visitorId, okCallback) {
   }
 }
 
-var newChatbotSession = function (displayName) {
+var newChatbotSession = function () {
   getBotUI().message.removeAll();
-  if(window.sayHelloToUser && displayName){
-    window.sayHelloToUser(displayName);
-  }else{
-    // skip
-    window.sayHelloToUser('người lạ');
+  if(window.sayHelloToUser){
+    window.sayHelloToUser();
   }
 };
 
@@ -97,7 +94,7 @@ var leoBotPromptQuestion = function (delay) {
       delay: typeof delay === "number" ? delay : 800,
       action: {
         icon: "question-circle",
-        cssClass: "leobot-question-input",
+        cssClass: "chatbot-question-input",
         value: "", // show the prevous answer if any
         placeholder: "Give me a question",
       },
@@ -150,7 +147,7 @@ var askTheEmailOfUser = function (name) {
       delay: 0,
       action: {
         icon: "envelope-o",
-        cssClass: "leobot-question-input",
+        cssClass: "chatbot-question-input",
         value: "",
         placeholder: "Input your email here",
       },
@@ -187,7 +184,7 @@ var askTheNameOfUser = function () {
       delay: 0,
       action: {
         icon: "user-circle-o",
-        cssClass: "leobot-question-input",
+        cssClass: "chatbot-question-input",
         value: "",
         placeholder: "Input your name here",
       },
@@ -299,21 +296,21 @@ var startChatbot = function (visitorId) {
 
 function sendToChatbot() {
   var msg = $("#chatbot_input").val().trim();
-  if (msg.length > 1) {
+  if (msg.length > 0) {
     sendMessageToAgent("ask", msg);
-    showChatMessage(msg);
-    $("#chatbot_input").val("");
+    showChatMessage(msg);    
   }
+  $("#chatbot_input").val("");
 }
 
 function setupChatbotDone() {
 
   // the button handler
-  $("#chatbot_input").keypress(function (event) {
-    if ((event.key === "Enter" || event.keyCode === 13) && !event.shiftKey && !event.ctrlKey) {
-      event.preventDefault(); // Prevent default newline behavior in textareas
-      sendToChatbot();
-    }
+  $("#chatbot_input").keydown(function (event) {
+      if ((event.key === "Enter" || event.keyCode === 13) && !event.shiftKey && !event.ctrlKey) {
+          event.preventDefault(); // Prevent default newline behavior in textareas
+          sendToChatbot();
+      }
   });
 
   // 
@@ -322,7 +319,6 @@ function setupChatbotDone() {
     $('#selected_agent_name').text(selected.text());
     $('#selected_agent_avatar_url').attr( 'src', selected.data('avatar'));
     
-    console.log(selected)
   })
 }
 

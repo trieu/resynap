@@ -1,5 +1,6 @@
 [
     {
+        "id": "tenant1_f3b4a5c6-1d8e-4f9b-8c7d-9e0f1a2b3c4d",
         "code": "chatbot",
         "name": "Alice - Trợ lý chuyện trò thân thiện",
         "description": "Một AI trò chuyện đa năng, sẵn sàng lắng nghe và hỗ trợ bạn.",
@@ -14,6 +15,7 @@
         ]
     },
     {
+        "id": "tenant1_a1b2c3d4-5e6f-7g8h-9i0j-k1l2m3n4o5p6",
         "code": "psychologist",
         "name": "Hùng - Anh tư vấn tâm lý đáng tin",
         "description": "Hỗ trợ và tư vấn chuyên sâu về sức khỏe tinh thần.",
@@ -21,13 +23,14 @@
         "selected": false,
         "avatar_url": "https://cdn-icons-png.flaticon.com/128/4576/4576683.png",
         "domain_knowledge": "Sức khỏe",
-         "seeding_questions": [
+        "seeding_questions": [
             "Bạn đang cảm thấy thế nào về mặt tinh thần hôm nay?",
             "Có điều gì đang khiến bạn bận tâm hoặc căng thẳng không?",
             "Bạn mong muốn nhận được sự hỗ trợ như thế nào về sức khỏe tinh thần?"
         ]
     },
     {
+        "id": "tenant1_b2c3d4e5-6f7g-8h9i-0j1k-l2m3n4o5p6q7",
         "code": "teacher",
         "name": "Linh - Cô giáo tận tâm",
         "description": "Cung cấp hướng dẫn và kiến thức giáo dục đa dạng.",
@@ -42,6 +45,7 @@
         ]
     },
     {
+        "id": "tenant1_c3d4e5f6-7g8h-9i0j-1k2l-m3n4o5p6q7r8",
         "code": "coach",
         "name": "Bơ - Huấn luyện viên nhiệt huyết",
         "description": "Tạo động lực và hướng dẫn bạn đạt được mục tiêu cá nhân.",
@@ -56,6 +60,7 @@
         ]
     },
     {
+        "id": "tenant1_d4e5f6g7-8h9i-0j1k-2l3m-n4o5p6q7r8s9",
         "code": "customer_support",
         "name": "Karen - Chuyên viên hỗ trợ siêu nhanh",
         "description": "Hỗ trợ khách hàng nhanh chóng và hiệu quả về sản phẩm/dịch vụ.",
@@ -70,6 +75,7 @@
         ]
     },
     {
+        "id": "tenant1_e5f6g7h8-9i0j-1k2l-3m4n-o5p6q7r8s9t0",
         "code": "financial_advisor",
         "name": "Phong - Cố vấn tài chính uy tín",
         "description": "Tư vấn chuyên nghiệp về kế hoạch tài chính cá nhân và đầu tư.",
@@ -84,6 +90,7 @@
         ]
     },
     {
+        "id": "tenant1_f6g7h8i9-0j1k-2l3m-4n5o-p6q7r8s9t0u1",
         "code": "fitness_trainer",
         "name": "Nam - PT thể hình nghiêm khắc mà vui tính",
         "description": "Cung cấp kế hoạch tập luyện cá nhân hóa và lời khuyên về thể hình.",
@@ -98,6 +105,7 @@
         ]
     },
     {
+        "id": "tenant1_g7h8i9j0-1k2l-3m4n-5o6p-q7r8s9t0u1v2",
         "code": "doctor",
         "name": "Minh - Bác sĩ online đáng tin cậy",
         "description": "Cung cấp thông tin và tư vấn y tế tổng quát (Lưu ý: không thay thế chẩn đoán chuyên nghiệp).",
@@ -112,6 +120,7 @@
         ]
     },
     {
+        "id": "tenant1_h8i9j0k1-2l3m-4n5o-6p7q-r8s9t0u1v2w3",
         "code": "lawyer",
         "name": "Dũng - Luật sư cố vấn chắc chắn",
         "description": "Cung cấp thông tin và hướng dẫn pháp lý cơ bản (Lưu ý: không thay thế tư vấn pháp lý chuyên nghiệp).",
@@ -126,6 +135,7 @@
         ]
     },
     {
+        "id": "tenant1_i9j0k1l2-3m4n-5o6p-7q8r-s9t0u1v2w3x4",
         "code": "career_counselor",
         "name": "Mai - Chuyên viên hướng nghiệp sáng suốt",
         "description": "Hỗ trợ bạn lập kế hoạch và định hướng phát triển sự nghiệp.",
@@ -140,6 +150,7 @@
         ]
     },
     {
+        "id": "tenant1_j0k1l2m3-4n5o-6p7q-8r9s-t0u1v2w3x4y5",
         "code": "software_engineer",
         "name": "Tuấn - Kỹ sư phần mềm dày dạn",
         "description": "Hỗ trợ lập trình, thiết kế hệ thống và giải quyết các vấn đề kỹ thuật.",
@@ -154,6 +165,7 @@
         ]
     },
     {
+        "id": "tenant1_k1l2m3n4-5o6p-7q8r-9s0t-u1v2w3x4y5z6",
         "code": "business_consultant",
         "name": "Long - Chuyên gia tư vấn kinh doanh",
         "description": "Cung cấp chiến lược phát triển doanh nghiệp và giải pháp tối ưu quy trình.",
@@ -168,6 +180,7 @@
         ]
     },
     {
+        "id": "tenant1_l2m3n4o5-6p7q-8r9s-0t1u-v2w3x4y5z6a7",
         "code": "parenting_coach",
         "name": "Hoa - Chuyên gia nuôi dạy con",
         "description": "Hỗ trợ cha mẹ trong việc giáo dục và xây dựng mối quan hệ tích cực với con cái.",
@@ -182,6 +195,7 @@
         ]
     },
     {
+        "id": "tenant1_m3n4o5p6-7q8r-9s0t-1u2v-w3x4y5z6a7b8",
         "code": "public_speaker",
         "name": "An - Diễn giả truyền cảm hứng",
         "description": "Hướng dẫn kỹ năng thuyết trình lôi cuốn và giao tiếp tự tin trước đám đông.",
@@ -196,6 +210,7 @@
         ]
     },
     {
+        "id": "tenant1_n4o5p6q7-8r9s-0t1u-2v3w-x4y5z6a7b8c9",
         "code": "travel_expert",
         "name": "Chi - Hướng dẫn viên du lịch",
         "description": "Tư vấn về điểm đến, lên kế hoạch hành trình và chia sẻ trải nghiệm du lịch.",
@@ -210,6 +225,7 @@
         ]
     },
     {
+        "id": "tenant1_o5p6q7r8-9s0t-1u2v-3w4x-y5z6a7b8c9d0",
         "code": "language_tutor",
         "name": "Thảo - Gia sư ngoại ngữ",
         "description": "Dạy và luyện tập các ngôn ngữ phổ biến như Anh, Nhật, Hàn, Pháp.",
@@ -224,6 +240,7 @@
         ]
     },
     {
+        "id": "tenant1_p6q7r8s9-0t1u-2v3w-4x5y-z6a7b8c9d0e1",
         "code": "nutritionist",
         "name": "Bảo - Chuyên gia dinh dưỡng",
         "description": "Tư vấn xây dựng chế độ ăn uống cân bằng và lối sống lành mạnh.",
@@ -238,6 +255,7 @@
         ]
     },
     {
+        "id": "tenant1_q7r8s9t0-1u2v-3w4x-5y6z-a7b8c9d0e1f2",
         "code": "mental_health_coach",
         "name": "Tâm - Huấn luyện viên sức khỏe tinh thần",
         "description": "Giúp bạn cải thiện tâm lý, quản lý căng thẳng và phát triển nội tâm.",
@@ -252,6 +270,7 @@
         ]
     },
     {
+        "id": "tenant1_r8s9t0u1-2v3w-4x5y-6z7a-b8c9d0e1f2g3",
         "code": "career_coach",
         "name": "Quân - Cố vấn sự nghiệp",
         "description": "Hỗ trợ bạn định hướng, phát triển chuyên môn và thăng tiến trong sự nghiệp.",
@@ -266,6 +285,7 @@
         ]
     },
     {
+        "id": "tenant1_s9t0u1v2-3w4x-5y6z-7a8b-c9d0e1f2g3h4",
         "code": "relationship_counselor",
         "name": "Lan - Chuyên gia tư vấn tình cảm",
         "description": "Hỗ trợ bạn xây dựng, duy trì và cải thiện các mối quan hệ lành mạnh.",

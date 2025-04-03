@@ -72,7 +72,7 @@
         </div>
     </nav>
 
-    <main class="container main-content py-4">
+    <main class="container-xl main-content py-4">
         <div class="text-center" id="hello_panel" style="display: none;">
             <h1>Xin chào, <span id="user_first_name"> người lạ </span> !</h1>
             <h2>Tôi có thể giúp gì cho bạn?</h2>
@@ -100,7 +100,8 @@
             </button>
             <button class="btn" type="button" aria-label="Attach file">
                 <i class="bi bi-paperclip"></i>
-            </button>            
+            </button>    
+            <!-- chatbox for user -->      
             <textarea id="chatbot_input" class="form-control" rows="2" placeholder="Hãy gửi tin nhắn cho tôi..." 
                 style="resize: none;" aria-label="Chat message input"></textarea>
             <button class="btn btn-send" type="button" aria-label="Send message" id="sendBtn" onclick="sendToChatbot()" >
@@ -174,6 +175,12 @@
                     </div>
                 {% endfor %}
             </div>
+
+            <hr>
+            <div class="menu-item" >
+                <i class="bi bi-eye-slash me-2"></i> Log out
+                
+            </div>
         </div>
     </div>
 
@@ -182,6 +189,10 @@
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
     <script>
+
+        // Convert Jinja2 data to JSON using the tojson filter
+        const persona_agent_list = {{ persona_agent_list|tojson }};
+        const user_profile = {{ user_profile|tojson }};
   
         const themeIcon = document.getElementById("theme-icon");
        
@@ -205,6 +216,8 @@
             localStorage.setItem("theme", newTheme);
 
             if(newSession){
+                // TODO reload currentProfile
+                currentProfile.displayName = "người lạ"
                 newChatbotSession()
             }
         }
@@ -226,23 +239,25 @@
             localStorage.setItem("theme", newTheme);
 
             if(newSession){
+                // TODO reload currentProfile
+                currentProfile.displayName = "Triều"
                 newChatbotSession()
             }
         }
 
        
-        window.sayHelloToUser = function(displayName){
+        window.sayHelloToUser = function(){
             $('#hello_panel').show()
             
              // Apply the current theme on load
             if (window.inPrivateMode) {
+                 // TODO reload currentProfile
+                currentProfile.displayName = "người lạ"
                 gotoPrivateChatMode()
-                $('#user_first_name').text('người lạ')
             } else {
                 gotoPublicChatMode()
-                $('#user_first_name').text(displayName)
             }
-     
+            $('#user_first_name').text(currentProfile.displayName)
         }
     </script>
 

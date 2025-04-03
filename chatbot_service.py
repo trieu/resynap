@@ -1,3 +1,4 @@
+from rs_domain.user_management import get_user_profile
 from rs_model.chatbot_models import (
     get_selected_agent, Message, is_gemini_model_ready, generate_report
 )
@@ -65,9 +66,11 @@ class ChatbotService:
     async def root(self, request: Request):
         ts = int(time.time())
         
+        # user profile 
+        user_profile = get_user_profile('')
+        
         # Sample menu items, TODO load from ArangoDB
         menu_items = read_json_from_file('./rs_agent/sample-saved-conversations.json')
-
 
         # TODO load from ArangoDB
         persona_agent_list = read_json_from_file('./rs_agent/vn-agent-list.json')
@@ -76,6 +79,7 @@ class ChatbotService:
         data = {
             "request": request,
             "timestamp": ts,
+            "user_profile": user_profile,
             "selected_agent" : get_selected_agent(persona_agent_list),
             "persona_agent_list": persona_agent_list,
             "menu_items": menu_items,
@@ -99,7 +103,7 @@ class ChatbotService:
         profile_id = self.redis_client.hget(visitor_id, 'profile_id')
         if not profile_id:
             if self.dev_mode:
-                return {"answer": "local_dev", "error_code": 0}
+                return {"answer": "Triều", "error_code": 0}
             
             return {"answer": "Not found any profile in CDP", "error": True, "error_code": 404}
         

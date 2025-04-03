@@ -237,6 +237,7 @@ body {
 }
 .botui-message-content.html {
   width: 100% !important;
+  max-width: 82% !important;
 }
 .botui-message-content span {
   line-height: 22px !important;
@@ -245,11 +246,10 @@ body {
 #chatbot_container {
   width: 100% !important;
   height: 400px !important;
-  overflow-y: scroll !important;
-  margin-bottom: 20px !important;
+  margin-bottom: 12px !important;
 }
 
-.leobot-question-input {
+.chatbot-question-input {
   width: 76% !important;
   box-shadow: 0 0 6px #0045fe;
   display: inline-block !important;

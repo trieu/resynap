@@ -9,9 +9,11 @@ from qdrant_client.http.models import Distance
 from langgraph.graph import StateGraph
 from sentence_transformers import SentenceTransformer
 
+from rs_domain.user_management import get_user_profile, get_user_profile_for_ai_agent
 from rs_model.langgraph.conversation_models import ConversationState, UserConversationState
 from rs_model.chatbot_models import Message
 from rs_model.language_utils import remove_similar_keywords
+from rs_model.system_utils import read_json_from_file
 
 
 # Configure Gemini AI
@@ -291,8 +293,8 @@ class LangGraphAI:
         state = UserConversationState.from_dict(state_dict) 
         
         # TODO Use load user profile from db_manager
-        user_profile = {"Name": "Thomas", "Interests": "AI, Marketing, Psychology"}
-        state.user_profile = user_profile
+        
+        state.user_profile = get_user_profile_for_ai_agent(state.profile_id)
         
         # Use load user conversation state from db_manager
         search_results = self.db_manager.load_user_conversation_state(state.profile_id, state.user_message)
@@ -323,7 +325,6 @@ class LangGraphAI:
         Returns:
             dict: The updated conversation state dictionary, including the generated AI response.
         """
-        
         #prompt = f"User: {state.user_message}\nContext: {state.context}\nAgent Role: {state.agent_role}\nResponse:"
         print("state_dict \n ",state_dict)
         state = UserConversationState.from_dict(state_dict) 
