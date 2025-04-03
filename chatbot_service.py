@@ -1,5 +1,5 @@
 from rs_model.chatbot_models import (
-    get_selected_agent, menu_items, persona_agent_list, Message, is_gemini_model_ready, generate_report
+    get_selected_agent, Message, is_gemini_model_ready, generate_report
 )
 
 import asyncio
@@ -15,6 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import markdown
 from rs_model.langgraph.langgraph_ai import submit_message_to_agent
+from rs_model.system_utils import read_json_from_file
 
 # Load environment variables
 load_dotenv(override=True)
@@ -63,10 +64,19 @@ class ChatbotService:
     
     async def root(self, request: Request):
         ts = int(time.time())
+        
+        # Sample menu items, TODO load from ArangoDB
+        menu_items = read_json_from_file('./rs_agent/sample-saved-conversations.json')
+
+
+        # TODO load from ArangoDB
+        persona_agent_list = read_json_from_file('./rs_agent/vn-agent-list.json')
+        
+        # TODO need a function
         data = {
             "request": request,
             "timestamp": ts,
-            "selected_agent" : get_selected_agent(),
+            "selected_agent" : get_selected_agent(persona_agent_list),
             "persona_agent_list": persona_agent_list,
             "menu_items": menu_items,
             "CHATBOT_HOSTNAME": self.hostname,

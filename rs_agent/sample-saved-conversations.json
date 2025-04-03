@@ -1,0 +1,72 @@
+[
+    {
+      "id": "your_uuid_1",
+      "name": "Hỗ trợ nhân sự",
+      "active": false,
+      "private": true,
+      "decode_key": "a1b2c3"
+    },
+    {
+      "id": "your_uuid_2",
+      "name": "Quản lý căng thẳng",
+      "active": false,
+      "private": true,
+      "decode_key": "x9y8z7"
+    },
+    {
+      "id": "your_uuid_3",
+      "name": "Báo cáo doanh số 2025",
+      "active": true,
+      "private": false,
+      "decode_key": ""
+    },
+    {
+      "id": "your_uuid_4",
+      "name": "Phân tích phản hồi khách hàng",
+      "active": false,
+      "private": false,
+      "decode_key": ""
+    },
+    {
+      "id": "your_uuid_5",
+      "name": "Thảo luận nghiên cứu AI",
+      "active": false,
+      "private": true,
+      "decode_key": "d4e5f6"
+    },
+    {
+      "id": "your_uuid_6",
+      "name": "Xu hướng Marketing 2025",
+      "active": false,
+      "private": false,
+      "decode_key": ""
+    },
+    {
+      "id": "your_uuid_7",
+      "name": "Sức khỏe nhân viên",
+      "active": false,
+      "private": true,
+      "decode_key": "g7h8i9"
+    },
+    {
+      "id": "your_uuid_8",
+      "name": "Đổi mới công nghệ",
+      "active": false,
+      "private": false,
+      "decode_key": ""
+    },
+    {
+      "id": "your_uuid_9",
+      "name": "AI hỗ trợ khách hàng",
+      "active": false,
+      "private": true,
+      "decode_key": "j1k2l3"
+    },
+    {
+      "id": "your_uuid_10",
+      "name": "Phân tích cạnh tranh",
+      "active": false,
+      "private": false,
+      "decode_key": ""
+    }
+  ]
