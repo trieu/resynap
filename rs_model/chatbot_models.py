@@ -41,17 +41,22 @@ class Message(BaseModel):
     context: str = Field("You are a creative chatbot.",
                          description="The context of question")
     question: str = Field("", description="The question for Q&A")
-    temperature_score: float = Field(
-        DEFAULT_TEMPERATURE_SCORE, description="The temperature score of LLM")
+    temperature_score: float = Field(DEFAULT_TEMPERATURE_SCORE, description="The temperature score of LLM")
 
     visitor_id: str = Field("", description="The visitor id")
-    profile_id: str = Field("", description="The user id")
+    profile_id: str = Field("", description="The user profile id")
     persona_name: str = Field("", description="The persona name")
     session_id: str = Field("", description="The session id")
+    private_mode: bool = Field(False, description="The private mode")
 
     def to_conversation_state(self, agent_role: str = "", journey_id: str = "", touchpoint_id: str = ""):
         """Converts the Message instance to a ConversationState object."""
+        
+        if self.private_mode:
+            self.profile_id = ''
+        
         state = UserConversationState(
+            private_mode=self.private_mode,
             profile_id=self.profile_id,
             user_message=self.question,
             agent_role=agent_role,
@@ -94,4 +99,5 @@ def get_selected_agent(persona_agent_list: list[dict]):
 
 def generate_report(question: str) -> str:
     # TODO create report in iframe
-    return '<iframe id="custom_report_iframe" src="https://superset.datatest.ch/superset/dashboard/10/?standalone=true" width="100%" style="" height="1280px" frameborder="0"></iframe>'
+    superset_url = 'https://superset.datatest.ch/superset/dashboard/10/?standalone=true'
+    return f'<a href="{superset_url}" target="_blank"> Report URL </a> <br> <iframe id="custom_report_iframe" src="{superset_url}" width="100%" style="" height="1280px" frameborder="0"></iframe>'

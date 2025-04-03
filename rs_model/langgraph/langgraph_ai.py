@@ -294,7 +294,10 @@ class LangGraphAI:
         
         # TODO Use load user profile from db_manager
         
-        state.user_profile = get_user_profile_for_ai_agent(state.profile_id)
+        if state.private_mode:
+            state.user_profile = None
+        else:
+            state.user_profile = get_user_profile_for_ai_agent(state.profile_id)
         
         # Use load user conversation state from db_manager
         search_results = self.db_manager.load_user_conversation_state(state.profile_id, state.user_message)
@@ -359,7 +362,7 @@ def init_ai_system():
     return agent_system
         
 
-def submit_message_to_agent(msg: Message):
+def submit_message_to_agent(user_msg: Message):
     """Submits a user message to the AI agent, runs the LangGraph workflow, and returns the final state.
 
     Args:
@@ -370,7 +373,7 @@ def submit_message_to_agent(msg: Message):
     """
 
     # Create an initial state
-    initial_state = msg.to_conversation_state()
+    initial_state = user_msg.to_conversation_state()
 
     # Run LangGraph workflow
     agent_system = init_ai_system()

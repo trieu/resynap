@@ -237,7 +237,7 @@ var sendMessageToAgent = function (context, question) {
         }
       };
 
-      var payload = {};
+      var payload = {'private_mode':window.inPrivateMode};
 
       payload["question"] = question;
       payload["visitor_id"] = currentProfile.visitorId;

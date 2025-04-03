@@ -54,6 +54,7 @@ class UserConversationState(ConversationState):
 
 This data class is used to store and pass around the conversation state in the AI workflow when user send a message """
 
+    private_mode: bool = False
     ext_context: str = ""
     answer_in_language: str = "Vietnamese"
     answer_in_format: str = "text"
@@ -77,28 +78,31 @@ This data class is used to store and pass around the conversation state in the A
         Constructs a well-formatted prompt for sending to an LLM foundation model.
         Allows inclusion of user profile details and external context.
         """
+        if len(self.persona_name) == 0:
+            self.persona_name = " Alice, a smart AI buddy for user."
+        
+        # profile
         profile_info = ""
         if self.user_profile:
             profile_info = "\n".join(
-                [f"- {key}: {value}" for key, value in self.user_profile.items()])
-
+                f"- {key}: {value}" for key, value in self.user_profile.items()
+            )
+        # additional context
         additional_context = f"\nAdditional Context: {self.ext_context}" if self.ext_context else ""
 
         if len(self.answer_in_language) == 0:
             self.answer_in_language = get_language_name(self.user_message)
-            
-        if len(self.persona_name) == 0:
-            self.persona_name = " Alice, a smart AI buddy for user."
 
         prompt_text = f"""
-        Your persona is {self.persona_name}. 
+        Your persona is "{self.persona_name}". 
         
-        Remember: this user profile: \n{profile_info if profile_info else "an anonymous user"}
+        Remember this user profile: \n{profile_info if profile_info else "an anonymous user"}
         
         Instruction to answer:
-        - Just return answer in {self.answer_in_language} in simple language
-        - Format the answer as {self.answer_in_format}
-        - Build conversation's context from keywords: {self.context} . {additional_context}
+        - Just return answer in "{self.answer_in_language}" in simple language.
+        - Format the answer as {self.answer_in_format}.
+        - Build conversation's context from keywords: {self.context} . 
+        - Additional context to help answer: {additional_context}.
         
         Your job is answering this message:
         {self.user_message}
