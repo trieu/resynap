@@ -1,0 +1,308 @@
+/* Default: Dark Theme Variables */
+:root {
+  --bg-color: #2a1a3d;
+  --text-color: #f8f9fa;
+  --text-muted-color: #adb5bd;
+  --component-bg-color: rgba(255, 255, 255, 0.08);
+  --component-border-color: rgba(255, 255, 255, 0.15);
+  --component-hover-bg-color: rgba(255, 255, 255, 0.15);
+  --navbar-bg: rgba(0, 0, 0, 0.1);
+  --navbar-text-color: #f8f9fa;
+  --input-placeholder-color: #adb5bd;
+  --icon-color: #adb5bd;
+  --icon-hover-color: #f8f9fa;
+  --gradient-bg: none;
+  /* No gradient for dark */
+}
+
+/* Light Theme Variables */
+body.light {
+  --bg-color: #ffffff;
+  /* Top color of gradient */
+  --text-color: #212529;
+  /* Bootstrap dark text */
+  --text-muted-color: #6c757d;
+  /* Bootstrap secondary text */
+  --component-bg-color: rgba(0, 0, 0, 0.03);
+  /* Lighter component bg */
+  --component-border-color: rgba(0, 0, 0, 0.1);
+  --component-hover-bg-color: rgba(0, 0, 0, 0.06);
+  --navbar-bg: rgba(255, 255, 255, 0.8);
+  /* Semi-transparent white */
+  --navbar-text-color: #212529;
+  --input-placeholder-color: #6c757d;
+  --icon-color: #6c757d;
+  --icon-hover-color: #212529;
+  /* Light mode gradient from user code */
+  --gradient-bg: linear-gradient(
+    180deg,
+    rgb(255, 255, 255),
+    rgb(232, 189, 250)
+  );
+}
+
+/* Apply variables */
+body {
+  background-color: var(--bg-color);
+  /* Base color */
+  background-image: var(--gradient-bg);
+  /* Apply gradient if defined */
+  background-attachment: fixed;
+  /* Keep gradient fixed */
+  background-size: cover;
+  color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  /* Smooth transition */
+}
+
+.navbar {
+  background-color: var(--navbar-bg);
+  transition: background-color 0.3s ease;
+  backdrop-filter: blur(5px);
+  /* Optional: Add blur for transparent navbar */
+}
+
+.navbar-brand {
+  font-size: 25px;
+}
+
+/* Ensure navbar text/links/button adapt */
+.navbar .navbar-brand,
+.navbar .btn-theme-toggle {
+  /* Style the toggle button */
+  color: var(--navbar-text-color);
+  transition: color 0.3s ease;
+}
+
+.navbar .btn-theme-toggle:hover {
+  opacity: 0.8;
+}
+
+/* Adjust user icon color */
+.user-icon a {
+  font-size: 1.5rem;
+  color: var(--icon-color);
+  /* Use icon color var */
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.user-icon a:hover {
+  color: var(--icon-hover-color);
+}
+
+.main-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.main-content h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  /* Text color comes from body */
+}
+
+.main-content h2,
+.main-content p.lead {
+  color: var(--text-muted-color);
+  transition: color 0.3s ease;
+}
+
+.main-content h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.main-content p.lead {
+  font-size: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.suggestion-btn {
+  background-color: var(--component-bg-color);
+  border: 1px solid var(--component-border-color);
+  color: var(--text-color);
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.suggestion-btn:hover,
+.suggestion-btn:focus {
+  background-color: var(--component-hover-bg-color);
+  color: var(--text-color);
+  border-color: var(--component-border-color);
+  /* Keep consistent or slightly darken/lighten */
+}
+
+.chat-input-section {
+  margin-top: auto;
+  padding-bottom: 1rem;
+}
+
+.chat-input-group {
+  background-color: var(--component-bg-color);
+  border: 1px solid var(--component-border-color);
+  border-radius: 10px;
+  padding: 0.5rem 0.75rem;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.chat-input-group .form-control {
+  background-color: transparent;
+  border: none;
+  color: var(--text-color);
+  box-shadow: none;
+  transition: color 0.3s ease;
+}
+
+.chat-input-group .form-control::placeholder {
+  color: var(--input-placeholder-color);
+  opacity: 1;
+  transition: color 0.3s ease;
+}
+
+.chat-input-group .btn {
+  background-color: transparent;
+  border: none;
+  color: var(--icon-color);
+  font-size: 1.1rem;
+  padding: 0 0.5rem;
+  transition: color 0.3s ease;
+}
+
+.chat-input-group .btn:hover,
+.chat-input-group .btn:focus {
+  color: var(--icon-hover-color);
+  box-shadow: none;
+}
+
+.chat-input-group .btn-send {
+  padding-right: 0;
+}
+
+.footer-link a {
+  color: var(--text-muted-color);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
+}
+
+.footer-link a:hover {
+  color: var(--text-color);
+}
+
+.footer-link i {
+  vertical-align: middle;
+  font-size: 1.1rem;
+  color: var(--icon-color);
+  /* Ensure icon color matches link */
+  transition: color 0.3s ease;
+}
+
+.offcanvas {
+  max-width: 320px;
+}
+.profile-pic {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-radius: 8px;
+  transition: background 0.3s;
+}
+.menu-item:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* botui  */
+.botui-container {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+.botui-message-content.html {
+  width: 100% !important;
+}
+.botui-message-content span {
+  line-height: 22px !important;
+}
+
+#chatbot_container {
+  width: 100% !important;
+  height: 400px !important;
+  overflow-y: scroll !important;
+  margin-bottom: 20px !important;
+}
+
+.leobot-question-input {
+  width: 76% !important;
+  box-shadow: 0 0 6px #0045fe;
+  display: inline-block !important;
+}
+
+.botui-action-text-icon {
+  display: inline-block !important;
+  font-size: 18px !important;
+}
+
+#chatbot_info_box {
+  display: inline-block !important;
+  font-size: 12.8px !important;
+  width: 100% !important;
+  color: #000 !important;
+}
+
+div.chatbot_answer .botui-message-content {
+  color: #000 !important;
+}
+
+div.chatbot-error .botui-message-content {
+  color: red !important;
+  border: 1px solid red;
+}
+
+div.leobot-question .botui-message-content {
+  color: blue !important;
+  border: 1px solid blue;
+}
+
+.botui-container {
+  font-size: 14.2px !important;
+}
+
+/* ajax loader  */
+.loader {
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid blue;
+  border-bottom: 16px solid blue;
+  width: 120px;
+  height: 120px;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+  margin: auto;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

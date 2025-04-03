@@ -244,7 +244,7 @@ var sendMessageToAgent = function (context, question) {
 
       payload["question"] = question;
       payload["visitor_id"] = currentProfile.visitorId;
-      payload["persona_name"] = $("#chatbot_persona_name").val();
+      payload["persona_name"] = $("#selected_agent_name").text().trim();
       payload["answer_in_format"] = "text";
       // TODO 
 
@@ -293,7 +293,7 @@ var callPostApi = function (urlStr, data, okCallback, errorCallback) {
 var startChatbot = function (visitorId) {
   currentProfile.visitorId = visitorId;
   $("#chatbot_container_loader").hide();
-  $("#chatbot_container, #chatbot_persona_name").show();
+  $("#chatbot_container").show();
   loadChatSession("leobot_website", visitorId);
 };
 
@@ -306,13 +306,24 @@ function sendToChatbot() {
   }
 }
 
-function detectEnterKeyInChatbotInput() {
+function setupChatbotDone() {
+
+  // the button handler
   $("#chatbot_input").keypress(function (event) {
     if ((event.key === "Enter" || event.keyCode === 13) && !event.shiftKey && !event.ctrlKey) {
       event.preventDefault(); // Prevent default newline behavior in textareas
       sendToChatbot();
     }
   });
+
+  // 
+  $("#persona_agent_list").change(function(){
+    var selected = $(this).find("option:selected");
+    $('#selected_agent_name').text(selected.text());
+    $('#selected_agent_avatar_url').attr( 'src', selected.data('avatar'));
+    
+    console.log(selected)
+  })
 }
 
 // ready to load tracking script for long-term memory
@@ -325,5 +336,5 @@ $(document).ready(function () {
     currentProfile.visitorId = "0";
   }
 
-  detectEnterKeyInChatbotInput()
+  setupChatbotDone()
 });

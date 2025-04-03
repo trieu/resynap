@@ -1,5 +1,5 @@
 from rs_model.chatbot_models import (
-    menu_items, persona_agent_list, Message, is_gemini_model_ready, generate_report
+    get_selected_agent, menu_items, persona_agent_list, Message, is_gemini_model_ready, generate_report
 )
 
 import asyncio
@@ -66,6 +66,7 @@ class ChatbotService:
         data = {
             "request": request,
             "timestamp": ts,
+            "selected_agent" : get_selected_agent(),
             "persona_agent_list": persona_agent_list,
             "menu_items": menu_items,
             "CHATBOT_HOSTNAME": self.hostname,
