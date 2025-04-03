@@ -55,22 +55,24 @@
 
 <body>
     <nav class="navbar navbar-expand">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="bi bi-robot me-2"></i> AI Buddy 
+        <div class="container d-flex justify-content-center">
+            <a class="navbar-brand mx-auto text-center" href="#">
+                <i class="bi bi-robot me-2"></i> AI Buddy
             </a>
-            <div class="ms-auto d-flex align-items-center">
-                <button class="btn btn-link btn-theme-toggle me-3" id="theme-toggle-btn" type="button"
+            <div class="position-absolute end-0 d-flex align-items-center">
+                <button class="btn btn-link btn-theme-toggle me-3 pe-2" id="theme-toggle-btn" type="button"
                     aria-label="Toggle theme">
                     <i class="bi" id="theme-icon"></i>
                 </button>
-                <div class="user-icon">
-                    <a href="#" data-bs-toggle="offcanvas" data-bs-target="#settingsPanel" ><i class="bi bi-person-circle"></i></a>
-                </div>
-                
+                <div class="user-icon pe-3">
+                    <a href="#" data-bs-toggle="offcanvas" data-bs-target="#settingsPanel"> 
+                        <i class="bi bi-toggles"></i>
+                    </a>
+                </div>                
             </div>
         </div>
     </nav>
+        
 
     <main class="container-xl main-content py-4">
         <div class="text-center" id="hello_panel" style="display: none;">
@@ -160,7 +162,7 @@
                 
             </div>
             <hr>
-            <h5>Đã lưu</h5>
+            <h5> <i class="bi bi-list"></i> Đã lưu</h5>
              
             <div>
                 <!-- Public chat history -->

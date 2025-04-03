@@ -1,4 +1,4 @@
-var currentProfile = { visitorId: "", displayName: "good friend" };
+var currentProfile = { };
 
 window.leoBotUI = false;
 window.leoBotContext = false;
