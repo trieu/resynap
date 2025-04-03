@@ -1,9 +1,9 @@
 from fastapi import FastAPI, HTTPException, Request, Depends
-from personalization_models import ProfileRequest, ProductRequest, ContentRequest
+from rs_model.personalization_models import ProfileRequest, ProductRequest, ContentRequest
 from typing import List
 import redis
 
-from personalization import add_profile_to_qdrant, add_product_to_qdrant, add_content_to_qdrant, recommend_products_for_profile
+from rs_domain.personalization import add_profile_to_qdrant, add_product_to_qdrant, add_content_to_qdrant, recommend_products_for_profile
 
 import os
 import traceback

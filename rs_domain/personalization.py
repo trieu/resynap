@@ -4,7 +4,7 @@ from qdrant_client import QdrantClient
 from qdrant_client.http.models import PointStruct, MatchExcept, Filter, MatchAny
 from qdrant_client.http.models import VectorParams, Distance, FieldCondition
 from sentence_transformers import SentenceTransformer
-from personalization_models import ContentRequest, ProfileRequest, ProductRequest
+from rs_model.personalization_models import ContentRequest, ProfileRequest, ProductRequest
 import hashlib
 import os
 

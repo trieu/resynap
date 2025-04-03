@@ -2,10 +2,10 @@ from dotenv import load_dotenv
 # Load the .env file and override any existing environment variables
 load_dotenv(override=True)
 
-from personalization import get_all_collection_names_in_qdrant, init_db_personalization
+from rs_domain.personalization import get_all_collection_names_in_qdrant, init_db_personalization
 init_db_personalization()
 
-from personalization_router import api_personalization
+from rs_api_router.personalization_router import api_personalization
 VERSION_API = "0.0.1"
 SERVICE_NAME = "Personalization Engine API"
 
