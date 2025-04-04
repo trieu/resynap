@@ -44,9 +44,21 @@ function setActiveChatSession(id) {
 }
 
 function loadSelectedChatSession(node) {
-  var sessionId = $(node).attr("id");
-  setActiveChatSession(sessionId);
-  window.scrollTo({ top: 0, behavior: "smooth" });
+
+  var sessionId = ''
+  var sessionName = ''
+
+  if(node != null) {
+    sessionId = $(node).attr("id");
+    sessionName = $(node).text();
+    setActiveChatSession(sessionId);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  newChatbotSession()
+  $('#session_name').text( sessionName )
+  showQuestionAboutKeyword( sessionName )
+  $('#btn_close_sidebar').click()
 }
 
 function loadChatSession(context, visitorId, okCallback) {
