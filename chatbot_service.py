@@ -15,7 +15,7 @@ from fastapi.responses import HTMLResponse, PlainTextResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 import markdown
-from rs_model.langgraph.langgraph_ai import submit_message_to_agent
+from rs_model.langgraph.langgraph_ai import critical_thinking, submit_message_to_agent
 from rs_model.system_utils import read_json_from_file
 
 # Load environment variables
@@ -138,11 +138,12 @@ class ChatbotService:
             if "report" in question.lower():
                 answer = generate_report(question)
             else:
-                answer = ask_question(msg)
+                answer,keywords = ask_question(msg)
                 
             # return the answer
             print(f"answer: {answer}")
-            return {"question": question, "answer": answer, "visitor_id": visitor_id, "error_code": 0}
+            print(f"keywords: {keywords}")
+            return {"question": question, "answer": answer, "keywords":keywords, "visitor_id": visitor_id, "error_code": 0}
         
         return {"answer": "Your profile is banned due to Violation of Terms", "error": True, "error_code": 666}
     
@@ -152,23 +153,36 @@ class ChatbotService:
         self.app.get("/get-visitor-info", response_class=JSONResponse)(self.get_visitor_info)
         self.app.post("/ask", response_class=JSONResponse)(self.ask)
 
-# the main function to ask chatbot
-def ask_question(msg: Message) -> str:
+
+def ask_question(msg):  
+    """
+    Asks a question to the chatbot, handling critical thinking or AI agent responses.
+
+    Args:
+        msg: The Message object containing the question and context.
+
+    Returns:
+        A tuple containing the answer text (str) and a list of keywords (list[str]).
+    """
+    if msg.context == 'critical_thinking':
+        question = critical_thinking(msg)
+        return str(question), []  # Ensure question is a string
+
     answer_text = ''
+    keywords = []
     try:
-        # call to AI agent
-        final_state =  submit_message_to_agent(msg)
-        answer_text = final_state.response   
-             
-        if answer_text:
-            # format markdown to HTML 
-            answer_text = markdown.markdown(answer_text)
+        final_state = submit_message_to_agent(msg)
+        if final_state: #Check if final_state is not None.
+            answer_text = final_state.response
+            keywords = final_state.keywords
+
+            if answer_text:
+                answer_text = markdown.markdown(answer_text)
     except Exception as error:
         print("An exception occurred:", error)
         answer_text = ''
 
-    # done
-    return str(answer_text)   
+    return str(answer_text), keywords
 
 # Initialize chatbot service as Fast API instance
 chatbot_service = ChatbotService()

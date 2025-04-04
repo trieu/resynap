@@ -80,3 +80,16 @@ def format_string_for_md_slides(rs: str):
     rs = rs.replace('##','## ')
     return rs
 
+
+def split_string_to_keywords(text: str) -> list[str]:
+    """Splits a string into a comma-separated list of keywords.
+    Args:
+        text: The input string.
+    Returns:
+        A list of keywords.
+    """
+    if not text:
+        return []  # Return an empty list if the input string is empty
+
+    keywords = [keyword.strip() for keyword in text.split(',')]
+    return keywords

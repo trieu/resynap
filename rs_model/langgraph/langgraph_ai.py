@@ -12,7 +12,7 @@ from sentence_transformers import SentenceTransformer
 from rs_domain.user_management import get_user_profile, get_user_profile_for_ai_agent
 from rs_model.langgraph.conversation_models import ConversationState, UserConversationState
 from rs_model.chatbot_models import Message
-from rs_model.language_utils import remove_similar_keywords
+from rs_model.language_utils import remove_similar_keywords, split_string_to_keywords
 from rs_model.system_utils import read_json_from_file
 
 
@@ -126,23 +126,31 @@ class DatabaseManager:
         Args:
             state (UserConversationState): The UserConversationState object containing the data to be saved.
         """
+        
+        keywords_str = ''
         if  len(state.user_message) > MIN_CONTEXT_TO_SAVE:
             try:       
                 prompt_text = f"""
-                    Extract context keywords from the following text. 
+                    Extract topic's keywords from the following text. 
                     Must focus on the keywords that to enrich user profile and personal traits
                     Must provide a comma-separated list of keywords () without explanations.
-                    The list has maximum 10 keywords.
+                    The list of keywords must has less than 6 keywords
                     
                 Text: "{state.user_message}"
                 Keywords:
                 """
                 response = gemini_model.generate_content(prompt_text)
-                state.context = response.text if response and response.text else ""
+                keywords_str = response.text if response and response.text else ""
             except Exception as e:  # Catch Gemini API errors
                 print(f"Error generating response from Gemini: {e}")
                 
-        if  len(state.context) > MIN_CONTEXT_TO_SAVE:
+        if  len(keywords_str) > MIN_CONTEXT_TO_SAVE:
+            
+            # process keywords and create context
+            keywords = split_string_to_keywords(keywords_str)
+            state.keywords = remove_similar_keywords(keywords)
+            state.context = keywords_str
+            
             print(f"=> Context to vectorize from AI model: {state.context}")        
             embedding = to_embedding_vector(state.context)
             conversation_id = str(uuid.uuid4())
@@ -178,7 +186,7 @@ class DatabaseManager:
         return []
     
     
-    def load_user_conversation_state(self, profile_id: str, user_message: str, limit=10):
+    def load_user_conversation_state(self, profile_id: str, user_message: str, limit=6):
         """Searches for relevant user conversation context in the Qdrant vector database.
 
         Args:
@@ -304,19 +312,20 @@ class LangGraphAI:
         
         print(f"=> retrieve_context len(search_results) = {len(search_results)} ")
         
-        contexts = []
+        final_keywords = []
         for result in search_results:
             context = result.payload["context"]
             if len(context) > 0: 
-                context = context.replace("\n", "").replace("\r", "")           
-                print(f"context {context}")
-                contexts.append(context)
+                keywords = split_string_to_keywords(context)
+                for keyword in keywords:
+                    if len(keyword) > 0:                                 
+                        print(f"keyword {keyword}")
+                        final_keywords.append(keyword)
         
         # Extract keywords from the text
         #
-        unique_keywords = remove_similar_keywords(contexts)
-        
-        state.context = ", ".join(unique_keywords)
+        state.keywords = remove_similar_keywords(final_keywords)
+        state.context = ", ".join(state.keywords)
         return state.to_dict()
 
     def generate_response(self, state_dict) :
@@ -382,10 +391,25 @@ def submit_message_to_agent(user_msg: Message):
     # Convert back to UserConversationState object
     final_state = UserConversationState.from_dict(final_state_dict)
 
-    #Save conversation state to database for future context
+    # Save conversation state to database for future context
     agent_system.db_manager.save_user_conversation_state(final_state)
 
     return final_state
+
+def critical_thinking(user_msg: Message):
+    try:       
+        state = user_msg.to_conversation_state()
+        keywords_str = state.user_message
+        prompt_text = f"""
+            create a short question for me to think critically about "{keywords_str}" in {state.answer_in_language}.
+            Must return as a suggested question for user without explanations.
+        """
+        response = gemini_model.generate_content(prompt_text)
+        question = response.text if response and response.text else ""
+        return question
+    except Exception as e:  # Catch Gemini API errors
+        print(f"Error generating response from Gemini: {e}")
+    return ''
    
 def main():
     profile_id = str(uuid.uuid4())

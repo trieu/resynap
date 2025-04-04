@@ -104,6 +104,7 @@ var leoBotPromptQuestion = function (delay) {
     });
 };
 
+
 var leoBotShowAnswer = function (answerInHtml, delay) {
   getBotUI()
     .message.add({
@@ -119,7 +120,7 @@ var leoBotShowAnswer = function (answerInHtml, delay) {
         .each(function () {
           $(this).attr("target", "_blank");
           var href = $(this).attr("href");
-          if (href.indexOf("google.com") < 0) {
+          if (href.indexOf("google.com") < 0 && href.indexOf("http") < 0) {
             var q = encodeURIComponent($(this).text());
             href = "https://www.google.com/search?q=" + q;
           }
@@ -128,6 +129,7 @@ var leoBotShowAnswer = function (answerInHtml, delay) {
     });
 };
 
+
 var chatbotShowError = function (error, nextAction) {
   getBotUI()
     .message.add({
@@ -135,10 +137,8 @@ var chatbotShowError = function (error, nextAction) {
       cssClass: "chatbot-error",
       content: error,
       type: "html",
-    })
-    .then(nextAction || function () {});
+    }).then(nextAction || function () {});
 };
-
 
 
 var askTheEmailOfUser = function (name) {
