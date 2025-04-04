@@ -206,10 +206,10 @@ var askForContactInfo = function (visitor_id) {
     .then(askTheNameOfUser);
 };
 
-var sendMessageToAgent = function (context, question) {
+var sendMessageToAgent = function (functionName, question, context) {
   if (question.length > 1 && question !== "exit") {
     var processAnswer = function (answer) {
-      if ("ask" === context) {
+      if ("ask" === functionName) {
         leoBotShowAnswer(answer);
       }
       // save event into CDP
@@ -226,7 +226,15 @@ var sendMessageToAgent = function (context, question) {
       var serverCallback = function (data) {
         getBotUI().message.remove(index);
         var error_code = data.error_code;
+        
+        // 
         var answer = data.answer;
+
+        // 
+        var keywords = data.keywords;
+        showContextKeywords(keywords);
+    
+
         if (error_code === 0) {
           currentProfile.displayName = data.name;
           processAnswer(answer);
@@ -237,9 +245,12 @@ var sendMessageToAgent = function (context, question) {
         }
       };
 
+      var previousMessage = $('#chatbot_container').find('.chatbot_answer:last').text();
       var payload = {'private_mode':window.inPrivateMode};
 
+      payload["context"] = typeof context === "string" ? context : '';
       payload["question"] = question;
+      payload["previous_message"] = previousMessage;
       payload["visitor_id"] = currentProfile.visitorId;
       payload["persona_name"] = $("#selected_agent_name").text().trim();
       payload["answer_in_format"] = "text";
@@ -250,6 +261,18 @@ var sendMessageToAgent = function (context, question) {
     showChatBotLoader().then(callServer);
   }
 };
+
+function showContextKeywords(keywords){
+  for (var keyword of keywords) {
+    console.log(`Keyword: ${keyword}`);
+    var btn = ' <button class="btn suggestion-btn" onclick=showQuestionAboutKeyword("'+keyword+'") >'+keyword+'</button>'
+    $('#context_keywords').html('').append(btn);
+  }
+}
+
+function showQuestionAboutKeyword(keyword){
+  sendMessageToAgent('ask', keyword, 'critical_thinking')
+}
 
 var showChatBotLoader = function () {
   return getBotUI().message.add({ loading: true, content: "" });

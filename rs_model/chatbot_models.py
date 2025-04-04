@@ -48,6 +48,7 @@ class Message(BaseModel):
     persona_name: str = Field("", description="The persona name")
     session_id: str = Field("", description="The session id")
     private_mode: bool = Field(False, description="The private mode")
+    previous_message: str = Field("", description="previous message")
 
     def to_conversation_state(self, agent_role: str = "", journey_id: str = "", touchpoint_id: str = ""):
         """Converts the Message instance to a ConversationState object."""
@@ -63,6 +64,7 @@ class Message(BaseModel):
             journey_id=journey_id,
             touchpoint_id=touchpoint_id,
             context=self.context,
+            previous_message=self.previous_message,
             created_at=int(time.time())
         )
 

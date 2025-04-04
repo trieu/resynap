@@ -64,6 +64,7 @@ This data class is used to store and pass around the conversation state in the A
     answer_in_format: str = "text"
     persona_name: str = "chatbot"
     session_id: str = ""
+    previous_message: str = ""
     user_profile: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self):
@@ -102,7 +103,9 @@ This data class is used to store and pass around the conversation state in the A
         
         Remember this user profile: \n{profile_info if profile_info else "an anonymous user"}
         
+        
         Instruction to answer:
+        - Previous message: "{self.previous_message}" of current conversation.
         - Just return answer in "{self.answer_in_language}" in simple language.
         - Format the answer as {self.answer_in_format}.
         - Build conversation's context from keywords: {self.context} . 

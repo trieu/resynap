@@ -154,7 +154,7 @@ class ChatbotService:
         self.app.post("/ask", response_class=JSONResponse)(self.ask)
 
 
-def ask_question(msg):  
+def ask_question(msg: Message):  
     """
     Asks a question to the chatbot, handling critical thinking or AI agent responses.
 

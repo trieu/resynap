@@ -78,13 +78,13 @@
         <div class="text-center" id="hello_panel" style="display: none;">
             <h1>Xin chào, <span id="user_first_name"> người lạ </span> !</h1>
             <h2>Tôi có thể giúp gì cho bạn?</h2>
-            <p class="lead">Bạn có thể hỏi tôi về bất kì lĩnh vực nào. Hoặc chúng ta có thể tâm sự dưới chế độ ẩn danh. Bắt đầu nào!</p>
+            <p class="lead">Bạn có thể hỏi tôi về bất kì lĩnh vực nào. Hoặc chúng ta có thể tâm sự dưới chế độ ẩn danh. Bắt đầu nào !</p>
 
-            <div class="d-flex justify-content-center flex-wrap gap-2 mb-5" >
-                <button class="btn suggestion-btn">Stress</button>
-                <button class="btn suggestion-btn">Tâm sự</button>
-                <button class="btn suggestion-btn">Cung hoàng đạo</button>
-                <button class="btn suggestion-btn">Sức khỏe</button>
+            <div class="d-flex justify-content-center flex-wrap gap-2 mb-5" id="context_keywords" >
+                <button class="btn suggestion-btn" onclick="showQuestionAboutKeyword('Stress')" >Stress</button>
+                <button class="btn suggestion-btn" onclick="showQuestionAboutKeyword('Tâm sự')">Tâm sự</button>
+                <button class="btn suggestion-btn" onclick="showQuestionAboutKeyword('Cung hoàng đạo')">Cung hoàng đạo</button>
+                <button class="btn suggestion-btn" onclick="showQuestionAboutKeyword('Sức khỏe')">Sức khỏe</button>
             </div>
             
         </div>
