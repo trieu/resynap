@@ -51,6 +51,45 @@ def to_embedding_vector(s: str):
     """
     return embedding_model.encode(s, convert_to_tensor=True).tolist()
 
+
+def extract_keywords_from_message(user_message: str, gemini_model, max_keywords: int = 6) -> list[str]:
+    """
+    Extracts keywords from a user message using Gemini, focusing on enriching user profile and personal traits.
+
+    Args:
+        user_message: The user's message as a string.
+        gemini_model: The Gemini model instance used for keyword extraction.
+        min_context_to_save: Minimum length of user_message to process.
+
+    Returns:
+        A list of extracted keywords, or an empty list if extraction fails.
+    """
+    keywords = []
+
+    if len(user_message) > MIN_CONTEXT_TO_SAVE:
+        try:
+            prompt_text = f"""
+                Extract topic's keywords from the following text. 
+                Focus on keywords that enrich user profile and personal traits.
+                Provide a comma-separated list of keywords (maximum {max_keywords}) without explanations.
+
+                Text: "{user_message}"
+                Keywords:
+            """
+            response = gemini_model.generate_content(prompt_text)
+            keywords_str = response.text.strip() if response and response.text else ""
+
+            if keywords_str:
+                keywords = [keyword.strip() for keyword in keywords_str.split(',') if keyword.strip()]  # Improved splitting and cleaning
+
+                if len(keywords) > max_keywords:
+                    keywords = keywords[:max_keywords] #limit keywords 
+
+        except Exception as e:
+            print(f"Error generating response from Gemini: {e}")
+
+    return keywords
+
 class DatabaseManager:
     """Handles interactions with Qdrant vector database for storing and retrieving conversation data."""
 
@@ -127,29 +166,13 @@ class DatabaseManager:
             state (UserConversationState): The UserConversationState object containing the data to be saved.
         """
         
-        keywords_str = ''
-        if  len(state.user_message) > MIN_CONTEXT_TO_SAVE:
-            try:       
-                prompt_text = f"""
-                    Extract topic's keywords from the following text. 
-                    Must focus on the keywords that to enrich user profile and personal traits
-                    Must provide a comma-separated list of keywords () without explanations.
-                    The list of keywords must has less than 6 keywords
-                    
-                Text: "{state.user_message}"
-                Keywords:
-                """
-                response = gemini_model.generate_content(prompt_text)
-                keywords_str = response.text if response and response.text else ""
-            except Exception as e:  # Catch Gemini API errors
-                print(f"Error generating response from Gemini: {e}")
+         # process keywords and create context
+        keywords = extract_keywords_from_message(state.user_message, gemini_model)
                 
-        if  len(keywords_str) > MIN_CONTEXT_TO_SAVE:
+        if  len(keywords) > 0:
             
-            # process keywords and create context
-            keywords = split_string_to_keywords(keywords_str)
             state.keywords = remove_similar_keywords(keywords)
-            state.context = keywords_str
+            state.context = ", ".join(keywords)
             
             print(f"=> Context to vectorize from AI model: {state.context}")        
             embedding = to_embedding_vector(state.context)

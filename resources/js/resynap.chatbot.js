@@ -276,10 +276,11 @@ var sendMessageToAgent = function (functionName, question, context) {
 };
 
 function showContextKeywords(keywords){
+  $('#context_keywords').html('')
   for (var keyword of keywords) {
     console.log(`Keyword: ${keyword}`);
-    var btn = ' <button class="btn suggestion-btn" onclick=showQuestionAboutKeyword("'+keyword+'") >'+keyword+'</button>'
-    $('#context_keywords').html('').append(btn);
+    var btn = `<button class="btn suggestion-btn" onclick=showQuestionAboutKeyword("${keyword}") >${keyword}</button>`
+    $('#context_keywords').append(btn);
   }
 }
 

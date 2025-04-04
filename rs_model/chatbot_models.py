@@ -98,9 +98,10 @@ def get_selected_agent(persona_agent_list: list[dict]):
             return agent
     return None
 
-def generate_report(question: str) -> str:
+def generate_report(question: str):
     """Generates an HTML report with a link and an embedded iframe, styled with Bootstrap 5."""
 
+    # TODO
     superset_url = 'https://superset.datatest.ch/superset/dashboard/10/?standalone=true'
 
     html_report = f"""
@@ -112,4 +113,4 @@ def generate_report(question: str) -> str:
     </div>
     """
 
-    return html_report
+    return html_report, ['analytics']

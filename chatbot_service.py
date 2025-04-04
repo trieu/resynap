@@ -136,13 +136,13 @@ class ChatbotService:
             # set profile_id 
             msg.profile_id = profile_id         
             if "report" in question.lower():
-                answer = generate_report(question)
+                answer, keywords = generate_report(question)
             else:
-                answer,keywords = ask_question(msg)
+                answer, keywords = ask_question(msg)
                 
             # return the answer
             print(f"answer: {answer}")
-            print(f"keywords: {keywords}")
+
             return {"question": question, "answer": answer, "keywords":keywords, "visitor_id": visitor_id, "error_code": 0}
         
         return {"answer": "Your profile is banned due to Violation of Terms", "error": True, "error_code": 666}
