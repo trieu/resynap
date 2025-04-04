@@ -43,19 +43,20 @@ function setActiveChatSession(id) {
   node.find("#" + id).addClass("active");
 }
 
-function loadSelectedChatSession(node) {
+function loadChatSessionById(sessionId, sessionName) {
 
-  var sessionId = ''
-  var sessionName = ''
-
-  if(node != null) {
-    sessionId = $(node).attr("id");
-    sessionName = $(node).text();
+  if(sessionId != null && sessionName != null) {
     setActiveChatSession(sessionId);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
+  else {
+    sessionId = 'new_session'
+    sessionName = 'Tôi có thể giúp gì cho bạn?'
 
-  newChatbotSession()
+    // TODO 
+    newChatbotSession()
+  }
+
   $('#session_name').text( sessionName )
   showQuestionAboutKeyword( sessionName )
   $('#btn_close_sidebar').click()

@@ -397,19 +397,30 @@ def submit_message_to_agent(user_msg: Message):
     return final_state
 
 def critical_thinking(user_msg: Message):
-    try:       
+    try:
         state = user_msg.to_conversation_state()
         keywords_str = state.user_message
+        target_language = state.answer_in_language
+
         prompt_text = f"""
-            create a short question for me to think critically about "{keywords_str}" in {state.answer_in_language}.
-            Must return as a suggested question for user without explanations.
+            Generate a short, thought-provoking question in {target_language} based on the topic: "{keywords_str}".
+            The response must only contain the question in {target_language}, without any explanations or additional text.
         """
+
         response = gemini_model.generate_content(prompt_text)
-        question = response.text if response and response.text else ""
-        return question
-    except Exception as e:  # Catch Gemini API errors
+        
+        # Validate response
+        if response and hasattr(response, 'text') and response.text:
+            question = response.text.strip()
+            return question
+        
+        print("Warning: Received an empty response from Gemini.")
+        return f"Sorry, I couldn't generate a question in {target_language}."
+
+    except Exception as e:
         print(f"Error generating response from Gemini: {e}")
-    return ''
+        return f"Sorry, an error occurred while generating a question in {target_language}."
+
    
 def main():
     profile_id = str(uuid.uuid4())

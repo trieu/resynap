@@ -64,6 +64,10 @@
                     aria-label="Toggle theme">
                     <i class="bi" id="theme-icon"></i>
                 </button>
+                <button class="btn btn-link me-3 pe-2" id="btn_new_session" type="button" onclick="loadChatSessionById()"
+                        aria-label="New Session Chat">
+                    <i class="bi bi-chat-right-dots"></i>
+                </button>
                 <div class="user-icon pe-3">
                     <a id="btn_settings_panel" href="#" data-bs-toggle="offcanvas" data-bs-target="#settingsPanel"> 
                         <i class="bi bi-toggles"></i>
@@ -173,7 +177,7 @@
                     <div class="menu-item">
                         <a id="{{ item.id }}" class="nav-link {% if item.active %}active{% endif %}" 
                             title="{{ item.name }}"
-                            onclick="loadSelectedChatSession(this)" href="#chat_session_{{ item.id }}" >
+                            onclick="loadChatSessionById('{{ item.id }}','{{ item.name }}')" href="#chat_session_{{ item.id }}" >
                                 <i class="bi bi-chat-right-dots"></i> 
                                 {{ item.name }}
                         </a>
