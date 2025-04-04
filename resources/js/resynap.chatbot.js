@@ -275,14 +275,24 @@ var sendMessageToAgent = function (functionName, question, context) {
   }
 };
 
-function showContextKeywords(keywords){
-  $('#context_keywords').html('')
-  for (var keyword of keywords) {
-    console.log(`Keyword: ${keyword}`);
-    var btn = `<button class="btn suggestion-btn" onclick=showQuestionAboutKeyword("${keyword}") >${keyword}</button>`
-    $('#context_keywords').append(btn);
-  }
+function showContextKeywords(keywords) {
+  const container = $('#context_keywords');
+  if (!container.length) return; // Avoid errors if the element is missing
+  
+  if(keywords.length > 0){
+    // Clear existing content
+    container.empty(); 
+
+    // show topic's keywords 
+    keywords.forEach(keyword => {
+      console.log(`Keyword: ${keyword}`);
+      const safeKeyword = keyword.replace(/"/g, '&quot;'); // Escape double quotes to avoid HTML issues
+      const btn = `<button class="btn suggestion-btn" onclick="showQuestionAboutKeyword('${safeKeyword}')">${safeKeyword}</button>`;
+      container.append(btn);
+    });
+  }  
 }
+
 
 function showQuestionAboutKeyword(keyword){
   sendMessageToAgent('ask', keyword, 'critical_thinking')
