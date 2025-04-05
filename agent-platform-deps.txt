@@ -56,6 +56,7 @@ business-rules>=1.1.1           # Declarative business rules engine
 # ===================================================================
 # AI Agent Frameworks & Foundational AI Libraries
 # ===================================================================
+google-genai>=1.9.0
 langchain>=0.2.0                # Core framework for building with LLMs
 langgraph>=0.3.25               # Building stateful, multi-actor applications (agents) with LLMs
 transformers>=4.41.0            # Hugging Face library (often needed for models/tokenizers used by other libs)

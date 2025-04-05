@@ -73,6 +73,7 @@ With ReSynap, transform data and text into actionable, visual insights and autom
 
 3. Install the dependencies:
 ```bash
+   python -m pip install --upgrade pip
    pip install -r requirements.txt
 ```
 

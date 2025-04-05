@@ -16,13 +16,13 @@ from rs_model.language_utils import remove_similar_keywords, split_string_to_key
 from rs_model.system_utils import read_json_from_file
 
 
-# Configure Gemini AI
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-
 # Embedding model for text transformation
 MODEL_NAME = 'BAAI/bge-m3'
 embedding_model = SentenceTransformer(MODEL_NAME)
 VECTOR_DIM_SIZE = embedding_model.get_sentence_embedding_dimension()
+
+# Configure Gemini AI
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 # Gemini AI model
 GEMINI_MODEL_ID = 'gemini-2.0-flash'

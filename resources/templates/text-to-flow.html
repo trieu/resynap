@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Content to Flowchart</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Mermaid.js -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+
+    <script>
+      mermaid.initialize({ startOnLoad: true });
+    </script>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      textarea {
+        width: 100%;
+        height: 120px;
+        margin-bottom: 10px;
+        padding: 10px;
+        font-size: 14px;
+      }
+      .spinner-container {
+        display: none;
+        text-align: center;
+        margin-top: 20px;
+      }
+      #mermaidChart {
+        margin-top: 20px;
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 5px;
+        transition: transform 0.3s ease; /* Smooth scaling transition */
+      }
+      .zoom-buttons {
+        margin-top: 10px;
+        display: flex;
+        justify-content: space-between;
+        max-width: 200px;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="my-4">Content to Flowchart</h1>
+
+      <form id="urlForm">
+        <div class="mb-3">
+          <label for="url" class="form-label">Enter URL:</label>
+          <input
+            type="text"
+            id="url"
+            name="url"
+            class="form-control"
+            required
+          />
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          Generate Flowchart
+        </button>
+      </form>
+
+      <!-- Spinner -->
+      <div class="spinner-container" id="spinner">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <hr />
+      <h3>Generated Mermaid Markdown:</h3>
+      <textarea id="mermaidResult" readonly class="form-control"></textarea>
+
+      <h3 class="mt-4">Rendered Flowchart:</h3>
+
+      <!-- Zoom buttons -->
+      <div class="zoom-buttons">
+        <button id="zoomIn" class="btn btn-outline-secondary">Zoom In</button>
+        <button id="zoomOut" class="btn btn-outline-secondary">Zoom Out</button>
+      </div>
+
+      <div id="mermaidChart"></div>
+    </div>
+
+    <script>
+      let zoomLevel = 1; // Initialize zoom level
+
+      // Handle zoom in functionality
+      document.getElementById("zoomIn").addEventListener("click", function () {
+        zoomLevel += 0.1; // Increment zoom level
+        updateZoom();
+      });
+
+      // Handle zoom out functionality
+      document.getElementById("zoomOut").addEventListener("click", function () {
+        zoomLevel = Math.max(0.5, zoomLevel - 0.1); // Decrement zoom level, but prevent zooming out too far
+        updateZoom();
+      });
+
+      // Function to update zoom on the mermaid chart
+      function updateZoom() {
+        const chart = document.getElementById("mermaidChart");
+        chart.style.transform = `scale(${zoomLevel})`; // Apply scaling to the chart
+        chart.style.transformOrigin = "top left"; // Keep zoom centered at the top-left
+      }
+
+      // Handle form submission and flowchart generation
+      document
+        .getElementById("urlForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+
+          const url = document.getElementById("url").value;
+
+          // Show the spinner while waiting for the result
+          document.getElementById("spinner").style.display = "block";
+
+          // Send URL to backend to generate summary and mermaid markdown
+          const response = await fetch("/generate_mermaid/", {
+            method: "POST",
+            body: new URLSearchParams({ url: url }),
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          });
+
+          const result = await response.json();
+
+          // Hide the spinner once the response is received
+          document.getElementById("spinner").style.display = "none";
+
+          if (result.error) {
+            alert("Error: " + result.error);
+          } else {
+            const mermaidCode = result.summary_markdown;
+            // Display the raw Mermaid markdown code in the textarea
+            document.getElementById("mermaidResult").value = mermaidCode;
+
+            // Render the Mermaid chart
+            document.getElementById(
+              "mermaidChart"
+            ).innerHTML = `<div class="mermaid">${mermaidCode}</div>`;
+            mermaid.contentLoaded(); // Re-render the chart with Mermaid.js
+          }
+        });
+    </script>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
