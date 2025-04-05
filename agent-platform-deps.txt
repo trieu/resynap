@@ -1,0 +1,97 @@
+# ===================================================================
+# Core Web Framework & Server
+# ===================================================================
+fastapi>=0.115.11         # High-performance async web framework
+uvicorn[standard]>=0.29.0 # ASGI server (includes websockets, cython speedups etc.)
+
+# ===================================================================
+# Data Validation, Configuration & Templating
+# ===================================================================
+pydantic[email,timezone]>=2.5.0 # Data validation, parsing, and settings management
+python-dotenv>=1.0.0            # Load .env files for local development configuration
+Jinja2>=3.1.4                   # Templating engine (for simple HTML pages or email templates)
+
+# ===================================================================
+# Asynchronous Database & Migrations (PostgreSQL)
+# ===================================================================
+sqlalchemy>=1.4.54        # ORM (Sticking to 1.4.x for compatibility with existing code)
+asyncpg>=0.29.0           # High-performance asynchronous PostgreSQL driver (Works with SQLAlchemy 1.4 async)
+alembic>=1.15.1           # Database schema migrations for SQLAlchemy
+
+# ===================================================================
+# Background Tasks & Caching
+# ===================================================================
+redis>=5.1.1              # Redis client (used by ARQ and potentially for caching)
+arq>=0.26                 # Asynchronous task queue using Redis (good fit for FastAPI/asyncio)
+
+# ===================================================================
+# Google Cloud Services & AI
+# ===================================================================
+# --- Foundational Google Cloud ---
+google-cloud-storage>=2.16.0    # For storing/retrieving media files (text, audio, video) on GCS
+# --- Google AI & ML ---
+google-genai>=1.5.0             # Google AI SDK (Gemini models etc.)
+google-cloud-aiplatform>=1.55.0 # Optional: If using Vertex AI specific features (pipelines, managed models)
+google-cloud-translate>=3.15.3  # Google Cloud Translation API
+google-cloud-texttospeech>=2.16.1 # Google Cloud Text-to-Speech API for audio generation
+
+# ===================================================================
+# Google Workspace Integrations (Calendar, Sheets) & Auth
+# ===================================================================
+google-api-python-client>=2.138.0 # General Google API client (used for Calendar, Drive, etc.)
+google-auth-httplib2>=0.2.0     # Required adapter for google-auth libraries
+google-auth-oauthlib>=1.2.0     # Handles OAuth 2.0 flow for user authorization (crucial for Calendar/Sheets access)
+gspread>=6.0.2                  # Client library for Google Sheets API
+
+# ===================================================================
+# AWS Services (e.g., for S3 Storage)
+# ===================================================================
+boto3>=1.34.0             # AWS SDK for Python (used for S3, etc.)
+
+# ===================================================================
+# Business Logic Engine
+# ===================================================================
+business-rules>=1.1.1           # Declarative business rules engine
+
+# ===================================================================
+# AI Agent Frameworks & Foundational AI Libraries
+# ===================================================================
+langchain>=0.2.0                # Core framework for building with LLMs
+langgraph>=0.3.25               # Building stateful, multi-actor applications (agents) with LLMs
+transformers>=4.41.0            # Hugging Face library (often needed for models/tokenizers used by other libs)
+langdetect>=1.0.9               # Basic language detection
+langchain-google-genai>=2.1.2
+
+# ===================================================================
+# Embeddings & Vector Search
+# ===================================================================
+sentence-transformers>=3.4.1    # For generating text embeddings
+fastembed>=0.4.2                # Efficient embedding generation library (optional, check if needed over sentence-transformers alone)
+qdrant-client>=1.13.3           # Client for Qdrant vector database
+
+# ===================================================================
+# Data, Text & Content Format Handling
+# ===================================================================
+numpy>=1.26.4                   # Fundamental package for numerical operations (often a dependency)
+pandas>=2.2.2                   # Data analysis/manipulation library
+pendulum>=3.0.0                 # Easier date/time manipulation (useful for scheduling/calendar)
+unidecode>=1.3.8                # Text processing: Normalize Unicode characters to ASCII
+rapidfuzz>=3.9.4                # Fast fuzzy string matching library
+python-multipart>=0.0.9         # Required by FastAPI for handling file uploads (media content)
+markdown>=3.6                   # Processing Markdown formatted text content
+PyMuPDF>=1.24.9                 # PDF text/image extraction (if sourcing content from PDFs)
+beautifulsoup4>=4.12.0          # HTML and XML parsing library
+lxml>=5.2.0                     # Fast and robust HTML/XML parser (backend for BeautifulSoup)
+
+# ===================================================================
+# Media Processing (Audio/Video)
+# ===================================================================
+opencv-python-headless>=4.10.0.84 # Image/video frame processing (headless for servers)
+moviepy>=1.0.3                  # Video editing, manipulation, audio extraction
+
+# ===================================================================
+# General Utilities
+# ===================================================================
+requests>=2.32.0                # Synchronous HTTP requests (handles HTTPS)
+pypdl>=1.1.0                    # Parallel download library
+aiohttp>=3.9.5                  # Asynchronous HTTP client/server (handles HTTPS)

@@ -42,8 +42,9 @@ google-api-python-client
 langdetect>=1.0.9
 
 # AI agents for LLM 
-langchain>=0.3.21
-langgraph>=0.3.20
+langchain
+langgraph>=0.3.25
+langchain-google-genai>=2.1.2
 
 # business rules engine
 business_rules
@@ -51,18 +52,21 @@ business_rules
 # AI & ML from AWS
 boto3
 
-# PDF & Markdown Handling & Google Sheets
+# PDF & Markdown Handling 
 markdown
+pymupdf
 pypdl
-gdown
+aiohttp>=3.9.5                  # Asynchronous HTTP client/server (handles HTTPS)
+
+# HTML and XML parsing library
+beautifulsoup4>=4.12.0          # HTML and XML parsing library
+lxml>=5.2.0                     # Fast and robust HTML/XML parser (backend for BeautifulSoup)
+
+# Google Sheets
 oauth2client
 gspread
-pymupdf
+gdown
 
 # Media Processing
 opencv-python-headless
 moviepy
-
-# Data Visualization
-pynarrative
-ipython
