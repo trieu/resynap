@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Content to Flowchart (Optimized + Padding)</title>
+  <title>Convert URL to Causal Graph</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
 
@@ -13,6 +13,7 @@
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
   <script>
+    // Initialize Mermaid manually after generating code
     mermaid.initialize({ startOnLoad: false });
   </script>
 
@@ -50,7 +51,7 @@
       width: 100%;
       height: 80vh; /* Viewport height */
       overflow: hidden; /* Essential for Panzoom clipping - DO NOT CHANGE TO auto/scroll */
-      position: relative;
+      position: relative; /* Needed for absolute positioning or containing */
       background-color: #ffffff;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
       transition: box-shadow 0.2s ease-in-out;
@@ -60,12 +61,16 @@
     }
     /* Generated SVG Styling */
     #mermaidChartContainer svg {
-      display: block;
+      display: block; /* Remove potential extra space below SVG */
+      /* Let Panzoom control size/position via transform. Width/height 100% can sometimes interfere,
+         but is often okay with Panzoom's canvas:true. If issues arise, try removing them. */
       width: 100%;
       height: 100%;
       cursor: grab;
       user-select: none;
       -webkit-user-drag: none;
+      /* Position controlled by Panzoom's transform, origin should be top-left for calculations */
+      transform-origin: 0 0;
     }
     #mermaidChartContainer svg:active {
       cursor: grabbing;
@@ -93,7 +98,7 @@
     <form id="urlForm" class="mb-4">
       <div class="mb-3">
         <label for="url" class="form-label">Enter URL:</label>
-        <input type="text" id="url" name="url" class="form-control" required />
+        <input type="text" id="url" name="url" class="form-control" required placeholder="e.g., https://example.com" />
       </div>
       <button type="submit" class="btn btn-primary">
         Generate Causal Graph
@@ -108,21 +113,26 @@
 
     <hr />
     <h3 class="mt-4 mb-3">Generated Mermaid Markdown:</h3>
-    <textarea id="mermaidResult" readonly class="form-control mb-4"></textarea>
+    <textarea id="mermaidResult" readonly class="form-control mb-4" placeholder="Mermaid code will appear here..."></textarea>
 
     <h3 class="mt-4 mb-3">Rendered Causal Graph:</h3>
 
     <div class="zoom-buttons mb-3 gap-2">
-      <button id="zoomIn" class="btn btn-outline-secondary btn-sm">Zoom In</button>
-      <button id="zoomOut" class="btn btn-outline-secondary btn-sm">Zoom Out</button>
-      <button id="resetZoom" class="btn btn-outline-secondary btn-sm">
+      <button id="zoomIn" class="btn btn-outline-secondary btn-sm" title="Zoom In">Zoom In</button>
+      <button id="zoomOut" class="btn btn-outline-secondary btn-sm" title="Zoom Out">Zoom Out</button>
+      <button id="resetZoom" class="btn btn-outline-secondary btn-sm" title="Fit chart to view">
         Reset View
       </button>
     </div>
 
-    <div id="mermaidChartContainer" class="mb-4"></div>
+    <!-- Container where the SVG will be rendered -->
+    <div id="mermaidChartContainer" class="mb-4">
+       <!-- SVG will be inserted here by JavaScript -->
+    </div>
 
-  </div> <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
     // Execute when the DOM is fully loaded
@@ -142,77 +152,102 @@
 
       // --- Panzoom Options ---
       const panzoomOptions = {
-        maxScale: 6,
-        minScale: 0.01, // Allow potentially smaller zoom for padding
-        step: 0.1,
-        contain: "outside", // Keeps SVG element edges within container
-        canvas: true,
-        origin: "top center",
+        maxScale: 8,    // Increased max zoom slightly
+        minScale: 0.01, // Allow very small zoom out for initial fit if needed
+        step: 0.15,     // Slightly larger zoom step
+        contain: "outside", // Keep SVG edges within container during user pan/zoom
+        canvas: true,       // Treat SVG as a canvas (recommended)
+        // origin: '50% 50%', // Center origin can sometimes feel more natural for zoom
       };
 
       // --- Helper Function to Display Errors ---
       function displayError(message) {
         console.error("Error:", message);
         $spinner.hide();
-        $chartContainer.html(`<p class='text-danger p-3'>Error: ${message}</p>`);
+        // Display error inside the chart container for visibility
+        $chartContainer.html(`<div class='alert alert-danger m-3'>Error: ${message}</div>`);
+        // Clear the mermaid code textarea as well
+        $mermaidResultTextarea.val('');
+        // Destroy any existing panzoom instance if an error occurs after init
+        if (panzoomInstance) {
+            panzoomInstance.destroy();
+            panzoomInstance = null;
+        }
       }
 
-       // --- Function to Zoom/Pan to Fit Content (with padding) ---
+      /**
+       * Calculates the appropriate scale and pan to fit the SVG content
+       * within the container, applying padding and centering the content.
+       * @param {object} pzInstance - The Panzoom instance.
+       * @param {HTMLElement} containerEl - The container DOM element.
+       * @param {SVGSVGElement} svgEl - The SVG DOM element.
+       */
       function zoomToFitAndCenter(pzInstance, containerEl, svgEl) {
         if (!pzInstance || !containerEl || !svgEl) {
-            console.warn("zoomToFitAndCenter: Missing instance or elements.");
+            console.warn("zoomToFitAndCenter: Missing Panzoom instance or DOM elements.");
             return;
         }
 
-        // *** Define desired padding inside the container ***
-        const chartPadding = 20; // Pixels of space around the chart content
+        // Desired padding (in pixels) around the chart content inside the container
+        const chartPadding = 30; // Increased padding slightly for more whitespace
 
         try {
-          const containerWidth = $(containerEl).width();
-          const containerHeight = $(containerEl).height();
-          const bbox = svgEl.getBBox(); // Get actual content dimensions
+          const containerWidth = containerEl.clientWidth; // Use clientWidth for inner width
+          const containerHeight = containerEl.clientHeight; // Use clientHeight for inner height
 
-          // Calculate the target dimensions *within* the padding
+          // Get the bounding box of the *actual* SVG content (excluding transforms)
+          const bbox = svgEl.getBBox();
+
+          // Calculate the available target area *inside* the padding
           const targetWidth = Math.max(1, containerWidth - (chartPadding * 2));
           const targetHeight = Math.max(1, containerHeight - (chartPadding * 2));
 
-          // Check for invalid dimensions
+          // Check for invalid dimensions (e.g., empty SVG or error during getBBox)
           if (bbox.width <= 0 || bbox.height <= 0 || targetWidth <= 0 || targetHeight <= 0) {
-            console.warn("Cannot zoom to fit: Zero dimensions for content or target area.");
+            console.warn("Cannot zoom to fit: Zero dimensions detected for SVG content or target container area. Resetting view.");
+            // Attempt a simple reset as a fallback
             try { pzInstance.reset({ animate: false }); } catch (_) {}
             return;
           }
 
-          // Calculate scale factors based on the *target* (padded) dimensions
+          // Calculate the scale needed to fit the content bbox into the target area
           const scaleX = targetWidth / bbox.width;
           const scaleY = targetHeight / bbox.height;
-          // Use the minimum scale factor; cap at 1 (don't zoom in past 100%)
+
+          // Use the *minimum* scale factor to ensure the entire content fits.
+          // Cap the scale at 1 (don't zoom *in* past 100% if content is already smaller than target area)
           const scaleToFit = Math.min(1, scaleX, scaleY);
 
-          // Apply the calculated zoom level
+          // Apply the calculated scale immediately (no animation)
+          // Note: Panzoom's zoom method might internally clamp based on min/maxScale options
           pzInstance.zoom(scaleToFit, { animate: false });
 
-          // Calculate the dimensions of the content *after* scaling
+          // Now, calculate the position needed to center the *scaled* content.
+          // Dimensions of the content *after* scaling:
           const scaledWidth = bbox.width * scaleToFit;
           const scaledHeight = bbox.height * scaleToFit;
 
-          // Calculate the target top-left corner for the scaled content,
-          // considering the padding and centering within the target area
+          // Calculate the desired top-left corner (X, Y) for the scaled content
+          // within the container, considering padding and centering.
           const targetX = chartPadding + (targetWidth - scaledWidth) / 2;
           const targetY = chartPadding + (targetHeight - scaledHeight) / 2;
 
-          // Calculate the final absolute pan position needed to place
-          // the scaled content's top-left (bbox.x * scale) at the targetX/Y
+          // Calculate the final absolute pan position (translateX, translateY)
+          // needed to move the scaled content's origin (bbox.x * scale, bbox.y * scale)
+          // to the calculated targetX, targetY.
+          // panX = targetX - (bbox.x * scaleToFit)
+          // panY = targetY - (bbox.y * scaleToFit)
           const finalPanX = targetX - (bbox.x * scaleToFit);
           const finalPanY = targetY - (bbox.y * scaleToFit);
 
-          // Apply the final pan position absolutely
+          // Apply the calculated pan position absolutely (not relative to current position)
           pzInstance.pan(finalPanX, finalPanY, { animate: false, relative: false });
 
-          console.log(`Zoomed to fit (padded): scale=${scaleToFit.toFixed(2)}, pan=(${finalPanX.toFixed(1)}, ${finalPanY.toFixed(1)})`);
+          console.log(`Zoomed/Panned to fit content (padded): scale=${scaleToFit.toFixed(3)}, pan=(${finalPanX.toFixed(1)}, ${finalPanY.toFixed(1)})`);
 
         } catch (error) {
-          console.error("Error during zoomToFitAndCenter (padded):", error);
+          console.error("Error during zoomToFitAndCenter calculation:", error);
+          // Attempt a simple reset as a fallback in case of calculation errors
            if (pzInstance) { try { pzInstance.reset({ animate: false }); } catch (_) {} }
         }
       }
@@ -221,80 +256,146 @@
       $zoomInBtn.on("click", function () { if (panzoomInstance) panzoomInstance.zoomIn(); });
       $zoomOutBtn.on("click", function () { if (panzoomInstance) panzoomInstance.zoomOut(); });
       $resetZoomBtn.on("click", function () {
+           // Reset should re-apply the "fit to view" logic
            if (panzoomInstance) {
                const svgEl = $chartContainer.find('svg')[0];
-               if(svgEl) {
-                 // Re-apply the zoom-to-fit logic (which now includes padding)
+               if (svgEl) {
                  zoomToFitAndCenter(panzoomInstance, $chartContainer[0], svgEl);
                } else {
-                 panzoomInstance.reset(); // Fallback
+                 // Fallback if SVG isn't found (shouldn't happen if instance exists)
+                 panzoomInstance.reset();
+                 console.warn("Reset Zoom: SVG element not found, using basic reset.");
                }
            }
       });
 
+      // Enable zooming with mouse wheel inside the container
       $chartContainer.on("wheel", function (event) {
         if (panzoomInstance) {
+          // Prevent default page scrolling when zooming chart
           event.preventDefault();
           panzoomInstance.zoomWithWheel(event.originalEvent);
         }
       });
 
-      // Form Submission Handler
+      // --- Form Submission Handler ---
       $urlForm.on("submit", async function (event) {
-        event.preventDefault();
-        const urlValue = $urlInput.val();
-        if (!urlValue) { displayError("Please enter a URL."); return; }
+        event.preventDefault(); // Prevent standard form submission
+        const urlValue = $urlInput.val()?.trim(); // Get URL and trim whitespace
+        if (!urlValue) {
+             displayError("Please enter a valid URL.");
+             $urlInput.trigger('focus'); // Focus input if empty
+             return;
+         }
 
-        $mermaidResultTextarea.val("");
-        $chartContainer.empty();
-        if (panzoomInstance) { panzoomInstance.destroy(); panzoomInstance = null; }
-        $spinner.show();
+        // --- Reset UI before request ---
+        $mermaidResultTextarea.val(""); // Clear previous mermaid code
+        $chartContainer.empty();       // Clear previous SVG
+        if (panzoomInstance) {
+          panzoomInstance.destroy();   // Clean up previous Panzoom instance
+          panzoomInstance = null;
+        }
+        $spinner.show(); // Show loading indicator
 
+        // --- Make AJAX request ---
         $.ajax({
-          url: "/generate_mermaid/",
+          url: "/generate_mermaid/", // Your backend endpoint
           method: "POST",
           data: { url: urlValue },
-          dataType: "json",
+          dataType: "json", // Expect JSON response
         })
           .done(async function (result) {
-            if (result.error) { displayError("API Error: " + result.error); return; }
+            // --- Handle successful response ---
+            if (result.error) {
+              // Handle application-specific errors returned in JSON
+              displayError("API Error: " + result.error);
+              return;
+            }
             const mermaidCode = result.summary_markdown;
-            if (!mermaidCode) { displayError("Received empty flowchart data."); return; }
+            if (!mermaidCode || typeof mermaidCode !== 'string' || mermaidCode.trim() === '') {
+              displayError("Received empty or invalid flowchart data from the server.");
+              return;
+            }
 
+            // Display the generated Mermaid code
             $mermaidResultTextarea.val(mermaidCode);
 
             try {
+              // Render the Mermaid code into SVG
+              // Use a unique ID for rendering in case multiple charts exist or re-renders happen
               const uniqueId = "mermaid-graph-" + Date.now();
-              const { svg } = await mermaid.render(uniqueId, mermaidCode);
+              const { svg, bindFunctions } = await mermaid.render(uniqueId, mermaidCode);
+
+              // Inject the SVG into the container
               $chartContainer.html(svg);
+
+              // Find the newly added SVG element
               const svgElement = $chartContainer.find("svg")[0];
 
               if (svgElement) {
+                // Apply Mermaid's interactivity if needed (e.g., click events)
+                if (bindFunctions) {
+                  bindFunctions(svgElement);
+                }
+
+                // Initialize Panzoom on the SVG element
                 panzoomInstance = Panzoom(svgElement, panzoomOptions);
                 console.log("Panzoom initialized.");
-                // Apply zoom-to-fit (with padding) after render
+
+                // Add Panzoom event listener for debugging (optional)
+                svgElement.parentElement.addEventListener('panzoomchange', (event) => {
+                   // console.log(event.detail); // logs scale, x, y
+                });
+
+                // *** CRITICAL STEP: Fit the SVG to the container view ***
+                // Use setTimeout to ensure the SVG is fully rendered and measurable
                 setTimeout(() => {
-                    zoomToFitAndCenter(panzoomInstance, $chartContainer[0], svgElement);
-                }, 0);
+                    // Check if elements still exist (e.g., user didn't submit again quickly)
+                    if(panzoomInstance && $chartContainer[0] && svgElement) {
+                       zoomToFitAndCenter(panzoomInstance, $chartContainer[0], svgElement);
+                    }
+                }, 0); // 0ms delay is usually sufficient, increase slightly (e.g., 50) if needed
+
               } else {
-                displayError("Failed to find SVG element after rendering.");
+                displayError("Failed to find the rendered SVG element in the container.");
               }
             } catch (renderError) {
+              // Catch errors during Mermaid rendering or Panzoom initialization
               displayError("Failed to render flowchart: " + renderError.message);
-              console.error("Render/Init Error:", renderError);
+              console.error("Render/Initialization Error:", renderError);
             }
           })
           .fail(function (jqXHR, textStatus, errorThrown) {
-             let errorMsg = `AJAX request failed: ${textStatus}${errorThrown ? ', '+errorThrown : ''}`;
-             try { const response = JSON.parse(jqXHR.responseText); if(response.error) errorMsg += ` (Server: ${response.error})`; } catch(e) { /* ignore */ }
+             // --- Handle AJAX communication errors ---
+             let errorMsg = `AJAX Request Failed: ${textStatus}`;
+             if (errorThrown) {
+                 errorMsg += `, ${errorThrown}`;
+             }
+             // Try to get more details from the response body if available
+             if (jqXHR.responseText) {
+                 try {
+                     const responseJson = JSON.parse(jqXHR.responseText);
+                     if (responseJson.error) {
+                         errorMsg += ` (Server Message: ${responseJson.error})`;
+                     } else if (jqXHR.responseText.length < 500) { // Show short text responses
+                         errorMsg += ` (Server Response: ${jqXHR.responseText})`;
+                     }
+                 } catch (e) {
+                     // Response wasn't valid JSON, ignore parsing error
+                     if (jqXHR.responseText.length < 500) {
+                        errorMsg += ` (Server Response: ${jqXHR.responseText})`;
+                     }
+                 }
+             }
              displayError(errorMsg);
           })
           .always(function () {
-            $spinner.hide();
+            // --- Always execute after request (success or fail) ---
+            $spinner.hide(); // Hide loading indicator
           });
       }); // End of form submit handler
     }); // End of $(document).ready
   </script>
-  
+
 </body>
 </html>
