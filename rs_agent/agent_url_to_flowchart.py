@@ -18,20 +18,26 @@ if not os.getenv("GEMINI_API_KEY"):
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL_ID = 'gemini-2.0-flash'
 
-BASE_PROMPT = '''
-You are an expert text summarizer as flowchart.
+# 
+NODE_SIZE_LIMIT = 25 
+BASE_PROMPT = f'''
+You are an expert AI assistant specialized in analyzing text and constructing Causal Graphs.
 
 Instructions:
-1. Your task is to summarize the provided input text into a flowchart using Mermaid.js version 10 Markdown syntax.
-2. The flowchart should represent the main steps, concepts, or flow described in the text.
-3. The output **must** have the same language as the input text.
-4. Use a simple top-down flowchart (`graph TD`). Example node format: id["Label"]. Example edge format: id1 --> id2["Label"].
-5. Keep the flowchart concise and focused on the core information.
-6. Ensure all nodes and all edges must be connected as flowchart
-7. Ensure the output is ONLY the raw Mermaid code block. 
-8. Do not include mermaid fences ```mermaid" at the beginning or "```" at the end, and no other explanatory text.
+1.  Your primary goal is to synthesize the provided input text into a concise Causal Graph using Mermaid.js (version 10+) Markdown syntax.
+2.  Identify the key entities, events, states, concepts, and their **causal relationships** described in the text. The graph should clearly illustrate how one element leads to, influences, or causes another.
+3.  **Infer causal links** based on the context, logical flow, and temporal sequence described in the text, even if words like "causes" or "because" are not explicitly used.
+4.  Represent the causal flow using a **top-down directed graph (`graph TD`)**.
+5.  **Nodes:** Use the format `id["Concise Label"]`. Nodes should represent the core causal elements (actions, events, states, key concepts). Keep labels brief and informative.
+6.  **Edges:** Use the format `id1 --> id2` to signify that `id1` directly leads to, causes, or enables `id2`. Optionally, for added clarity on the relationship *only when necessary*, you can add a brief description to the link: `id1 -- "link description" --> id2`. Keep link descriptions extremely short if used at all. **Focus on the directed link (`-->`) representing causality.**
+7.  **Connectivity:** The graph must be fully connected. Every node must have at least one incoming or outgoing edge, forming a single coherent causal structure. No isolated nodes or disconnected sub-graphs are allowed.
+8.  **Conciseness and Focus:** Limit the graph complexity to a **maximum of {NODE_SIZE_LIMIT} nodes**. Concentrate on the most significant causal factors, outcomes, and the primary causal chain(s) presented in the text. Avoid minor details.
+9.  **Language:** The output graph (node labels, edge descriptions if any) **must** be in the **same language** as the input text.
+10. **Critical Output Formatting:** The final response MUST contain **ONLY the raw Mermaid code block** for the `graph TD`.
+    * **Do NOT** include the markdown fences (```mermaid ... ```).
+    * **Do NOT** include any introductory text, explanations, comments, titles, or closing remarks before or after the Mermaid code. Just the code itself.
 
-Input Text to summarize:
+Input text to summarize:
 '''
 
 app = FastAPI()
@@ -87,9 +93,9 @@ class GeminiAPI:
             response = self.client.models.generate_content(
                 model=self.model_id, contents=prompt, config=genai.types.GenerateContentConfig(temperature=0.6)
             )
-            summary_markdown = (response.text.strip())
+            summary_markdown = self.remove_mermaid_fences(response.text.strip())
 
-            return self.remove_mermaid_fences(summary_markdown)
+            return summary_markdown
 
         except Exception as e:
             return f"Error during summarization: {e}"

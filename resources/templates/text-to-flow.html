@@ -1,161 +1,300 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Content to Flowchart</title>
 
-    <!-- Bootstrap 5 CSS -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Content to Flowchart (Optimized + Padding)</title>
 
-    <!-- Mermaid.js -->
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-    <script>
-      mermaid.initialize({ startOnLoad: true });
-    </script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+  <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        padding: 20px;
-      }
-      textarea {
-        width: 100%;
-        height: 120px;
-        margin-bottom: 10px;
-        padding: 10px;
-        font-size: 14px;
-      }
-      .spinner-container {
-        display: none;
-        text-align: center;
-        margin-top: 20px;
-      }
-      #mermaidChart {
-        margin-top: 20px;
-        border: 1px solid #ddd;
-        padding: 10px;
-        border-radius: 5px;
-        transition: transform 0.3s ease; /* Smooth scaling transition */
-      }
-      .zoom-buttons {
-        margin-top: 10px;
-        display: flex;
-        justify-content: space-between;
-        max-width: 200px;
-        margin-bottom: 20px;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h1 class="my-4">Content to Flowchart</h1>
+  <script>
+    mermaid.initialize({ startOnLoad: false });
+  </script>
 
-      <form id="urlForm">
-        <div class="mb-3">
-          <label for="url" class="form-label">Enter URL:</label>
-          <input
-            type="text"
-            id="url"
-            name="url"
-            class="form-control"
-            required
-          />
-        </div>
+  <style>
+    /* General Body & Container Styling */
+    body {
+      background-color: #f8f9fa; /* Light gray background */
+    }
+    .container {
+      padding-top: 1.5rem;
+      padding-bottom: 3rem; /* More space at the bottom */
+    }
+    /* Form Elements Styling */
+    #urlForm .form-label {
+      font-weight: 500; /* Slightly bolder label */
+    }
+    /* Generated Mermaid code textarea */
+    #mermaidResult {
+      height: 150px; /* Slightly taller */
+      font-family: var(--bs-font-monospace); /* Bootstrap's monospace variable */
+      font-size: 0.85rem; /* Slightly smaller text */
+      background-color: #fff;
+      color: #000;
+      border-color: #ced4da;
+      resize: vertical;
+    }
+    /* Spinner Container */
+    .spinner-container {
+      min-height: 40px; /* Reserve space */
+    }
+    /* Diagram Container Styling */
+    #mermaidChartContainer {
+      border: 1px solid #dee2e6;
+      border-radius: 0.375rem;
+      width: 100%;
+      height: 80vh; /* Viewport height */
+      overflow: hidden; /* Essential for Panzoom clipping - DO NOT CHANGE TO auto/scroll */
+      position: relative;
+      background-color: #ffffff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      transition: box-shadow 0.2s ease-in-out;
+    }
+    #mermaidChartContainer:hover {
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    /* Generated SVG Styling */
+    #mermaidChartContainer svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+    #mermaidChartContainer svg:active {
+      cursor: grabbing;
+    }
+    /* Zoom Buttons Container */
+    .zoom-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      /* Use Bootstrap gap-2 class in HTML */
+    }
+    /* Horizontal rule */
+    hr {
+      margin-top: 2rem;
+      margin-bottom: 2rem;
+      border-top-width: 2px;
+      opacity: 0.15;
+    }
+  </style>
+</head>
 
-        <button type="submit" class="btn btn-primary">
-          Generate Flowchart
-        </button>
-      </form>
+<body>
+  <div class="container">
+    <h1 class="my-4">Convert URL to Causal Graph</h1>
 
-      <!-- Spinner -->
-      <div class="spinner-container" id="spinner">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
+    <form id="urlForm" class="mb-4">
+      <div class="mb-3">
+        <label for="url" class="form-label">Enter URL:</label>
+        <input type="text" id="url" name="url" class="form-control" required />
       </div>
+      <button type="submit" class="btn btn-primary">
+        Generate Causal Graph
+      </button>
+    </form>
 
-      <hr />
-      <h3>Generated Mermaid Markdown:</h3>
-      <textarea id="mermaidResult" readonly class="form-control"></textarea>
-
-      <h3 class="mt-4">Rendered Flowchart:</h3>
-
-      <!-- Zoom buttons -->
-      <div class="zoom-buttons">
-        <button id="zoomIn" class="btn btn-outline-secondary">Zoom In</button>
-        <button id="zoomOut" class="btn btn-outline-secondary">Zoom Out</button>
+    <div class="spinner-container text-center my-4" id="spinner" style="display: none;">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
       </div>
-
-      <div id="mermaidChart"></div>
     </div>
 
-    <script>
-      let zoomLevel = 1; // Initialize zoom level
+    <hr />
+    <h3 class="mt-4 mb-3">Generated Mermaid Markdown:</h3>
+    <textarea id="mermaidResult" readonly class="form-control mb-4"></textarea>
 
-      // Handle zoom in functionality
-      document.getElementById("zoomIn").addEventListener("click", function () {
-        zoomLevel += 0.1; // Increment zoom level
-        updateZoom();
-      });
+    <h3 class="mt-4 mb-3">Rendered Causal Graph:</h3>
 
-      // Handle zoom out functionality
-      document.getElementById("zoomOut").addEventListener("click", function () {
-        zoomLevel = Math.max(0.5, zoomLevel - 0.1); // Decrement zoom level, but prevent zooming out too far
-        updateZoom();
-      });
+    <div class="zoom-buttons mb-3 gap-2">
+      <button id="zoomIn" class="btn btn-outline-secondary btn-sm">Zoom In</button>
+      <button id="zoomOut" class="btn btn-outline-secondary btn-sm">Zoom Out</button>
+      <button id="resetZoom" class="btn btn-outline-secondary btn-sm">
+        Reset View
+      </button>
+    </div>
 
-      // Function to update zoom on the mermaid chart
-      function updateZoom() {
-        const chart = document.getElementById("mermaidChart");
-        chart.style.transform = `scale(${zoomLevel})`; // Apply scaling to the chart
-        chart.style.transformOrigin = "top left"; // Keep zoom centered at the top-left
+    <div id="mermaidChartContainer" class="mb-4"></div>
+
+  </div> <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Execute when the DOM is fully loaded
+    $(function () {
+      // --- Cache jQuery Objects ---
+      const $urlInput = $("#url");
+      const $urlForm = $("#urlForm");
+      const $spinner = $("#spinner");
+      const $mermaidResultTextarea = $("#mermaidResult");
+      const $chartContainer = $("#mermaidChartContainer");
+      const $zoomInBtn = $("#zoomIn");
+      const $zoomOutBtn = $("#zoomOut");
+      const $resetZoomBtn = $("#resetZoom");
+
+      // --- State Variable ---
+      let panzoomInstance = null; // Holds the Panzoom instance
+
+      // --- Panzoom Options ---
+      const panzoomOptions = {
+        maxScale: 6,
+        minScale: 0.01, // Allow potentially smaller zoom for padding
+        step: 0.1,
+        contain: "outside", // Keeps SVG element edges within container
+        canvas: true,
+        origin: "top center",
+      };
+
+      // --- Helper Function to Display Errors ---
+      function displayError(message) {
+        console.error("Error:", message);
+        $spinner.hide();
+        $chartContainer.html(`<p class='text-danger p-3'>Error: ${message}</p>`);
       }
 
-      // Handle form submission and flowchart generation
-      document
-        .getElementById("urlForm")
-        .addEventListener("submit", async function (event) {
-          event.preventDefault();
+       // --- Function to Zoom/Pan to Fit Content (with padding) ---
+      function zoomToFitAndCenter(pzInstance, containerEl, svgEl) {
+        if (!pzInstance || !containerEl || !svgEl) {
+            console.warn("zoomToFitAndCenter: Missing instance or elements.");
+            return;
+        }
 
-          const url = document.getElementById("url").value;
+        // *** Define desired padding inside the container ***
+        const chartPadding = 20; // Pixels of space around the chart content
 
-          // Show the spinner while waiting for the result
-          document.getElementById("spinner").style.display = "block";
+        try {
+          const containerWidth = $(containerEl).width();
+          const containerHeight = $(containerEl).height();
+          const bbox = svgEl.getBBox(); // Get actual content dimensions
 
-          // Send URL to backend to generate summary and mermaid markdown
-          const response = await fetch("/generate_mermaid/", {
-            method: "POST",
-            body: new URLSearchParams({ url: url }),
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          });
+          // Calculate the target dimensions *within* the padding
+          const targetWidth = Math.max(1, containerWidth - (chartPadding * 2));
+          const targetHeight = Math.max(1, containerHeight - (chartPadding * 2));
 
-          const result = await response.json();
-
-          // Hide the spinner once the response is received
-          document.getElementById("spinner").style.display = "none";
-
-          if (result.error) {
-            alert("Error: " + result.error);
-          } else {
-            const mermaidCode = result.summary_markdown;
-            // Display the raw Mermaid markdown code in the textarea
-            document.getElementById("mermaidResult").value = mermaidCode;
-
-            // Render the Mermaid chart
-            document.getElementById(
-              "mermaidChart"
-            ).innerHTML = `<div class="mermaid">${mermaidCode}</div>`;
-            mermaid.contentLoaded(); // Re-render the chart with Mermaid.js
+          // Check for invalid dimensions
+          if (bbox.width <= 0 || bbox.height <= 0 || targetWidth <= 0 || targetHeight <= 0) {
+            console.warn("Cannot zoom to fit: Zero dimensions for content or target area.");
+            try { pzInstance.reset({ animate: false }); } catch (_) {}
+            return;
           }
-        });
-    </script>
 
-    <!-- Bootstrap 5 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-  </body>
+          // Calculate scale factors based on the *target* (padded) dimensions
+          const scaleX = targetWidth / bbox.width;
+          const scaleY = targetHeight / bbox.height;
+          // Use the minimum scale factor; cap at 1 (don't zoom in past 100%)
+          const scaleToFit = Math.min(1, scaleX, scaleY);
+
+          // Apply the calculated zoom level
+          pzInstance.zoom(scaleToFit, { animate: false });
+
+          // Calculate the dimensions of the content *after* scaling
+          const scaledWidth = bbox.width * scaleToFit;
+          const scaledHeight = bbox.height * scaleToFit;
+
+          // Calculate the target top-left corner for the scaled content,
+          // considering the padding and centering within the target area
+          const targetX = chartPadding + (targetWidth - scaledWidth) / 2;
+          const targetY = chartPadding + (targetHeight - scaledHeight) / 2;
+
+          // Calculate the final absolute pan position needed to place
+          // the scaled content's top-left (bbox.x * scale) at the targetX/Y
+          const finalPanX = targetX - (bbox.x * scaleToFit);
+          const finalPanY = targetY - (bbox.y * scaleToFit);
+
+          // Apply the final pan position absolutely
+          pzInstance.pan(finalPanX, finalPanY, { animate: false, relative: false });
+
+          console.log(`Zoomed to fit (padded): scale=${scaleToFit.toFixed(2)}, pan=(${finalPanX.toFixed(1)}, ${finalPanY.toFixed(1)})`);
+
+        } catch (error) {
+          console.error("Error during zoomToFitAndCenter (padded):", error);
+           if (pzInstance) { try { pzInstance.reset({ animate: false }); } catch (_) {} }
+        }
+      }
+
+      // --- Event Handlers ---
+      $zoomInBtn.on("click", function () { if (panzoomInstance) panzoomInstance.zoomIn(); });
+      $zoomOutBtn.on("click", function () { if (panzoomInstance) panzoomInstance.zoomOut(); });
+      $resetZoomBtn.on("click", function () {
+           if (panzoomInstance) {
+               const svgEl = $chartContainer.find('svg')[0];
+               if(svgEl) {
+                 // Re-apply the zoom-to-fit logic (which now includes padding)
+                 zoomToFitAndCenter(panzoomInstance, $chartContainer[0], svgEl);
+               } else {
+                 panzoomInstance.reset(); // Fallback
+               }
+           }
+      });
+
+      $chartContainer.on("wheel", function (event) {
+        if (panzoomInstance) {
+          event.preventDefault();
+          panzoomInstance.zoomWithWheel(event.originalEvent);
+        }
+      });
+
+      // Form Submission Handler
+      $urlForm.on("submit", async function (event) {
+        event.preventDefault();
+        const urlValue = $urlInput.val();
+        if (!urlValue) { displayError("Please enter a URL."); return; }
+
+        $mermaidResultTextarea.val("");
+        $chartContainer.empty();
+        if (panzoomInstance) { panzoomInstance.destroy(); panzoomInstance = null; }
+        $spinner.show();
+
+        $.ajax({
+          url: "/generate_mermaid/",
+          method: "POST",
+          data: { url: urlValue },
+          dataType: "json",
+        })
+          .done(async function (result) {
+            if (result.error) { displayError("API Error: " + result.error); return; }
+            const mermaidCode = result.summary_markdown;
+            if (!mermaidCode) { displayError("Received empty flowchart data."); return; }
+
+            $mermaidResultTextarea.val(mermaidCode);
+
+            try {
+              const uniqueId = "mermaid-graph-" + Date.now();
+              const { svg } = await mermaid.render(uniqueId, mermaidCode);
+              $chartContainer.html(svg);
+              const svgElement = $chartContainer.find("svg")[0];
+
+              if (svgElement) {
+                panzoomInstance = Panzoom(svgElement, panzoomOptions);
+                console.log("Panzoom initialized.");
+                // Apply zoom-to-fit (with padding) after render
+                setTimeout(() => {
+                    zoomToFitAndCenter(panzoomInstance, $chartContainer[0], svgElement);
+                }, 0);
+              } else {
+                displayError("Failed to find SVG element after rendering.");
+              }
+            } catch (renderError) {
+              displayError("Failed to render flowchart: " + renderError.message);
+              console.error("Render/Init Error:", renderError);
+            }
+          })
+          .fail(function (jqXHR, textStatus, errorThrown) {
+             let errorMsg = `AJAX request failed: ${textStatus}${errorThrown ? ', '+errorThrown : ''}`;
+             try { const response = JSON.parse(jqXHR.responseText); if(response.error) errorMsg += ` (Server: ${response.error})`; } catch(e) { /* ignore */ }
+             displayError(errorMsg);
+          })
+          .always(function () {
+            $spinner.hide();
+          });
+      }); // End of form submit handler
+    }); // End of $(document).ready
+  </script>
+  
+</body>
 </html>
