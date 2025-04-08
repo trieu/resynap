@@ -264,6 +264,7 @@
           panzoomInstance.zoom(scale, { animate: true });
           panzoomInstance.pan(10, 10, { animate: true });
         }
+        
 
         function exportDiagram() {
           console.log("[Export] Starting diagram export...");
@@ -293,18 +294,15 @@
 
           clonedSvg.removeAttribute("style");
           clonedSvg.removeAttribute("transform");
-          clonedSvg.style.width =
-            svgElement.getBoundingClientRect().width + "px";
-          clonedSvg.style.height =
-            svgElement.getBoundingClientRect().height + "px";
+          clonedSvg.style.width = svgElement.getBoundingClientRect().width + "px";
+          clonedSvg.style.height = svgElement.getBoundingClientRect().height + "px";
 
           html2canvas(tempWrapper, {
             scale: 2,
             useCORS: true,
             backgroundColor: "#ffffff",
             logging: true,
-          })
-            .then((canvas) => {
+          }).then((canvas) => {
               if (!canvas) throw new Error("html2canvas returned null canvas.");
 
               const pngDataUrl = canvas.toDataURL("image/png");
