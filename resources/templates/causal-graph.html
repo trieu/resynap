@@ -8,10 +8,12 @@
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.3/dist/mermaid.min.js"></script>
+  
   <script src="https://unpkg.com/@panzoom/panzoom@4.6/dist/panzoom.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
+  <!-- Mermaid  -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.3/dist/mermaid.min.js"></script>
   <script>
     // Initialize Mermaid manually after generating code
     mermaid.initialize({ startOnLoad: false });
@@ -50,7 +52,7 @@
       border: 1px solid #dee2e6;
       border-radius: 0.375rem;
       width: 100%;
-      height: 80vh; /* Viewport height */
+      height: 86vh; /* Viewport height */
       overflow: hidden; /* Essential for Panzoom clipping - DO NOT CHANGE TO auto/scroll */
       position: relative; /* Needed for absolute positioning or containing */
       background-color: #ffffff;
@@ -101,9 +103,15 @@
     <h1 class="my-4">Convert URL to Causal Graph</h1>
 
     <form id="urlForm" class="mb-4">
-      <div class="mb-3">
+      <div class="mb-1">
         <label for="url" class="form-label">Enter URL:</label>
         <input type="text" id="url" name="url" class="form-control" required placeholder="e.g., https://example.com" />
+      </div>
+      <div class="mb-3">
+        <input class="form-check-input" type="checkbox" value="" id="no_cache" >
+        <label class="form-check-label" for="no_cache">
+          No cache
+        </label>
       </div>
       <button type="submit" class="btn btn-primary">
         Generate Causal Graph
@@ -156,10 +164,9 @@
 
       // --- Panzoom Options ---
       const panzoomOptions = {
-        maxScale: 10,    // Increased max zoom slightly
-        minScale: 0.01, // Allow very small zoom out for initial fit if needed
+        maxScale: 6,    // Increased max zoom slightly
+        minScale: 0.06, // Allow very small zoom out for initial fit if needed
         step: 0.15,     // Slightly larger zoom step
-        contain: "outside", // Keep SVG edges within container during user pan/zoom
         canvas: true,       // Treat SVG as a canvas (recommended)
         //origin: '50% 50%', // Center origin can sometimes feel more natural for zoom
       };
@@ -179,65 +186,42 @@
         }
       }
 
-      function zoomToFitAndCenter(pzInstance, containerEl, svgEl) {
-        if (!pzInstance || !containerEl || !svgEl) return;
+      function zoomToFit() {
+        const container = $chartContainer[0];
+        const svg = container.querySelector("svg");
+        if (!svg) return;
       
-        const chartPadding = 40;
-      
-        // Select inner <g> element that contains the actual diagram
-        const g = svgEl.querySelector("g");
-        if (!g) {
-          console.warn("zoomToFitAndCenter: No <g> inside SVG");
-          return;
-        }
+        const g = svg.querySelector("g");
+        if (!g) return;
       
         const bbox = g.getBBox();
-        if (bbox.width === 0 || bbox.height === 0) {
-          console.warn("zoomToFitAndCenter: Empty diagram content.");
-          return;
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+      
+        // Calculate scale in each direction
+        const scaleX = containerWidth / bbox.width;
+        const scaleY = containerHeight / bbox.height;
+      
+        // Apply padding only on the limiting axis
+        let scale;
+        if (scaleX < scaleY) {
+          scale = scaleX * 1; // Width is limiting
+        } else {
+          scale = scaleY * 0.94; // Height is limiting
         }
       
-        const containerWidth = containerEl.clientWidth;
-        const containerHeight = containerEl.clientHeight;
-      
-        const scaleX = (containerWidth - chartPadding * 2) / bbox.width;
-        const scaleY = (containerHeight - chartPadding * 2) / bbox.height;
-        const scale = Math.min(scaleX, scaleY, 1); // Prevent overscaling
-      
-        // Reset before applying custom zoom
-        pzInstance.reset({ animate: false });
-        pzInstance.zoom(scale, { animate: false });
-      
-        const panX = -bbox.x * scale + (containerWidth - bbox.width * scale) / 2;
-        const panY = -bbox.y * scale + (containerHeight - bbox.height * scale) / 2;
-      
-        pzInstance.moveTo(panX, panY);
-      }
-      
-      
 
-      function exportDiagram() {
-        const svgElement = $chartContainer.find("svg")[0];
-        const xml = new XMLSerializer().serializeToString(svgElement);
-        const svg64 = btoa(unescape(encodeURIComponent(xml)));
-        const image64 = 'data:image/svg+xml;base64,' + svg64;
-    
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          canvas.width = svgElement.viewBox.baseVal.width;
-          canvas.height = svgElement.viewBox.baseVal.height;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0);
-          canvas.toBlob(blob => {
-            const link = document.createElement("a");
-            link.download = "diagram.png";
-            link.href = URL.createObjectURL(blob);
-            link.click();
-          });
-        };
-        img.src = image64;
+        panzoomInstance.zoom(scale, { animate: true });
+        panzoomInstance.pan(10, 10, { animate: true });
       }
+      
+      
+      
+      function exportDiagram() {
+        // TODO
+      }
+      
+      
 
       // --- Event Handlers ---
       $zoomInBtn.on("click", function () { if (panzoomInstance) panzoomInstance.zoomIn(); });
@@ -247,7 +231,7 @@
            if (panzoomInstance) {
                const svgEl = $chartContainer.find('svg')[0];
                if (svgEl) {
-                 zoomToFitAndCenter(panzoomInstance, $chartContainer[0], svgEl);
+                zoomToFit()
                } else {
                  // Fallback if SVG isn't found (shouldn't happen if instance exists)
                  panzoomInstance.reset();
@@ -285,11 +269,13 @@
         }
         $spinner.show(); // Show loading indicator
 
+        var no_cache = $('#no_cache').prop('checked');
+
         // --- Make AJAX request ---
         $.ajax({
           url: "/generate_mermaid/", // Your backend endpoint
           method: "POST",
-          data: { url: urlValue },
+          data: { "url": urlValue, 'no_cache': no_cache },
           dataType: "json", // Expect JSON response
         })
           .done(async function (result) {
@@ -340,7 +326,7 @@
                 setTimeout(() => {
                     // Check if elements still exist (e.g., user didn't submit again quickly)
                     if(panzoomInstance && $chartContainer[0] && svgElement) {
-                       zoomToFitAndCenter(panzoomInstance, $chartContainer[0], svgElement);
+                      zoomToFit()
                     }
                 }, 0); // 0ms delay is usually sufficient, increase slightly (e.g., 50) if needed
 
@@ -383,7 +369,6 @@
           });
       }); // End of form submit handler
     }); // End of $(document).ready
-
 
   </script>
 

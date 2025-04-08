@@ -7,6 +7,8 @@ import aiohttp
 from bs4 import BeautifulSoup
 from google import genai
 from dotenv import load_dotenv
+from typing import Dict
+import hashlib
 
 # --- Load Environment Variables ---
 load_dotenv(override=True)
@@ -24,15 +26,15 @@ BASE_PROMPT = f'''
 You are an expert AI assistant specialized in analyzing text and constructing Causal Graphs.
 
 Instructions:
-1.  Your primary goal is to synthesize the provided input text into a concise Causal Graph using Mermaid.js (version 11+) Markdown syntax.
+1.  Your primary goal is to synthesize the provided input text into a concise Causal Graph using Mermaid.js (version 10+) Markdown syntax.
 2.  Identify the key entities, events, states, concepts, and their **causal relationships** described in the text. The graph should clearly illustrate how one element leads to, influences, or causes another.
 3.  **Infer causal links** based on the context, logical flow, and temporal sequence described in the text, even if words like "causes" or "because" are not explicitly used.
-4.  Represent the causal flow using a **top-down directed graph (`graph TD`)**.
+4.  Represent the causal flow using a top-down directed graph (`graph TD`), the top is the cause and the bottom is the effect.
 5.  **Nodes:** Use the format `id["Concise Label"]`. Each id must start with the prefix n followed by an ordered number (e.g., n1, n2, n3, …). Nodes should represent the core causal elements (actions, events, states, key concepts). Keep labels brief and informative.
 6.  **Edges:** Use the format `id1 --> id2` to signify that `id1` directly leads to, causes, or enables `id2`. Optionally, for added clarity on the relationship *only when necessary*, you can add a brief description to the link: `id1 -- "link description" --> id2`. Keep link descriptions extremely short if used at all. **Focus on the directed link (`-->`) representing causality.**
-7.  **Connectivity:** The graph must be complete and fully connected. Every node must have at least one incoming or outgoing edge, forming a single coherent causal structure.
-8.  **Conciseness and Focus:** Limit the graph complexity to a **maximum of {NODE_SIZE_LIMIT} nodes**. Concentrate on the most significant causal factors, outcomes, and the primary causal chain(s) presented in the text. Avoid minor details.
-9.  **Language:** The output graph (node labels, edge descriptions if any) **must** be in the **same language** as the input text.
+7.  The graph must be complete and fully connected. Every node must have at least one incoming or outgoing edge, forming a single complete causal structure.
+8.  Limit the graph complexity to a **maximum of {NODE_SIZE_LIMIT} nodes**. Concentrate on the most significant causal factors, outcomes, and the primary causal chain(s) presented in the text. Avoid minor details.
+9.  The output graph (node labels, edge descriptions if any) **must** be in the **same language** as the input text.
 10. **Critical Output Formatting:** The final response MUST contain **ONLY the raw Mermaid code block** for the `graph TD`.
     * **Do NOT** include the markdown fences (```mermaid ... ```).
     * **Do NOT** include any introductory text, explanations, comments, titles, or closing remarks before or after the Mermaid code. Just the code itself.
@@ -44,8 +46,16 @@ app = FastAPI()
 
 # --- Class to Handle Google Gemini API Calls ---
 
+ # Local in-memory cache (URL hash -> Mermaid summary)
+local_cache: Dict[str, str] = {}
+
+# Utility: hash the URL to use as a cache key
+def hash_url(url: str) -> str:
+    return hashlib.sha256(url.encode("utf-8")).hexdigest()
 
 class GeminiAPI:
+   
+    
     def __init__(self, api_key: str, model_id: str):
         self.client = genai.Client(api_key=api_key)
         self.model_id = model_id
@@ -91,7 +101,7 @@ class GeminiAPI:
         try:
             # Call Google Gemini API
             response = self.client.models.generate_content(
-                model=self.model_id, contents=prompt, config=genai.types.GenerateContentConfig(temperature=0.6)
+                model=self.model_id, contents=prompt, config=genai.types.GenerateContentConfig(temperature=0.7)
             )
             summary_markdown = self.remove_mermaid_fences(response.text.strip())
 
@@ -142,7 +152,13 @@ async def fetch_and_parse(url: str) -> str:
 
 
 @app.post("/generate_mermaid/")
-async def generate_mermaid(url: str = Form(...)):
+async def generate_mermaid(url: str = Form(...), no_cache: bool = Form(False) ): # default to False):
+    cache_key = hash_url(url)
+
+    # Return from cache if available
+    if cache_key in local_cache and not no_cache:
+        return {"summary_markdown": local_cache[cache_key], "cached": True}
+    
     state = GraphState(url=url)
 
     # Step 1: Fetch and parse URL
@@ -159,7 +175,10 @@ async def generate_mermaid(url: str = Form(...)):
         state.extracted_text)
     state.summary_markdown = summary_markdown
 
-    return {"summary_markdown": state.summary_markdown}
+    # Store in cache
+    local_cache[cache_key] = summary_markdown
+
+    return {"summary_markdown": summary_markdown, "cached": False}
 
 # --- Serve the Static HTML File (index.html) ---
 
