@@ -218,7 +218,155 @@
       
       
       function exportDiagram() {
-        // TODO
+        console.log("Export Diagram function started."); // Log start
+
+        const svgEl = $chartContainer.find('svg')[0];
+        if (!svgEl) {
+            alert("No diagram found to export.");
+            console.error("Export Error: No SVG element found in #mermaidChartContainer."); // Log error
+            return;
+        }
+        console.log("Found SVG element:", svgEl); // Log SVG found
+
+        try {
+            // 1. Get SVG dimensions
+            console.log("Attempting to get SVG dimensions from element attributes...");
+            let svgWidth = svgEl.width?.baseVal?.value;
+            let svgHeight = svgEl.height?.baseVal?.value;
+            console.log(`Initial dimensions from attributes: width=${svgWidth}, height=${svgHeight}`);
+
+            // Validate dimensions and attempt fallback if necessary
+            if (!svgWidth || !svgHeight || svgWidth <= 0 || svgHeight <= 0 || !isFinite(svgWidth) || !isFinite(svgHeight)) {
+                console.warn("Invalid dimensions from SVG attributes. Attempting fallback using getBBox...");
+                const groupEl = svgEl.querySelector('g'); // Find the main group
+                if (!groupEl) {
+                    alert("Export Error: Cannot determine diagram size. Could not find main group in SVG.");
+                    console.error("Export Error: Fallback failed - Cannot find main <g> element.");
+                    return;
+                }
+                try {
+                    const bbox = groupEl.getBBox();
+                    console.log("Fallback BBox:", bbox);
+                    if (bbox.width > 0 && bbox.height > 0 && isFinite(bbox.width) && isFinite(bbox.height)) {
+                         // Use BBox size + padding for canvas. Drawing needs adjustment.
+                         const padding = 20; // Add more padding when using BBox
+                         svgWidth = Math.ceil(bbox.width + 2 * padding);
+                         svgHeight = Math.ceil(bbox.height + 2 * padding);
+                         console.log(`Fallback dimensions set from BBox (with padding): width=${svgWidth}, height=${svgHeight}`);
+                         // Note: Drawing logic needs to account for bbox.x/y and padding if using this size.
+                         // However, for simplicity, we'll still try to draw the whole image at 0,0 later,
+                         // which might lead to clipping if bbox origin wasn't 0,0.
+                         // A better approach would involve transforming the drawing context.
+                    } else {
+                         alert("Export Error: Could not determine valid diagram size from attributes or fallback BBox.");
+                         console.error("Export Error: Fallback failed - BBox has zero or invalid dimensions.");
+                        return;
+                    }
+                } catch(bboxError) {
+                    alert("Export Error: Could not determine diagram size. Error during fallback calculation.");
+                    console.error("Export Error: Fallback getBBox() failed:", bboxError);
+                    return;
+                }
+            }
+
+            // 2. Serialize SVG to String
+            console.log("Serializing SVG to string...");
+            const serializer = new XMLSerializer();
+            let svgString = serializer.serializeToString(svgEl);
+            console.log("SVG serialized (first 100 chars):", svgString.substring(0, 100));
+
+            // Add XML declaration if missing
+            if (!svgString.startsWith('<?xml')) {
+                svgString = '<?xml version="1.0" standalone="no"?>\r\n' + svgString;
+            }
+            // Basic script removal (more robust sanitization might be needed for complex cases)
+            svgString = svgString.replace(/<script.*?<\/script>/gs, '');
+
+            // 3. Create Canvas
+            console.log("Creating canvas element...");
+            const canvas = document.createElement('canvas');
+            canvas.width = svgWidth; // Use determined dimensions
+            canvas.height = svgHeight;
+            const ctx = canvas.getContext('2d');
+            console.log(`Canvas created with size: ${canvas.width}x${canvas.height}`);
+
+            // 4. Create Image Object
+            console.log("Creating Image object...");
+            const img = new Image();
+
+            // 5. Create SVG Data URL
+            console.log("Creating SVG data URL...");
+            // Use encodeURIComponent for safety with special characters in SVG text/attributes
+            const svgDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
+            console.log(`SVG data URL created (length: ${svgDataUrl.length})`);
+             if (svgDataUrl.length > 4000000) { // Warn if URL is excessively long (browser limits vary)
+                console.warn(`SVG data URL is very long (${svgDataUrl.length} chars). This might exceed browser limits.`);
+             }
+
+            // --- Define image load handler ---
+            img.onload = function() {
+                console.log("Image loaded successfully from SVG data URL.");
+                try {
+                    // Fill canvas with white background BEFORE drawing the image
+                    console.log("Filling canvas background white...");
+                    ctx.fillStyle = 'white'; // Ensures transparency becomes white
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    // 6. Draw Image onto Canvas
+                    console.log("Drawing image onto canvas...");
+                    // Draw the loaded image. If using BBox dimensions, adjustments are needed here.
+                    // For simplicity now, draw at 0,0 with the canvas dimensions.
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    console.log("Image drawn onto canvas.");
+
+                    // 7. Generate PNG Data URL from canvas
+                    console.log("Generating PNG data URL...");
+                    const pngDataUrl = canvas.toDataURL('image/png');
+                    console.log(`PNG data URL generated (length: ${pngDataUrl.length})`);
+                     if (!pngDataUrl || pngDataUrl === "data:,") {
+                         throw new Error("Generated PNG data URL is empty or invalid.");
+                     }
+
+
+                    // 8. Create Temporary Download Link
+                    console.log("Creating download link...");
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = pngDataUrl;
+                    downloadLink.download = 'causal-graph.png'; // Filename for the download
+
+                    // 9. Trigger Download
+                    console.log("Appending link and triggering click...");
+                    document.body.appendChild(downloadLink); // Append temporarily
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink); // Clean up
+                    console.log("Download triggered and link removed.");
+
+                } catch (drawError) {
+                     console.error("Export Error: Error during canvas drawing or PNG generation:", drawError);
+                     alert("An error occurred while generating the PNG image: " + drawError.message);
+                }
+            };
+
+            // --- Define image error handler ---
+            img.onerror = function(errEvent) {
+                 // This is often the point of failure if the SVG data URL is malformed or too large
+                 console.error("Export Error: Failed to load SVG data into image element.", errEvent);
+                 let errorMsg = "Error preparing SVG for export. The browser could not load the SVG data as an image. This can happen if the diagram is too complex, too large, or contains unsupported elements. Check the console for details.";
+                 if (svgDataUrl.length > 4000000) {
+                    errorMsg += " The diagram's data URL size might exceed browser limits.";
+                 }
+                 alert(errorMsg);
+            }
+
+            // --- Start loading the SVG data into the image ---
+            console.log("Setting image src to SVG data URL to start loading...");
+            img.src = svgDataUrl; // This initiates the loading process -> onload or onerror will trigger
+
+        } catch (error) {
+            // Catch synchronous errors in the setup phase
+            console.error("Export Error: General error during PNG export setup:", error);
+            alert("An unexpected error occurred during export setup: " + error.message);
+        }
       }
       
       
