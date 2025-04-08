@@ -19,18 +19,18 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL_ID = 'gemini-2.0-flash'
 
 # 
-NODE_SIZE_LIMIT = 25 
+NODE_SIZE_LIMIT = 50 
 BASE_PROMPT = f'''
 You are an expert AI assistant specialized in analyzing text and constructing Causal Graphs.
 
 Instructions:
-1.  Your primary goal is to synthesize the provided input text into a concise Causal Graph using Mermaid.js (version 10+) Markdown syntax.
+1.  Your primary goal is to synthesize the provided input text into a concise Causal Graph using Mermaid.js (version 11+) Markdown syntax.
 2.  Identify the key entities, events, states, concepts, and their **causal relationships** described in the text. The graph should clearly illustrate how one element leads to, influences, or causes another.
 3.  **Infer causal links** based on the context, logical flow, and temporal sequence described in the text, even if words like "causes" or "because" are not explicitly used.
 4.  Represent the causal flow using a **top-down directed graph (`graph TD`)**.
-5.  **Nodes:** Use the format `id["Concise Label"]`. Nodes should represent the core causal elements (actions, events, states, key concepts). Keep labels brief and informative.
+5.  **Nodes:** Use the format `id["Concise Label"]`. Each id must start with the prefix n followed by an ordered number (e.g., n1, n2, n3, …). Nodes should represent the core causal elements (actions, events, states, key concepts). Keep labels brief and informative.
 6.  **Edges:** Use the format `id1 --> id2` to signify that `id1` directly leads to, causes, or enables `id2`. Optionally, for added clarity on the relationship *only when necessary*, you can add a brief description to the link: `id1 -- "link description" --> id2`. Keep link descriptions extremely short if used at all. **Focus on the directed link (`-->`) representing causality.**
-7.  **Connectivity:** The graph must be fully connected. Every node must have at least one incoming or outgoing edge, forming a single coherent causal structure. No isolated nodes or disconnected sub-graphs are allowed.
+7.  **Connectivity:** The graph must be complete and fully connected. Every node must have at least one incoming or outgoing edge, forming a single coherent causal structure.
 8.  **Conciseness and Focus:** Limit the graph complexity to a **maximum of {NODE_SIZE_LIMIT} nodes**. Concentrate on the most significant causal factors, outcomes, and the primary causal chain(s) presented in the text. Avoid minor details.
 9.  **Language:** The output graph (node labels, edge descriptions if any) **must** be in the **same language** as the input text.
 10. **Critical Output Formatting:** The final response MUST contain **ONLY the raw Mermaid code block** for the `graph TD`.
@@ -167,7 +167,7 @@ async def generate_mermaid(url: str = Form(...)):
 @app.get("/", response_class=HTMLResponse)
 async def home():
     # Serve the index.html file from disk
-    return FileResponse("./resources/templates/text-to-flow.html")
+    return FileResponse("./resources/templates/causal-graph.html")
 
 # --- Run the FastAPI app ---
 if __name__ == "__main__":
