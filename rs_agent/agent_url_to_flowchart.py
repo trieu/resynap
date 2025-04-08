@@ -1,8 +1,6 @@
 
-from fastapi import FastAPI, Form
-from fastapi.responses import HTMLResponse, FileResponse
+
 import os
-import asyncio
 import aiohttp
 from bs4 import BeautifulSoup
 from google import genai
@@ -44,11 +42,6 @@ Constraints:
 
 Input text to summarize:
 '''
-
-app = FastAPI()
-
-# --- Class to Handle Google Gemini API Calls ---
-
 
 
 # Utility: hash the URL to use as a cache key
@@ -194,22 +187,3 @@ async def fetch_and_parse(url: str) -> str:
 
 # --- Endpoint to process the URL and return the Mermaid markdown ---
 
-
-@app.post("/generate_mermaid/")
-async def generate_mermaid(url: str = Form(...), no_cache: bool = Form(False) ): 
-    state = GraphState(url=url)
-    return await state.process_url(no_cache=no_cache)
-    
-
-# --- Serve the Static HTML File (index.html) ---
-
-
-@app.get("/", response_class=HTMLResponse)
-async def home():
-    # Serve the index.html file from disk
-    return FileResponse("./resources/templates/causal-graph.html")
-
-# --- Run the FastAPI app ---
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
