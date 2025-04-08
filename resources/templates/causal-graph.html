@@ -1,526 +1,511 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Convert URL to Causal Graph</title>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Convert URL to Causal Graph</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://unpkg.com/@panzoom/panzoom@4.6/dist/panzoom.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-  
-  <script src="https://unpkg.com/@panzoom/panzoom@4.6/dist/panzoom.min.js"></script>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Mermaid  -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.3/dist/mermaid.min.js"></script>
+    <script>
+      // Initialize Mermaid manually after generating code
+      mermaid.initialize({ startOnLoad: false });
+    </script>
 
-  <!-- Mermaid  -->
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.3/dist/mermaid.min.js"></script>
-  <script>
-    // Initialize Mermaid manually after generating code
-    mermaid.initialize({ startOnLoad: false });
-  </script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
 
-  <style>
-    /* General Body & Container Styling */
-    body {
-      background-color: #f8f9fa; /* Light gray background */
-    }
-    .container {
-      padding-top: 1.5rem;
-      padding-bottom: 3rem; /* More space at the bottom */
-    }
-    /* Form Elements Styling */
-    #urlForm .form-label {
-      font-weight: 500; /* Slightly bolder label */
-    }
-    /* Generated Mermaid code textarea */
-    #mermaidResult {
-      height: 150px; /* Slightly taller */
-      font-family: var(--bs-font-monospace); /* Bootstrap's monospace variable */
-      font-size: 0.85rem; /* Slightly smaller text */
-      background-color: #fff;
-      color: #000;
-      border-color: #ced4da;
-      resize: vertical;
-    }
-    /* Spinner Container */
-    .spinner-container {
-      min-height: 40px; /* Reserve space */
-    }
+    <style>
+      /* General Body & Container Styling */
+      body {
+        background-color: #f8f9fa; /* Light gray background */
+      }
+      .container {
+        padding-top: 1.5rem;
+        padding-bottom: 3rem; /* More space at the bottom */
+      }
+      /* Form Elements Styling */
+      #urlForm .form-label {
+        font-weight: 500; /* Slightly bolder label */
+      }
+      /* Generated Mermaid code textarea */
+      #mermaidResult {
+        height: 150px; /* Slightly taller */
+        font-family: var(
+          --bs-font-monospace
+        ); /* Bootstrap's monospace variable */
+        font-size: 0.85rem; /* Slightly smaller text */
+        background-color: #fff;
+        color: #000;
+        border-color: #ced4da;
+        resize: vertical;
+      }
+      /* Spinner Container */
+      .spinner-container {
+        min-height: 40px; /* Reserve space */
+      }
 
-    /* Diagram Container Styling */
-    #mermaidChartContainer {
-      border: 1px solid #dee2e6;
-      border-radius: 0.375rem;
-      width: 100%;
-      height: 86vh; /* Viewport height */
-      overflow: hidden; /* Essential for Panzoom clipping - DO NOT CHANGE TO auto/scroll */
-      position: relative; /* Needed for absolute positioning or containing */
-      background-color: #ffffff;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-      transition: box-shadow 0.2s ease-in-out;
-    }
-   
-    /* Generated SVG Styling */
-    #mermaidChartContainer svg {
-      display: block; /* Remove potential extra space below SVG */
-      /* Let Panzoom control size/position via transform. Width/height 100% can sometimes interfere,
+      /* Diagram Container Styling */
+      #mermaidChartContainer {
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        width: 100%;
+        height: 100vh; /* Viewport height */
+        overflow: hidden; /* Essential for Panzoom clipping - DO NOT CHANGE TO auto/scroll */
+        position: relative; /* Needed for absolute positioning or containing */
+        background-color: #ffffff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        transition: box-shadow 0.2s ease-in-out;
+      }
+
+      /* Generated SVG Styling */
+      #mermaidChartContainer svg {
+        display: block; /* Remove potential extra space below SVG */
+        /* Let Panzoom control size/position via transform. Width/height 100% can sometimes interfere,
          but is often okay with Panzoom's canvas:true. If issues arise, try removing them. */
-      width: 100%;
-      height: 100%;
-      cursor: grab;
-      user-select: none;
-      -webkit-user-drag: none;
-      /* Position controlled by Panzoom's transform, origin should be top-left for calculations */
-      transform-origin: 0 0;
-    }
+        width: 100%;
+        height: 100%;
+        cursor: grab;
+        user-select: none;
+        -webkit-user-drag: none;
+        /* Position controlled by Panzoom's transform, origin should be top-left for calculations */
+        transform-origin: 0 0;
+      }
 
-    #mermaidChartContainer:hover {
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
+      #mermaidChartContainer:hover {
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
 
-    #mermaidChartContainer svg:active {
-      cursor: grabbing;
-    }
+      #mermaidChartContainer svg:active {
+        cursor: grabbing;
+      }
 
-    /* Zoom Buttons Container */
-    .zoom-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      /* Use Bootstrap gap-2 class in HTML */
-    }
-    /* Horizontal rule */
-    hr {
-      margin-top: 2rem;
-      margin-bottom: 2rem;
-      border-top-width: 2px;
-      opacity: 0.15;
-    }
-  </style>
-</head>
+      /* Zoom Buttons Container */
+      .zoom-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        /* Use Bootstrap gap-2 class in HTML */
+      }
+      /* Horizontal rule */
+      hr {
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+        border-top-width: 2px;
+        opacity: 0.15;
+      }
+    </style>
+  </head>
 
-<body>
-  <div class="container">
-    <h1 class="my-4">Convert URL to Causal Graph</h1>
+  <body>
+    <div class="container">
+      <h1 class="my-4">Convert URL to Causal Graph</h1>
 
-    <form id="urlForm" class="mb-4">
-      <div class="mb-1">
-        <label for="url" class="form-label">Enter URL:</label>
-        <input type="text" id="url" name="url" class="form-control" required placeholder="e.g., https://example.com" />
+      <form id="urlForm" class="mb-4">
+        <div class="mb-1">
+          <label for="url" class="form-label">Enter URL:</label>
+          <input
+            type="text"
+            id="url"
+            name="url"
+            class="form-control"
+            required
+            placeholder="e.g., https://example.com"
+          />
+        </div>
+        <div class="mb-3">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            value=""
+            id="no_cache"
+          />
+          <label class="form-check-label" for="no_cache"> No cache </label>
+        </div>
+        <button type="submit" class="btn btn-primary">
+          Generate Causal Graph
+        </button>
+      </form>
+
+      <div
+        class="spinner-container text-center my-4"
+        id="spinner"
+        style="display: none"
+      >
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
       </div>
-      <div class="mb-3">
-        <input class="form-check-input" type="checkbox" value="" id="no_cache" >
-        <label class="form-check-label" for="no_cache">
-          No cache
-        </label>
-      </div>
-      <button type="submit" class="btn btn-primary">
-        Generate Causal Graph
-      </button>
-    </form>
 
-    <div class="spinner-container text-center my-4" id="spinner" style="display: none;">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
+      <hr />
+      <h3 class="mt-4 mb-3">Generated Mermaid Markdown:</h3>
+      <textarea
+        id="mermaidResult"
+        readonly
+        class="form-control mb-4"
+        placeholder="Mermaid code will appear here..."
+      ></textarea>
+
+      <h3 class="mt-4 mb-3">Rendered Causal Graph:</h3>
+
+      <div class="zoom-buttons mb-3 gap-2">
+        <button
+          id="zoomIn"
+          class="btn btn-outline-secondary btn-sm"
+          title="Zoom In"
+        >
+          Zoom In
+        </button>
+        <button
+          id="zoomOut"
+          class="btn btn-outline-secondary btn-sm"
+          title="Zoom Out"
+        >
+          Zoom Out
+        </button>
+        <button
+          id="resetZoom"
+          class="btn btn-outline-secondary btn-sm"
+          title="Fit chart to view"
+        >
+          Reset View
+        </button>
+        <button
+          id="exportDiagram"
+          class="btn btn-outline-secondary btn-sm"
+          title="Export Diagram"
+        >
+          Export Diagram
+        </button>
+      </div>
+
+      <!-- Container where the SVG will be rendered -->
+      <div id="mermaidChartContainer" class="mb-4">
+        <!-- SVG will be inserted here by JavaScript -->
       </div>
     </div>
 
-    <hr />
-    <h3 class="mt-4 mb-3">Generated Mermaid Markdown:</h3>
-    <textarea id="mermaidResult" readonly class="form-control mb-4" placeholder="Mermaid code will appear here..."></textarea>
+    <script>
+      // Execute when the DOM is fully loaded
+      $(function () {
+        // --- Cache jQuery Objects ---
+        const $urlInput = $("#url");
+        const $urlForm = $("#urlForm");
+        const $spinner = $("#spinner");
+        const $mermaidResultTextarea = $("#mermaidResult");
+        const $chartContainer = $("#mermaidChartContainer");
+        const $zoomInBtn = $("#zoomIn");
+        const $zoomOutBtn = $("#zoomOut");
+        const $resetZoomBtn = $("#resetZoom");
 
-    <h3 class="mt-4 mb-3">Rendered Causal Graph:</h3>
+        // --- State Variable ---
+        let panzoomInstance = null; // Holds the Panzoom instance
 
-    <div class="zoom-buttons mb-3 gap-2">
-      <button id="zoomIn" class="btn btn-outline-secondary btn-sm" title="Zoom In">Zoom In</button>
-      <button id="zoomOut" class="btn btn-outline-secondary btn-sm" title="Zoom Out">Zoom Out</button>
-      <button id="resetZoom" class="btn btn-outline-secondary btn-sm" title="Fit chart to view">
-        Reset View
-      </button>
-      <button id="exportDiagram" class="btn btn-outline-secondary btn-sm" title="Export Diagram">Export Diagram</button>
-    </div>
+        // --- Panzoom Options ---
+        const panzoomOptions = {
+          maxScale: 6, // Increased max zoom slightly
+          minScale: 0.06, // Allow very small zoom out for initial fit if needed
+          step: 0.15, // Slightly larger zoom step
+          canvas: true, // Treat SVG as a canvas (recommended)
+          //origin: '50% 50%', // Center origin can sometimes feel more natural for zoom
+        };
 
-    <!-- Container where the SVG will be rendered -->
-    <div id="mermaidChartContainer" class="mb-4">
-       <!-- SVG will be inserted here by JavaScript -->
-    </div>
-
-  </div>
-
-  <script>
-    // Execute when the DOM is fully loaded
-    $(function () {
-      // --- Cache jQuery Objects ---
-      const $urlInput = $("#url");
-      const $urlForm = $("#urlForm");
-      const $spinner = $("#spinner");
-      const $mermaidResultTextarea = $("#mermaidResult");
-      const $chartContainer = $("#mermaidChartContainer");
-      const $zoomInBtn = $("#zoomIn");
-      const $zoomOutBtn = $("#zoomOut");
-      const $resetZoomBtn = $("#resetZoom");
-
-      // --- State Variable ---
-      let panzoomInstance = null; // Holds the Panzoom instance
-
-      // --- Panzoom Options ---
-      const panzoomOptions = {
-        maxScale: 6,    // Increased max zoom slightly
-        minScale: 0.06, // Allow very small zoom out for initial fit if needed
-        step: 0.15,     // Slightly larger zoom step
-        canvas: true,       // Treat SVG as a canvas (recommended)
-        //origin: '50% 50%', // Center origin can sometimes feel more natural for zoom
-      };
-
-      // --- Helper Function to Display Errors ---
-      function displayError(message) {
-        console.error("Error:", message);
-        $spinner.hide();
-        // Display error inside the chart container for visibility
-        $chartContainer.html(`<div class='alert alert-danger m-3'>Error: ${message}</div>`);
-        // Clear the mermaid code textarea as well
-        $mermaidResultTextarea.val('');
-        // Destroy any existing panzoom instance if an error occurs after init
-        if (panzoomInstance) {
+        // --- Helper Function to Display Errors ---
+        function displayError(message) {
+          console.error("Error:", message);
+          $spinner.hide();
+          // Display error inside the chart container for visibility
+          $chartContainer.html(
+            `<div class='alert alert-danger m-3'>Error: ${message}</div>`
+          );
+          // Clear the mermaid code textarea as well
+          $mermaidResultTextarea.val("");
+          // Destroy any existing panzoom instance if an error occurs after init
+          if (panzoomInstance) {
             panzoomInstance.destroy();
             panzoomInstance = null;
+          }
         }
-      }
 
-      function zoomToFit() {
-        const container = $chartContainer[0];
-        const svg = container.querySelector("svg");
-        if (!svg) return;
-      
-        const g = svg.querySelector("g");
-        if (!g) return;
-      
-        const bbox = g.getBBox();
-        const containerWidth = container.clientWidth;
-        const containerHeight = container.clientHeight;
-      
-        // Calculate scale in each direction
-        const scaleX = containerWidth / bbox.width;
-        const scaleY = containerHeight / bbox.height;
-      
-        // Apply padding only on the limiting axis
-        let scale;
-        if (scaleX < scaleY) {
-          scale = scaleX * 1; // Width is limiting
-        } else {
-          scale = scaleY * 0.94; // Height is limiting
+        function zoomToFit() {
+          const container = $chartContainer[0];
+          const svg = container.querySelector("svg");
+          if (!svg) return;
+
+          const g = svg.querySelector("g");
+          if (!g) return;
+
+          const bbox = g.getBBox();
+          const containerWidth = container.clientWidth;
+          const containerHeight = container.clientHeight;
+
+          // Calculate scale in each direction
+          const scaleX = containerWidth / bbox.width;
+          const scaleY = containerHeight / bbox.height;
+
+          // Apply padding only on the limiting axis
+          let scale;
+          if (scaleX < scaleY) {
+            scale = scaleX * 1; // Width is limiting
+          } else {
+            scale = scaleY * 0.98; // Height is limiting
+          }
+
+          panzoomInstance.zoom(scale, { animate: true });
+          panzoomInstance.pan(10, 10, { animate: true });
         }
-      
 
-        panzoomInstance.zoom(scale, { animate: true });
-        panzoomInstance.pan(10, 10, { animate: true });
-      }
-      
-      
-      
-      function exportDiagram() {
-        console.log("Export Diagram function started."); // Log start
+        function exportDiagram() {
+          console.log("[Export] Starting diagram export...");
 
-        const svgEl = $chartContainer.find('svg')[0];
-        if (!svgEl) {
-            alert("No diagram found to export.");
-            console.error("Export Error: No SVG element found in #mermaidChartContainer."); // Log error
+          const chartContainerElement = $chartContainer?.[0];
+          if (!chartContainerElement) {
+            alert("Export Error: Chart container not found.");
+            console.error("[Export Error] No chart container.");
             return;
-        }
-        console.log("Found SVG element:", svgEl); // Log SVG found
+          }
 
-        try {
-            // 1. Get SVG dimensions
-            console.log("Attempting to get SVG dimensions from element attributes...");
-            let svgWidth = svgEl.width?.baseVal?.value;
-            let svgHeight = svgEl.height?.baseVal?.value;
-            console.log(`Initial dimensions from attributes: width=${svgWidth}, height=${svgHeight}`);
+          const svgElement = chartContainerElement.querySelector("svg");
+          if (!svgElement) {
+            alert("Export Error: No SVG found in container.");
+            console.error("[Export Error] No SVG inside chart container.");
+            return;
+          }
 
-            // Validate dimensions and attempt fallback if necessary
-            if (!svgWidth || !svgHeight || svgWidth <= 0 || svgHeight <= 0 || !isFinite(svgWidth) || !isFinite(svgHeight)) {
-                console.warn("Invalid dimensions from SVG attributes. Attempting fallback using getBBox...");
-                const groupEl = svgEl.querySelector('g'); // Find the main group
-                if (!groupEl) {
-                    alert("Export Error: Cannot determine diagram size. Could not find main group in SVG.");
-                    console.error("Export Error: Fallback failed - Cannot find main <g> element.");
-                    return;
-                }
-                try {
-                    const bbox = groupEl.getBBox();
-                    console.log("Fallback BBox:", bbox);
-                    if (bbox.width > 0 && bbox.height > 0 && isFinite(bbox.width) && isFinite(bbox.height)) {
-                         // Use BBox size + padding for canvas. Drawing needs adjustment.
-                         const padding = 20; // Add more padding when using BBox
-                         svgWidth = Math.ceil(bbox.width + 2 * padding);
-                         svgHeight = Math.ceil(bbox.height + 2 * padding);
-                         console.log(`Fallback dimensions set from BBox (with padding): width=${svgWidth}, height=${svgHeight}`);
-                         // Note: Drawing logic needs to account for bbox.x/y and padding if using this size.
-                         // However, for simplicity, we'll still try to draw the whole image at 0,0 later,
-                         // which might lead to clipping if bbox origin wasn't 0,0.
-                         // A better approach would involve transforming the drawing context.
-                    } else {
-                         alert("Export Error: Could not determine valid diagram size from attributes or fallback BBox.");
-                         console.error("Export Error: Fallback failed - BBox has zero or invalid dimensions.");
-                        return;
-                    }
-                } catch(bboxError) {
-                    alert("Export Error: Could not determine diagram size. Error during fallback calculation.");
-                    console.error("Export Error: Fallback getBBox() failed:", bboxError);
-                    return;
-                }
-            }
+          const clonedSvg = svgElement.cloneNode(true);
+          const tempWrapper = document.createElement("div");
+          tempWrapper.style.position = "fixed";
+          tempWrapper.style.top = "-10000px";
+          tempWrapper.style.left = "-10000px";
+          tempWrapper.style.background = "#ffffff";
+          tempWrapper.appendChild(clonedSvg);
+          document.body.appendChild(tempWrapper);
 
-            // 2. Serialize SVG to String
-            console.log("Serializing SVG to string...");
-            const serializer = new XMLSerializer();
-            let svgString = serializer.serializeToString(svgEl);
-            console.log("SVG serialized (first 100 chars):", svgString.substring(0, 100));
+          clonedSvg.removeAttribute("style");
+          clonedSvg.removeAttribute("transform");
+          clonedSvg.style.width =
+            svgElement.getBoundingClientRect().width + "px";
+          clonedSvg.style.height =
+            svgElement.getBoundingClientRect().height + "px";
 
-            // Add XML declaration if missing
-            if (!svgString.startsWith('<?xml')) {
-                svgString = '<?xml version="1.0" standalone="no"?>\r\n' + svgString;
-            }
-            // Basic script removal (more robust sanitization might be needed for complex cases)
-            svgString = svgString.replace(/<script.*?<\/script>/gs, '');
+          html2canvas(tempWrapper, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: "#ffffff",
+            logging: true,
+          })
+            .then((canvas) => {
+              if (!canvas) throw new Error("html2canvas returned null canvas.");
 
-            // 3. Create Canvas
-            console.log("Creating canvas element...");
-            const canvas = document.createElement('canvas');
-            canvas.width = svgWidth; // Use determined dimensions
-            canvas.height = svgHeight;
-            const ctx = canvas.getContext('2d');
-            console.log(`Canvas created with size: ${canvas.width}x${canvas.height}`);
-
-            // 4. Create Image Object
-            console.log("Creating Image object...");
-            const img = new Image();
-
-            // 5. Create SVG Data URL
-            console.log("Creating SVG data URL...");
-            // Use encodeURIComponent for safety with special characters in SVG text/attributes
-            const svgDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
-            console.log(`SVG data URL created (length: ${svgDataUrl.length})`);
-             if (svgDataUrl.length > 4000000) { // Warn if URL is excessively long (browser limits vary)
-                console.warn(`SVG data URL is very long (${svgDataUrl.length} chars). This might exceed browser limits.`);
-             }
-
-            // --- Define image load handler ---
-            img.onload = function() {
-                console.log("Image loaded successfully from SVG data URL.");
-                try {
-                    // Fill canvas with white background BEFORE drawing the image
-                    console.log("Filling canvas background white...");
-                    ctx.fillStyle = 'white'; // Ensures transparency becomes white
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                    // 6. Draw Image onto Canvas
-                    console.log("Drawing image onto canvas...");
-                    // Draw the loaded image. If using BBox dimensions, adjustments are needed here.
-                    // For simplicity now, draw at 0,0 with the canvas dimensions.
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    console.log("Image drawn onto canvas.");
-
-                    // 7. Generate PNG Data URL from canvas
-                    console.log("Generating PNG data URL...");
-                    const pngDataUrl = canvas.toDataURL('image/png');
-                    console.log(`PNG data URL generated (length: ${pngDataUrl.length})`);
-                     if (!pngDataUrl || pngDataUrl === "data:,") {
-                         throw new Error("Generated PNG data URL is empty or invalid.");
-                     }
-
-
-                    // 8. Create Temporary Download Link
-                    console.log("Creating download link...");
-                    const downloadLink = document.createElement('a');
-                    downloadLink.href = pngDataUrl;
-                    downloadLink.download = 'causal-graph.png'; // Filename for the download
-
-                    // 9. Trigger Download
-                    console.log("Appending link and triggering click...");
-                    document.body.appendChild(downloadLink); // Append temporarily
-                    downloadLink.click();
-                    document.body.removeChild(downloadLink); // Clean up
-                    console.log("Download triggered and link removed.");
-
-                } catch (drawError) {
-                     console.error("Export Error: Error during canvas drawing or PNG generation:", drawError);
-                     alert("An error occurred while generating the PNG image: " + drawError.message);
-                }
-            };
-
-            // --- Define image error handler ---
-            img.onerror = function(errEvent) {
-                 // This is often the point of failure if the SVG data URL is malformed or too large
-                 console.error("Export Error: Failed to load SVG data into image element.", errEvent);
-                 let errorMsg = "Error preparing SVG for export. The browser could not load the SVG data as an image. This can happen if the diagram is too complex, too large, or contains unsupported elements. Check the console for details.";
-                 if (svgDataUrl.length > 4000000) {
-                    errorMsg += " The diagram's data URL size might exceed browser limits.";
-                 }
-                 alert(errorMsg);
-            }
-
-            // --- Start loading the SVG data into the image ---
-            console.log("Setting image src to SVG data URL to start loading...");
-            img.src = svgDataUrl; // This initiates the loading process -> onload or onerror will trigger
-
-        } catch (error) {
-            // Catch synchronous errors in the setup phase
-            console.error("Export Error: General error during PNG export setup:", error);
-            alert("An unexpected error occurred during export setup: " + error.message);
-        }
-      }
-      
-      
-
-      // --- Event Handlers ---
-      $zoomInBtn.on("click", function () { if (panzoomInstance) panzoomInstance.zoomIn(); });
-      $zoomOutBtn.on("click", function () { if (panzoomInstance) panzoomInstance.zoomOut(); });
-      $resetZoomBtn.on("click", function () {
-           // Reset should re-apply the "fit to view" logic
-           if (panzoomInstance) {
-               const svgEl = $chartContainer.find('svg')[0];
-               if (svgEl) {
-                zoomToFit()
-               } else {
-                 // Fallback if SVG isn't found (shouldn't happen if instance exists)
-                 panzoomInstance.reset();
-                 console.warn("Reset Zoom: SVG element not found, using basic reset.");
-               }
-           }
-      });
-      $('#exportDiagram').click(exportDiagram)
-
-      // Enable zooming with mouse wheel inside the container
-      $chartContainer.on("wheel", function (event) {
-        if (panzoomInstance) {
-          // Prevent default page scrolling when zooming chart
-          event.preventDefault();
-          panzoomInstance.zoomWithWheel(event.originalEvent);
-        }
-      });
-
-      // --- Form Submission Handler ---
-      $urlForm.on("submit", async function (event) {
-        event.preventDefault(); // Prevent standard form submission
-        const urlValue = $urlInput.val()?.trim(); // Get URL and trim whitespace
-        if (!urlValue) {
-             displayError("Please enter a valid URL.");
-             $urlInput.trigger('focus'); // Focus input if empty
-             return;
-         }
-
-        // --- Reset UI before request ---
-        $mermaidResultTextarea.val(""); // Clear previous mermaid code
-        $chartContainer.empty();       // Clear previous SVG
-        if (panzoomInstance) {
-          panzoomInstance.destroy();   // Clean up previous Panzoom instance
-          panzoomInstance = null;
-        }
-        $spinner.show(); // Show loading indicator
-
-        var no_cache = $('#no_cache').prop('checked');
-
-        // --- Make AJAX request ---
-        $.ajax({
-          url: "/generate_mermaid/", // Your backend endpoint
-          method: "POST",
-          data: { "url": urlValue, 'no_cache': no_cache },
-          dataType: "json", // Expect JSON response
-        })
-          .done(async function (result) {
-            // --- Handle successful response ---
-            if (result.error) {
-              // Handle application-specific errors returned in JSON
-              displayError("API Error: " + result.error);
-              return;
-            }
-            const mermaidCode = result.summary_markdown;
-            if (!mermaidCode || typeof mermaidCode !== 'string' || mermaidCode.trim() === '') {
-              displayError("Received empty or invalid flowchart data from the server.");
-              return;
-            }
-
-            // Display the generated Mermaid code
-            $mermaidResultTextarea.val(mermaidCode);
-
-            try {
-              // Render the Mermaid code into SVG
-              // Use a unique ID for rendering in case multiple charts exist or re-renders happen
-              const uniqueId = "mermaid-graph-" + Date.now();
-              const { svg, bindFunctions } = await mermaid.render(uniqueId, mermaidCode);
-
-              // Inject the SVG into the container
-              $chartContainer.html(svg);
-
-              // Find the newly added SVG element
-              const svgElement = $chartContainer.find("svg")[0];
-
-              if (svgElement) {
-                // Apply Mermaid's interactivity if needed (e.g., click events)
-                if (bindFunctions) {
-                  bindFunctions(svgElement);
-                }
-
-                // Initialize Panzoom on the SVG element
-                panzoomInstance = Panzoom(svgElement, panzoomOptions);
-                console.log("Panzoom initialized.");
-
-                // Add Panzoom event listener for debugging (optional)
-                svgElement.parentElement.addEventListener('panzoomchange', (event) => {
-                   // console.log(event.detail); // logs scale, x, y
-                });
-
-                // *** CRITICAL STEP: Fit the SVG to the container view ***
-                // Use setTimeout to ensure the SVG is fully rendered and measurable
-                setTimeout(() => {
-                    // Check if elements still exist (e.g., user didn't submit again quickly)
-                    if(panzoomInstance && $chartContainer[0] && svgElement) {
-                      zoomToFit()
-                    }
-                }, 0); // 0ms delay is usually sufficient, increase slightly (e.g., 50) if needed
-
-              } else {
-                displayError("Failed to find the rendered SVG element in the container.");
+              const pngDataUrl = canvas.toDataURL("image/png");
+              if (
+                !pngDataUrl ||
+                pngDataUrl === "data:," ||
+                pngDataUrl.length < 100
+              ) {
+                throw new Error("Invalid PNG data URL.");
               }
-            } catch (renderError) {
-              // Catch errors during Mermaid rendering or Panzoom initialization
-              displayError("Failed to render flowchart: " + renderError.message);
-              console.error("Render/Initialization Error:", renderError);
+
+              const downloadLink = document.createElement("a");
+              downloadLink.href = pngDataUrl;
+              downloadLink.download = `diagram-export-${Date.now()}.png`;
+              document.body.appendChild(downloadLink);
+              downloadLink.click();
+              document.body.removeChild(downloadLink);
+
+              console.log("[Export] PNG downloaded with watermark.");
+            })
+            .catch((error) => {
+              console.error("[Export Error] html2canvas failed:", error);
+              alert("Diagram export failed. See console for details.");
+            })
+            .finally(() => {
+              document.body.removeChild(tempWrapper);
+              console.log("[Export] Cleanup complete.");
+            });
+        }
+
+
+        // --- Event Handlers ---
+        $zoomInBtn.on("click", function () {
+          if (panzoomInstance) panzoomInstance.zoomIn();
+        });
+        $zoomOutBtn.on("click", function () {
+          if (panzoomInstance) panzoomInstance.zoomOut();
+        });
+        $resetZoomBtn.on("click", function () {
+          // Reset should re-apply the "fit to view" logic
+          if (panzoomInstance) {
+            const svgEl = $chartContainer.find("svg")[0];
+            if (svgEl) {
+              zoomToFit();
+            } else {
+              // Fallback if SVG isn't found (shouldn't happen if instance exists)
+              panzoomInstance.reset();
+              console.warn(
+                "Reset Zoom: SVG element not found, using basic reset."
+              );
             }
+          }
+        });
+        $("#exportDiagram").click(exportDiagram);
+
+        // Enable zooming with mouse wheel inside the container
+        $chartContainer.on("wheel", function (event) {
+          if (panzoomInstance) {
+            // Prevent default page scrolling when zooming chart
+            event.preventDefault();
+            panzoomInstance.zoomWithWheel(event.originalEvent);
+          }
+        });
+
+        // --- Form Submission Handler ---
+        $urlForm.on("submit", async function (event) {
+          event.preventDefault(); // Prevent standard form submission
+          const urlValue = $urlInput.val()?.trim(); // Get URL and trim whitespace
+          if (!urlValue) {
+            displayError("Please enter a valid URL.");
+            $urlInput.trigger("focus"); // Focus input if empty
+            return;
+          }
+
+          // --- Reset UI before request ---
+          $mermaidResultTextarea.val(""); // Clear previous mermaid code
+          $chartContainer.empty(); // Clear previous SVG
+          if (panzoomInstance) {
+            panzoomInstance.destroy(); // Clean up previous Panzoom instance
+            panzoomInstance = null;
+          }
+          $spinner.show(); // Show loading indicator
+
+          var no_cache = $("#no_cache").prop("checked");
+
+          // --- Make AJAX request ---
+          $.ajax({
+            url: "/generate_mermaid/", // Your backend endpoint
+            method: "POST",
+            data: { url: urlValue, no_cache: no_cache },
+            dataType: "json", // Expect JSON response
           })
-          .fail(function (jqXHR, textStatus, errorThrown) {
-             // --- Handle AJAX communication errors ---
-             let errorMsg = `AJAX Request Failed: ${textStatus}`;
-             if (errorThrown) {
-                 errorMsg += `, ${errorThrown}`;
-             }
-             // Try to get more details from the response body if available
-             if (jqXHR.responseText) {
-                 try {
-                     const responseJson = JSON.parse(jqXHR.responseText);
-                     if (responseJson.error) {
-                         errorMsg += ` (Server Message: ${responseJson.error})`;
-                     } else if (jqXHR.responseText.length < 500) { // Show short text responses
-                         errorMsg += ` (Server Response: ${jqXHR.responseText})`;
-                     }
-                 } catch (e) {
-                     // Response wasn't valid JSON, ignore parsing error
-                     if (jqXHR.responseText.length < 500) {
-                        errorMsg += ` (Server Response: ${jqXHR.responseText})`;
-                     }
-                 }
-             }
-             displayError(errorMsg);
-          })
-          .always(function () {
-            // --- Always execute after request (success or fail) ---
-            $spinner.hide(); // Hide loading indicator
-          });
-      }); // End of form submit handler
-    }); // End of $(document).ready
+            .done(async function (result) {
+              // --- Handle successful response ---
+              if (result.error) {
+                // Handle application-specific errors returned in JSON
+                displayError("API Error: " + result.error);
+                return;
+              }
+              const mermaidCode = result.summary_markdown;
+              if (
+                !mermaidCode ||
+                typeof mermaidCode !== "string" ||
+                mermaidCode.trim() === ""
+              ) {
+                displayError(
+                  "Received empty or invalid flowchart data from the server."
+                );
+                return;
+              }
 
-  </script>
+              // Display the generated Mermaid code
+              $mermaidResultTextarea.val(mermaidCode);
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+              try {
+                // Render the Mermaid code into SVG
+                // Use a unique ID for rendering in case multiple charts exist or re-renders happen
+                const uniqueId = "mermaid-graph-" + Date.now();
+                const { svg, bindFunctions } = await mermaid.render(
+                  uniqueId,
+                  mermaidCode
+                );
 
-</body>
+                // Inject the SVG into the container
+                $chartContainer.html(svg);
+
+                // Find the newly added SVG element
+                const svgElement = $chartContainer.find("svg")[0];
+
+                if (svgElement) {
+                  // Apply Mermaid's interactivity if needed (e.g., click events)
+                  if (bindFunctions) {
+                    bindFunctions(svgElement);
+                  }
+
+                  // Initialize Panzoom on the SVG element
+                  panzoomInstance = Panzoom(svgElement, panzoomOptions);
+                  console.log("Panzoom initialized.");
+
+                  // Add Panzoom event listener for debugging (optional)
+                  svgElement.parentElement.addEventListener(
+                    "panzoomchange",
+                    (event) => {
+                      // console.log(event.detail); // logs scale, x, y
+                    }
+                  );
+
+                  // *** CRITICAL STEP: Fit the SVG to the container view ***
+                  // Use setTimeout to ensure the SVG is fully rendered and measurable
+                  setTimeout(() => {
+                    // Check if elements still exist (e.g., user didn't submit again quickly)
+                    if (panzoomInstance && $chartContainer[0] && svgElement) {
+                      zoomToFit();
+                    }
+                  }, 0); // 0ms delay is usually sufficient, increase slightly (e.g., 50) if needed
+                } else {
+                  displayError(
+                    "Failed to find the rendered SVG element in the container."
+                  );
+                }
+              } catch (renderError) {
+                // Catch errors during Mermaid rendering or Panzoom initialization
+                displayError(
+                  "Failed to render flowchart: " + renderError.message
+                );
+                console.error("Render/Initialization Error:", renderError);
+              }
+            })
+            .fail(function (jqXHR, textStatus, errorThrown) {
+              // --- Handle AJAX communication errors ---
+              let errorMsg = `AJAX Request Failed: ${textStatus}`;
+              if (errorThrown) {
+                errorMsg += `, ${errorThrown}`;
+              }
+              // Try to get more details from the response body if available
+              if (jqXHR.responseText) {
+                try {
+                  const responseJson = JSON.parse(jqXHR.responseText);
+                  if (responseJson.error) {
+                    errorMsg += ` (Server Message: ${responseJson.error})`;
+                  } else if (jqXHR.responseText.length < 500) {
+                    // Show short text responses
+                    errorMsg += ` (Server Response: ${jqXHR.responseText})`;
+                  }
+                } catch (e) {
+                  // Response wasn't valid JSON, ignore parsing error
+                  if (jqXHR.responseText.length < 500) {
+                    errorMsg += ` (Server Response: ${jqXHR.responseText})`;
+                  }
+                }
+              }
+              displayError(errorMsg);
+            })
+            .always(function () {
+              // --- Always execute after request (success or fail) ---
+              $spinner.hide(); // Hide loading indicator
+            });
+        }); // End of form submit handler
+      }); // End of $(document).ready
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
 </html>
