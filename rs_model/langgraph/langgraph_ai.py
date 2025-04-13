@@ -1,6 +1,6 @@
 import os
 import uuid
-import google.generativeai as genai
+from google import genai
 from qdrant_client import QdrantClient
 from qdrant_client.models import PointStruct, VectorParams, SearchParams, Filter, FieldCondition, MatchValue
 

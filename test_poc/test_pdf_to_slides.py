@@ -1,22 +1,15 @@
 import warnings
 warnings.filterwarnings("ignore")
 
+import common_test_util
+common_test_util.setup_test()
+
 import fitz  # PyMuPDF
 import re
-import google.generativeai as genai
-import os
 
-from dotenv import load_dotenv
-load_dotenv()
+from rs_agent.ai_core import GeminiClient
 
-GEMINI_MODEL = 'models/gemini-1.5-flash-latest'
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-
-if GEMINI_API_KEY is None or len(GEMINI_API_KEY) == 0:
-    print('GEMINI_API_KEY is empty')
-    exit
-
-genai.configure(api_key=GEMINI_API_KEY)
+gemini_client = GeminiClient()  # uses env vars by default
 
 
 def insert_separator_before_headings(text):
@@ -41,15 +34,14 @@ def text_to_slides(extracted_text: str):
     Returns:
         slides_in_markdown (str): slides in markdown code
     """
-    gemini_model = genai.GenerativeModel(model_name=GEMINI_MODEL)
-    model_config = genai.GenerationConfig(temperature=0.5)
+   
     
     context = "You are book reader. You can do book summary into slides in markdown."
     context = context + " Each slide must begins with '##'. Write summary slides for this content: \n "
     prompt = context + extracted_text
 
-    response = gemini_model.generate_content(prompt, generation_config=model_config)
-    return insert_separator_before_headings(response.text)
+    text = gemini_client.generate_content(prompt)
+    return insert_separator_before_headings(text)
 
 
 def extract_text_from_pdf(pdf_path, start_page, end_page):
@@ -99,7 +91,7 @@ def write_text_to_file(text: str, filename="summary-slides.md"):
 
 # ---------------------------
 # Replace with your PDF file path
-pdf_path = "/home/thomas/Documents/CDP/aws-in-action.pdf"
+pdf_path = "/home/trieu/Documents/AI/AI-Driven Value Management How AI Can Help Bridge the Gap Across the Enterprise to Achieve Customer Success.pdf"
 start_page = 200
 end_page = 232
 

@@ -1,13 +1,10 @@
-import google.generativeai as genai
-import os
-import markdown
-from dotenv import load_dotenv
-load_dotenv()
 
-GEMINI_MODEL = 'gemini-2.0-flash'
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-genai.configure(api_key=GEMINI_API_KEY)
-gemini_text_model = genai.GenerativeModel(model_name=GEMINI_MODEL)
+
+from common_test_util import setup_test
+setup_test()
+
+from rs_agent.ai_core import GeminiClient
+gemini_client = GeminiClient()
 
 
 prompt = ''' 
@@ -60,8 +57,7 @@ mindmap
 '''
 
 
-model_config = genai.GenerationConfig(temperature=0.1)
-response = gemini_text_model.generate_content(prompt, generation_config=model_config)
-answer_text = response.text 
+
+answer_text = gemini_client.generate_content(prompt, 0.2)
 
 print(answer_text)

@@ -1,5 +1,5 @@
 from rs_model.langgraph.conversation_models import UserConversationState
-import google.generativeai as genai
+from google import genai
 from typing import Optional, Dict
 from pydantic import BaseModel, Field
 from typing import Optional
