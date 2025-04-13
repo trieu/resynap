@@ -1,6 +1,6 @@
 import os
 import uuid
-from google import genai
+
 from qdrant_client import QdrantClient
 from qdrant_client.models import PointStruct, VectorParams, SearchParams, Filter, FieldCondition, MatchValue
 
@@ -15,18 +15,16 @@ from rs_model.chatbot_models import Message
 from rs_model.language_utils import remove_similar_keywords, split_string_to_keywords
 from rs_model.system_utils import read_json_from_file
 
+from rs_agent.ai_core import GeminiClient
 
 # Embedding model for text transformation
 MODEL_NAME = 'BAAI/bge-m3'
 embedding_model = SentenceTransformer(MODEL_NAME)
 VECTOR_DIM_SIZE = embedding_model.get_sentence_embedding_dimension()
 
-# Configure Gemini AI
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-
-# Gemini AI model
-GEMINI_MODEL_ID = 'gemini-2.0-flash'
-gemini_model = genai.GenerativeModel(GEMINI_MODEL_ID)
+# AI model
+DEFAULT_ERROR = "I'm sorry, I am unable to generate a response at this time."
+gemini_client = GeminiClient()
 
 # Fetch the host and port from environment variables
 QDRANT_HOST = os.getenv('QDRANT_HOST', 'localhost')  # default is 'localhost'
@@ -52,13 +50,12 @@ def to_embedding_vector(s: str):
     return embedding_model.encode(s, convert_to_tensor=True).tolist()
 
 
-def extract_keywords_from_message(user_message: str, gemini_model, max_keywords: int = 6) -> list[str]:
+def extract_keywords_from_message(user_message: str, max_keywords: int = 6) -> list[str]:
     """
     Extracts keywords from a user message using Gemini, focusing on enriching user profile and personal traits.
 
     Args:
         user_message: The user's message as a string.
-        gemini_model: The Gemini model instance used for keyword extraction.
         min_context_to_save: Minimum length of user_message to process.
 
     Returns:
@@ -76,8 +73,8 @@ def extract_keywords_from_message(user_message: str, gemini_model, max_keywords:
                 Text: "{user_message}"
                 Keywords:
             """
-            response = gemini_model.generate_content(prompt_text)
-            keywords_str = response.text.strip() if response and response.text else ""
+            
+            keywords_str = gemini_client.generate_content(prompt_text, 1)
 
             if keywords_str:
                 keywords = [keyword.strip() for keyword in keywords_str.split(',') if keyword.strip()]  # Improved splitting and cleaning
@@ -167,7 +164,7 @@ class DatabaseManager:
         """
         
          # process keywords and create context
-        keywords = extract_keywords_from_message(state.user_message, gemini_model)
+        keywords = extract_keywords_from_message(state.user_message)
                 
         if  len(keywords) > 0:
             
@@ -366,9 +363,8 @@ class LangGraphAI:
         print("state \n ",state)
         try:            
             prompt_text = state.build_prompt()
-            print(prompt_text)
-            response = gemini_model.generate_content(prompt_text)
-            state.response = response.text if response and response.text else "I'm sorry, I am unable to generate a response at this time."
+            print(prompt_text)           
+            state.response = gemini_client.generate_content(prompt_text , temperature=0.9 , on_error=DEFAULT_ERROR)
         except Exception as e:  # Catch Gemini API errors
             print(f"Error generating response from Gemini: {e}")
             state.response = "I'm sorry, an error occurred while generating a response."
@@ -430,11 +426,10 @@ def critical_thinking(user_msg: Message):
             The response must only contain the question in {target_language}, without any explanations or additional text.
         """
 
-        response = gemini_model.generate_content(prompt_text)
+        question = gemini_client.generate_content(prompt=prompt_text)
         
         # Validate response
-        if response and hasattr(response, 'text') and response.text:
-            question = response.text.strip()
+        if len(question) > 0:
             return question
         
         print("Warning: Received an empty response from Gemini.")

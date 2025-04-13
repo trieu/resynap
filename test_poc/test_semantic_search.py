@@ -65,9 +65,9 @@ for query in queries:
     print("\nTop 5 most similar sentences in corpus_list:")
 
     # Alternatively, we can also use util.semantic_search to perform cosine similarty + topk
-    search_result = qdrantClient.search(
+    search_result = qdrantClient.query_points(
         collection_name="text_data",
-        query_vector=query_embedding, 
+        query=query_embedding, 
         limit=3
     )
     
