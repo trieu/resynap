@@ -1,30 +1,39 @@
-import google.generativeai as genai
-import os
+
+
 import markdown
-from dotenv import load_dotenv
-load_dotenv()
+from common_test_util import setup_test
+setup_test()
 
-GEMINI_MODEL = 'gemini-2.0-flash'
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-genai.configure(api_key=GEMINI_API_KEY)
-gemini_text_model = genai.GenerativeModel(model_name=GEMINI_MODEL)
+from rs_agent.ai_core import GeminiClient
 
-book_title = 'Big Data and AI for Jewelry Brands'
+class GeminiBookWriter:
+    def __init__(self, gemini_client: GeminiClient):
+        self.gemini_client = gemini_client
 
-question_for_toc = "Write a table of contents for the book '" + book_title + "'."
-question_for_toc = question_for_toc + " Each chapter must begine with '##'"
+    def generate_markdown(self, book_title: str, section: str, language: str = 'English') -> str:
+        prompt = (
+            f"You are the author of the book '{book_title}'. "
+            f"Write a chapter of the book about '{section}' in the language '{language}'."
+            f"Just return the markdown code only. "
+        )
+        print(f"\n{prompt}\n")
+        return self.gemini_client.generate_content(prompt)
 
-section = "Automated data collection"
-question_for_content = "You are the author of book '"+book_title+"'. Write a paragraph about '"+section+"'"
+    def render_html(self, markdown_text: str) -> str:
+        return markdown.markdown(markdown_text, extensions=['fenced_code'])
 
-print("\n"+question_for_content+"\n")
+    def write_section(self, book_title: str, section: str, language: str = 'English'):
+        markdown_content = self.generate_markdown(book_title, section, language)
+        html_content = self.render_html(markdown_content)
 
-model_config = genai.GenerationConfig(temperature=0.8)
-response = gemini_text_model.generate_content(question_for_content, generation_config=model_config)
-answer_text = response.text 
+        print(markdown_content)
+        print("\nHTML:\n" + html_content + "\n")
 
-rs_html = markdown.markdown(answer_text, extensions=['fenced_code'])
-print(answer_text)
 
-print("\n HTML: \n "+rs_html+"\n")
+if __name__ == "__main__":
+    book_title = "Big Data and AI for Retail"
+    section = "Open Source AI-first CDP"
 
+    gemini_client = GeminiClient()  # uses env vars by default
+    writer = GeminiBookWriter(gemini_client)
+    writer.write_section(book_title, section, 'Vietnamse')
