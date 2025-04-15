@@ -14,11 +14,18 @@ logger = logging.getLogger(__name__)
 
 # Default fallback values
 DEFAULT_MODEL_ID = os.getenv("GEMINI_TEXT_MODEL_ID", "gemini-2.0-flash-001")
-DEFAULT_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # Error message used when required config is missing
 INIT_FAIL_MSG = "Both `model_name` and `api_key` must be provided or set in the environment."
 
+def is_gemini_model_ready():
+    isReady = isinstance(GEMINI_API_KEY, str)
+    # init Google AI
+    if isReady:
+        return True
+    else:
+        return False
 
 class GeminiClient:
     """
@@ -26,7 +33,7 @@ class GeminiClient:
     Handles text generation via a specified model.
     """
 
-    def __init__(self, model_name: str = DEFAULT_MODEL_ID, api_key: str = DEFAULT_API_KEY):
+    def __init__(self, model_name: str = DEFAULT_MODEL_ID, api_key: str = GEMINI_API_KEY):
         if not model_name or not api_key:
             logger.critical(INIT_FAIL_MSG)
             raise ValueError(INIT_FAIL_MSG)

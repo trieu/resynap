@@ -218,7 +218,7 @@ def add_product_to_qdrant(p: ProductRequest):
     product_vector = build_product_vector(p.product_name, p.product_category, p.product_keywords, p.journey_maps)
     if product_vector is None:
         print(
-            f"Error: Could not generate a valid vector for product {product_name} with ID {product_id}.")
+            f"Error: Could not generate a valid vector for product {p.product_name} with ID {product_id}.")
         return
 
     # Save product vector to Qdrant

@@ -1,9 +1,6 @@
 from rs_model.langgraph.conversation_models import UserConversationState
-from google import genai
-from typing import Optional, Dict
+
 from pydantic import BaseModel, Field
-from typing import Optional
-import uuid
 import time
 from dotenv import load_dotenv
 import os
@@ -73,15 +70,6 @@ class Message(BaseModel):
         state.session_id = self.session_id
         return state
 
-
-def is_gemini_model_ready():
-    isReady = isinstance(GEMINI_API_KEY, str)
-    # init Google AI
-    if isReady:
-        genai.configure(api_key=GEMINI_API_KEY)
-        return True
-    else:
-        return False
 
 
 

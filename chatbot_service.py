@@ -1,9 +1,9 @@
 from rs_domain.user_management import get_user_profile
 from rs_model.chatbot_models import (
-    get_selected_agent, Message, is_gemini_model_ready, generate_report
+    get_selected_agent, Message, generate_report
 )
 
-import asyncio
+from rs_agent.ai_core import GeminiClient, is_gemini_model_ready
 import os
 import time
 from dotenv import load_dotenv

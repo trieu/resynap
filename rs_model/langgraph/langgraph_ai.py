@@ -9,11 +9,10 @@ from qdrant_client.http.models import Distance
 from langgraph.graph import StateGraph
 from sentence_transformers import SentenceTransformer
 
-from rs_domain.user_management import get_user_profile, get_user_profile_for_ai_agent
+from rs_domain.user_management import get_user_profile_for_ai_agent
 from rs_model.langgraph.conversation_models import ConversationState, UserConversationState
 from rs_model.chatbot_models import Message
 from rs_model.language_utils import remove_similar_keywords, split_string_to_keywords
-from rs_model.system_utils import read_json_from_file
 
 from rs_agent.ai_core import GeminiClient
 
@@ -261,10 +260,12 @@ class LangGraphAI:
         self.workflow.add_node("detect_ai_persona", self.detect_ai_persona)
         self.workflow.add_node("retrieve_context", self.retrieve_context)
         self.workflow.add_node("generate_response", self.generate_response)
+        self.workflow.add_node("update_memory", self.update_memory)
 
         # Define workflow transitions
         self.workflow.add_edge("detect_ai_persona", "retrieve_context")
         self.workflow.add_edge("retrieve_context", "generate_response")
+        self.workflow.add_edge("generate_response", "update_memory")
 
         #  Set entry point for the workflow
         self.workflow.set_entry_point("detect_ai_persona")
@@ -360,7 +361,7 @@ class LangGraphAI:
         #prompt = f"User: {state.user_message}\nContext: {state.context}\nAgent Role: {state.agent_role}\nResponse:"
         print("state_dict \n ",state_dict)
         state = UserConversationState.from_dict(state_dict) 
-        print("state \n ",state)
+        print("generate_response.state \n ",state)
         try:            
             prompt_text = state.build_prompt()
             print(prompt_text)           
@@ -368,6 +369,22 @@ class LangGraphAI:
         except Exception as e:  # Catch Gemini API errors
             print(f"Error generating response from Gemini: {e}")
             state.response = "I'm sorry, an error occurred while generating a response."
+        return state.to_dict()
+    
+    
+    def update_memory(self, state_dict) :
+        """Save generated conversation state to a user_memory.
+
+        Args:
+            state_dict (dict): A dictionary representing the current conversation state.
+
+        Returns:
+            dict: The updated conversation state dictionary, including the generated AI response.
+        """
+        state = UserConversationState.from_dict(state_dict) 
+        # Save conversation state to database for future context
+        self.db_manager.save_user_conversation_state(state)
+        print("update_memory.save_user_conversation_state \n ",state)
         return state.to_dict()
 
 # Agent System 
@@ -409,9 +426,6 @@ def submit_message_to_agent(user_msg: Message):
 
     # Convert back to UserConversationState object
     final_state = UserConversationState.from_dict(final_state_dict)
-
-    # Save conversation state to database for future context
-    agent_system.db_manager.save_user_conversation_state(final_state)
 
     return final_state
 
