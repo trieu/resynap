@@ -46,7 +46,6 @@ Giải pháp bao gồm các thành phần chính sau:
 
 ## Flow chính
 
-
 Biểu đồ sau mô tả luồng dữ liệu và các thành phần trong giải pháp:
 
 ```mermaid
@@ -408,7 +407,7 @@ Một quy trình bên ngoài (ví dụ: Python script chạy bằng cron, Lambda
 Quy trình này có nhiệm vụ gọi stored procedure nhận dạng danh tính chính (resolve_customer_identities_dynamic) để xử lý toàn bộ bảng staging, đảm bảo không có bản ghi nào bị bỏ sót và xử lý các trường hợp phức tạp có thể cần quét lại.
 Quan trọng: Để tránh xung đột và xử lý trùng lặp không mong muốn, quy trình lịch trình hàng ngày phải vô hiệu hóa trigger real-time trước khi bắt đầu quá trình quét toàn bộ và kích hoạt lại sau khi hoàn thành.
 
-Mã Python Khái niệm cho Lịch Trình Hàng Ngày:
+### Daily Trigger using Python code 
 
 ```python
 import psycopg2
@@ -490,6 +489,60 @@ if __name__ == "__main__":
 ```
 
 
+### Daily Trigger using PostgreSQL pg_cron 
+
+#### 🧩 Bước 1: Tạo hàm PostgreSQL
+
+```sql
+CREATE OR REPLACE FUNCTION run_daily_identity_resolution()
+RETURNS void AS $$
+BEGIN
+    RAISE NOTICE '[%] Vô hiệu hóa trigger real-time...', clock_timestamp();
+    EXECUTE format('ALTER TABLE %I DISABLE TRIGGER %I', 'cdp_raw_profiles_stage', 'cdp_trigger_process_new_raw_profiles');
+
+    -- Chờ một chút (5 giây)
+    PERFORM pg_sleep(5);
+
+    RAISE NOTICE '[%] Gọi stored procedure resolve_customer_identities_dynamic...', clock_timestamp();
+    PERFORM resolve_customer_identities_dynamic();
+
+    RAISE NOTICE '[%] Kích hoạt lại trigger real-time...', clock_timestamp();
+    EXECUTE format('ALTER TABLE %I ENABLE TRIGGER %I', 'cdp_raw_profiles_stage', 'cdp_trigger_process_new_raw_profiles');
+
+    RAISE NOTICE '[%] Quá trình lịch trình hàng ngày hoàn tất.', clock_timestamp();
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING '[%] Lỗi trong quá trình thực thi: %', clock_timestamp(), SQLERRM;
+        -- Cố gắng bật lại trigger
+        BEGIN
+            EXECUTE format('ALTER TABLE %I ENABLE TRIGGER %I', 'cdp_raw_profiles_stage', 'cdp_trigger_process_new_raw_profiles');
+            RAISE NOTICE '[%] Đã kích hoạt lại trigger sau lỗi.', clock_timestamp();
+        EXCEPTION
+            WHEN OTHERS THEN
+                RAISE WARNING '[%] Lỗi khi kích hoạt lại trigger sau lỗi: %', clock_timestamp(), SQLERRM;
+        END;
+END;
+$$ LANGUAGE plpgsql;
+
+```
+
+#### 🕑 Bước 2: Đăng ký job pg_cron
+
+
+Chạy đoạn SQL sau để tạo cronjob:
+
+```sql
+SELECT cron.schedule(
+    'daily_identity_resolution',
+    '0 2 * * *', -- Mỗi ngày lúc 2:00 AM
+    $$SELECT run_daily_identity_resolution();$$
+);
+```
+
+💡 Lưu ý: pg_cron cần được cài đặt và kích hoạt (shared_preload_libraries = 'pg_cron'), và bạn nên chạy trên RDS PostgreSQL hỗ trợ pg_cron, hoặc tự host PostgreSQL 16.
+
+
 ## Quá Trình Nhận Dạng Danh Tính (Bên trong Stored Procedure - SQL)
 
 Đây là stored procedure chính chứa toàn bộ logic nhận dạng danh tính. Nó đọc cấu hình từ bảng cdp_profile_attributes để thực hiện ghép nối và tổng hợp dữ liệu một cách động. Stored procedure này được gọi bởi cả real-time trigger và lịch trình hàng ngày.
@@ -499,200 +552,158 @@ Lưu ý quan trọng: Việc làm cho stored procedure hoàn toàn động dựa
 Mã dưới đây là phiên bản đã được sửa đổi để đọc cấu hình từ cdp_profile_attributes và thử xây dựng logic ghép nối động, nhưng phần truy cập giá trị từ bản ghi thô và tổng hợp dữ liệu vẫn cần được mở rộng và hoàn thiện trong một triển khai thực tế.
 
 ```sql 
--- Stored Procedure để thực hiện Identity Resolution một cách động dựa trên cấu hình cdp_profile_attributes
+-- 1. Tạo TYPE dùng cho identity resolution config
+DO $$ BEGIN
+    CREATE TYPE identity_config_type AS (
+        id INT,
+        attr_code VARCHAR,
+        data_type VARCHAR,
+        match_rule VARCHAR,
+        threshold DECIMAL,
+        cons_rule VARCHAR
+    );
+EXCEPTION
+    WHEN duplicate_object THEN NULL; -- Nếu type đã tồn tại thì bỏ qua
+END $$;
+
+-- 2. Hàm chính với logic dynamic identity resolution
 CREATE OR REPLACE FUNCTION resolve_customer_identities_dynamic(batch_size INT DEFAULT 1000)
 RETURNS VOID AS $$
 DECLARE
     r_profile cdp_raw_profiles_stage%ROWTYPE; -- Biến cho bản ghi thô hiện tại
     matched_master_id UUID; -- ID của master profile tìm thấy khớp
 
-    -- Lấy cấu hình thuộc tính identity resolution chỉ MỘT LẦN khi hàm bắt đầu
-    -- Lưu cấu hình vào một mảng các RECORD
-    identity_configs_array RECORD[];
+    identity_configs_array identity_config_type[]; -- Mảng chứa cấu hình IR từ bảng cấu hình
 
-    -- Biến cho xây dựng truy vấn động tìm kiếm khớp
-    v_where_conditions TEXT[] := '{}'; -- Danh sách các phần của mệnh đề WHERE (ví dụ: 'mp.email = %L')
-    v_condition_text TEXT; -- Biến tạm lưu một phần điều kiện
+    v_where_conditions TEXT[] := '{}'; -- Danh sách điều kiện WHERE động
+    v_condition_text TEXT;
 
-    v_identity_config_rec RECORD; -- Biến lặp cho cấu hình thuộc tính IR
-    v_raw_value_text TEXT; -- Giá trị thuộc tính từ bản ghi thô (ép kiểu về text)
-    v_master_col_name TEXT; -- Tên cột tương ứng trong bảng master (giả định khớp attribute_internal_code)
+    v_identity_config_rec identity_config_type; -- Biến duyệt từng cấu hình trong mảng
+    v_raw_value_text TEXT;
+    v_master_col_name TEXT;
 
-    -- Biến cho việc thực thi truy vấn động tìm kiếm khớp
     v_dynamic_select_query TEXT;
 
-    -- Biến cho tổng hợp dữ liệu (sẽ rất phức tạp khi làm động dựa trên consolidation_rule)
-    -- Các biến này chỉ được khai báo để minh họa ý tưởng, không được sử dụng đầy đủ trong mã ví dụ này.
+    -- Các biến tổng hợp chưa được dùng đầy đủ
     v_update_set_clauses TEXT[] := '{}';
     v_insert_cols TEXT[] := '{}';
     v_insert_values TEXT[] := '{}';
     v_consolidate_config_rec RECORD;
 
 BEGIN
-    -- 1. Lấy cấu hình các thuộc tính identity resolution từ bảng cdp_profile_attributes (Chỉ một lần)
-    -- Lấy các thuộc tính IR đang hoạt động và có cấu hình ghép nối
-    SELECT array_agg(ROW(id, attribute_internal_code, data_type, matching_rule, matching_threshold, consolidation_rule))
+    -- 1. Lấy các cấu hình IR
+    SELECT array_agg(ROW(id, attribute_internal_code, data_type, matching_rule, matching_threshold, consolidation_rule)::identity_config_type)
     INTO identity_configs_array
     FROM cdp_profile_attributes
     WHERE is_identity_resolution = TRUE AND status = 'ACTIVE'
     AND matching_rule IS NOT NULL AND matching_rule != 'none';
 
-    -- Kiểm tra xem có thuộc tính IR nào được cấu hình không. Nếu không, bỏ qua quá trình giải quyết.
     IF identity_configs_array IS NULL OR array_length(identity_configs_array, 1) IS NULL THEN
-        RAISE WARNING 'Không có thuộc tính identity resolution hoạt động được cấu hình. Quá trình giải quyết bỏ qua.';
+        RAISE WARNING 'Không có thuộc tính identity resolution hoạt động được cấu hình.';
         RETURN;
     END IF;
 
-    -- 2. Lặp qua từng bản ghi profile thô chưa xử lý theo lô
+    -- 2. Duyệt qua các bản ghi thô chưa xử lý
     FOR r_profile IN
         SELECT *
         FROM cdp_raw_profiles_stage
         WHERE processed_at IS NULL
         LIMIT batch_size
     LOOP
-        matched_master_id := NULL; -- Đặt lại kết quả khớp cho bản ghi thô mới
-        v_where_conditions := '{}'; -- Đặt lại danh sách điều kiện WHERE cho bản ghi thô mới
+        matched_master_id := NULL;
+        v_where_conditions := '{}';
 
-        -- 3. Xây dựng các điều kiện ghép nối động cho bản ghi thô hiện tại
-        -- Dựa trên cấu hình các thuộc tính IR đã lấy ở trên
-        FOR v_identity_config_rec IN SELECT * FROM unnest(identity_configs_array) as t(id INT, attr_code VARCHAR, data_type VARCHAR, match_rule VARCHAR, threshold DECIMAL, cons_rule VARCHAR)
+        -- 3. Lặp qua các cấu hình IR
+        FOREACH v_identity_config_rec IN ARRAY identity_configs_array
         LOOP
-            -- --- LẤY GIÁ TRỊ THUỘC TÍNH TỪ BẢN GHI THÔ (PHẦN KHÓ LÀM ĐỘNG) ---
-            -- Việc lấy giá trị từ biến RECORD (r_profile) dựa trên tên cột lưu dưới dạng chuỗi
-            -- (v_identity_config_rec.attr_code) rất phức tạp trong PL/pgSQL với lược đồ cột cố định.
-            -- Dưới đây là cách làm đơn giản hóa bằng CASE cho các thuộc tính ĐÃ BIẾT.
-            -- Trong hệ thống thực tế, cân nhắc dùng HSTORE/JSONB hoặc kỹ thuật EXECUTE phức tạp hơn.
-            v_raw_value_text := NULL; -- Reset giá trị thuộc tính
+            v_raw_value_text := NULL;
 
+            -- 3.1 Lấy giá trị thuộc tính từ bản ghi thô
             CASE v_identity_config_rec.attr_code
                 WHEN 'first_name' THEN v_raw_value_text := r_profile.first_name::TEXT;
                 WHEN 'last_name' THEN v_raw_value_text := r_profile.last_name::TEXT;
                 WHEN 'email' THEN v_raw_value_text := r_profile.email::TEXT;
                 WHEN 'phone_number' THEN v_raw_value_text := r_profile.phone_number::TEXT;
                 WHEN 'address_line1' THEN v_raw_value_text := r_profile.address_line1::TEXT;
-                -- THÊM CÁC THUỘC TÍNH IR ĐÃ BIẾT KHÁC Ở ĐÂY THEO CẤU TRÚC CASE
                 ELSE
-                    -- Nếu thuộc tính không có trong CASE này, không thể lấy giá trị động từ r_profile
-                    RAISE WARNING 'Thuộc tính IR "%" không được xử lý trong CASE lấy giá trị từ raw_profile.', v_identity_config_rec.attr_code;
-                    CONTINUE; -- Bỏ qua thuộc tính này
+                    RAISE WARNING 'Thuộc tính IR "%" không được hỗ trợ.', v_identity_config_rec.attr_code;
+                    CONTINUE;
             END CASE;
-            -- --- KẾT THÚC LẤY GIÁ TRỊ ĐƠN GIẢN HÓA ---
 
-
-            -- Chỉ thêm điều kiện nếu giá trị thuộc tính từ bản ghi thô không NULL và không rỗng (đối với chuỗi)
+            -- 3.2 Kiểm tra giá trị hợp lệ
             IF v_raw_value_text IS NOT NULL AND (v_identity_config_rec.data_type NOT IN ('VARCHAR', 'citext', 'TEXT') OR v_raw_value_text != '') THEN
-                v_master_col_name := v_identity_config_rec.attr_code; -- Giả định tên cột trong master khớp với internal code
-                v_condition_text := ''; -- Reset điều kiện thuộc tính
+                v_master_col_name := v_identity_config_rec.attr_code;
+                v_condition_text := '';
 
-                -- Xây dựng điều kiện dựa trên quy tắc ghép nối và kiểu dữ liệu
                 CASE v_identity_config_rec.match_rule
                     WHEN 'exact' THEN
-                        -- Sử dụng %I cho tên cột và %L cho giá trị string để tránh SQL Injection
-                        -- Cần đảm bảo kiểu dữ liệu tương thích hoặc ép kiểu rõ ràng trong điều kiện
-                        -- Ví dụ: format('mp.%I::%s = %L::%s', v_master_col_name, v_identity_config_rec.data_type, v_raw_value_text, v_identity_config_rec.data_type)
-                        -- Hoặc dựa vào ép kiểu ngầm định của PGSQL nếu an toàn
                         v_condition_text := format('mp.%I = %L', v_master_col_name, v_raw_value_text);
 
                     WHEN 'fuzzy_trgm' THEN
-                        -- Áp dụng cho các kiểu dữ liệu text-like và cần ngưỡng
-                         IF v_identity_config_rec.data_type IN ('VARCHAR', 'citext', 'TEXT') AND v_identity_config_rec.threshold IS NOT NULL THEN
-                             v_condition_text := format('similarity(mp.%I, %L) >= %s', v_master_col_name, v_raw_value_text, v_identity_config_rec.threshold);
-                         ELSE
-                             RAISE WARNING 'Quy tắc fuzzy_trgm không áp dụng cho kiểu dữ liệu "%" hoặc thiếu ngưỡng cho thuộc tính "%".', v_identity_config_rec.data_type, v_identity_config_rec.attr_code;
-                         END IF;
+                        IF v_identity_config_rec.data_type IN ('VARCHAR', 'citext', 'TEXT') AND v_identity_config_rec.threshold IS NOT NULL THEN
+                            v_condition_text := format('similarity(mp.%I, %L) >= %s', v_master_col_name, v_raw_value_text, v_identity_config_rec.threshold);
+                        ELSE
+                            RAISE WARNING 'Fuzzy_trgm không hợp lệ với "%".', v_identity_config_rec.attr_code;
+                        END IF;
 
                     WHEN 'fuzzy_dmetaphone' THEN
-                         IF v_identity_config_rec.data_type IN ('VARCHAR', 'citext', 'TEXT') THEN
+                        IF v_identity_config_rec.data_type IN ('VARCHAR', 'citext', 'TEXT') THEN
                             v_condition_text := format('dmetaphone(mp.%I) = dmetaphone(%L)', v_master_col_name, v_raw_value_text);
-                         ELSE
-                             RAISE WARNING 'Quy tắc fuzzy_dmetaphone không áp dụng cho kiểu dữ liệu "%" cho thuộc tính "%".', v_identity_config_rec.data_type, v_identity_config_rec.attr_code;
-                         END IF;
-
-                    -- THÊM CÁC QUY TẮC GHÉP NỐI ĐỘNG KHÁC TẠI ĐÂY DỰA TRÊN matching_rule
+                        ELSE
+                            RAISE WARNING 'Fuzzy_dmetaphone không hợp lệ với "%".', v_identity_config_rec.attr_code;
+                        END IF;
 
                     ELSE
-                        RAISE WARNING 'Quy tắc ghép nối không xác định "%" cho thuộc tính "%".', v_identity_config_rec.match_rule, v_identity_config_rec.attr_code;
-                        -- Bỏ qua quy tắc không xác định
+                        RAISE WARNING 'match_rule không xác định: %', v_identity_config_rec.match_rule;
                         CONTINUE;
                 END CASE;
 
-                -- Thêm điều kiện đã xây dựng vào danh sách nếu nó không rỗng
                 IF v_condition_text != '' THEN
-                    v_where_conditions := array_append(v_where_conditions, '(' || v_condition_text || ')'); -- Bọc mỗi điều kiện thuộc tính bằng ngoặc đơn
+                    v_where_conditions := array_append(v_where_conditions, '(' || v_condition_text || ')');
                 END IF;
+            END IF;
+        END LOOP;
 
-            END IF; -- Kết thúc kiểm tra giá trị thuộc tính không NULL/rỗng
-
-        END LOOP; -- Kết thúc lặp qua các cấu hình thuộc tính IR
-
-        -- 4. Thực thi truy vấn động để tìm kiếm khớp trong Hồ sơ Master hiện có
-        -- Kết hợp tất cả các điều kiện thuộc tính IR bằng OR (Tìm bất kỳ khớp nào trên bất kỳ thuộc tính IR nào)
-        -- Logic phức tạp hơn có thể sử dụng AND hoặc kết hợp AND/OR tùy theo quy tắc nghiệp vụ và điểm tin cậy.
-        matched_master_id := NULL; -- Đặt lại kết quả khớp
-        v_dynamic_select_query := ''; -- Đặt lại câu truy vấn động
-
+        -- 4. Thực thi truy vấn tìm khớp
         IF array_length(v_where_conditions, 1) IS NOT NULL THEN
-             v_dynamic_select_query := 'SELECT master_profile_id FROM cdp_master_profiles mp WHERE ' || array_to_string(v_where_conditions, ' OR ') || ' LIMIT 1';
+            v_dynamic_select_query := 'SELECT master_profile_id FROM cdp_master_profiles mp WHERE ' || array_to_string(v_where_conditions, ' OR ') || ' LIMIT 1';
 
-            -- Thực thi câu truy vấn động
             BEGIN
-                 EXECUTE v_dynamic_select_query INTO matched_master_id;
-
+                EXECUTE v_dynamic_select_query INTO matched_master_id;
             EXCEPTION
-                WHEN sqlstate '42601' THEN -- Lỗi cú pháp SQL
-                     RAISE WARNING 'Lỗi cú pháp khi xây dựng truy vấn động WHERE cho raw profile %: % - SQL: %', r_profile.raw_profile_id, SQLERRM, v_dynamic_select_query;
-                     -- Xử lý lỗi: ghi log, có thể đánh dấu bản ghi thô cần xem xét thủ công
-                     matched_master_id := NULL; -- Đảm bảo kết quả là NULL nếu có lỗi
-                WHEN OTHERS THEN -- Các lỗi khác trong quá trình thực thi
-                     RAISE WARNING 'Lỗi khi thực thi truy vấn động cho raw profile %: % - SQL: %', r_profile.raw_profile_id, SQLERRM, v_dynamic_select_query;
-                     -- Xử lý lỗi tương tự
-                     matched_master_id := NULL;
-            END; -- Kết thúc khối EXECUTE
+                WHEN OTHERS THEN
+                    RAISE WARNING 'Lỗi truy vấn: % - SQL: %', SQLERRM, v_dynamic_select_query;
+                    matched_master_id := NULL;
+            END;
+        END IF;
 
-        END IF; -- Kết thúc kiểm tra xem có điều kiện WHERE nào được tạo không
-
-
-        -- 5. Xử lý kết quả khớp: Liên kết hoặc tạo Master mới
+        -- 5. Xử lý kết quả khớp
         IF matched_master_id IS NOT NULL THEN
-            -- Tìm thấy khớp với Master hiện có
-
-            -- Liên kết hồ sơ thô với Master tìm thấy
             BEGIN
-                -- match_rule ở đây nên phản ánh quy tắc nào đã khớp mạnh nhất, rất phức tạp để xác định động
-                -- Hoặc chỉ đơn giản ghi là 'Linked' hoặc 'DynamicMatch'
                 INSERT INTO cdp_profile_links (raw_profile_id, master_profile_id, match_rule)
                 VALUES (r_profile.raw_profile_id, matched_master_id, 'DynamicMatch');
             EXCEPTION WHEN unique_violation THEN
-                 RAISE NOTICE 'Raw profile % đã được liên kết trong lần chạy khác, bỏ qua.', r_profile.raw_profile_id;
-                 CONTINUE; -- Bỏ qua bản ghi thô này nếu nó đã được xử lý và liên kết
-             END;
+                CONTINUE;
+            END;
 
-            -- Tổng hợp dữ liệu vào Master Profile hiện có (Logic phức tạp khi làm động)
-            -- Cần lặp lại cấu hình thuộc tính và áp dụng consolidation_rule cho từng thuộc tính IR
-            -- Đây là một ví dụ đơn giản, bạn cần mở rộng để làm động dựa trên consolidation_rule
-             UPDATE cdp_master_profiles mp
-             SET
-                 first_name = COALESCE(mp.first_name, r_profile.first_name), -- Ví dụ rule: non_null
-                 email = COALESCE(mp.email, r_profile.email), -- Ví dụ rule: non_null
-                 phone_number = COALESCE(mp.phone_number, r_profile.phone_number), -- Ví dụ rule: non_null
-                 address_line1 = COALESCE(mp.address_line1, r_profile.address_line1), -- Ví dụ rule: non_null
-                 city = COALESCE(mp.city, r_profile.city), -- Ví dụ rule: non_null
-                 state = COALESCE(mp.state, r_profile.state), -- Ví dụ rule: non_null
-                 zip_code = COALESCE(mp.zip_code, r_profile.zip_code), -- Ví dụ rule: non_null
-                 source_systems = array_append(mp.source_systems, r_profile.source_system), -- Ví dụ rule: concatenate/append
-                 updated_at = NOW() -- Cập nhật thời gian
-             WHERE mp.master_profile_id = matched_master_id;
-
+            UPDATE cdp_master_profiles mp
+            SET
+                first_name = COALESCE(mp.first_name, r_profile.first_name),
+                email = COALESCE(mp.email, r_profile.email),
+                phone_number = COALESCE(mp.phone_number, r_profile.phone_number),
+                address_line1 = COALESCE(mp.address_line1, r_profile.address_line1),
+                city = COALESCE(mp.city, r_profile.city),
+                state = COALESCE(mp.state, r_profile.state),
+                zip_code = COALESCE(mp.zip_code, r_profile.zip_code),
+                source_systems = array_append(mp.source_systems, r_profile.source_system),
+                updated_at = NOW()
+            WHERE mp.master_profile_id = matched_master_id;
 
         ELSE
-            -- Không tìm thấy khớp với Master hiện có nào dựa trên các thuộc tính IR
-            -- Coi đây là một Danh tính mới tiềm năng
-
-            -- Tạo một Master Profile mới từ dữ liệu của bản ghi thô
-            -- Việc chọn giá trị ban đầu cho master cũng nên tuân theo consolidation_rule (ở đây đơn giản lấy từ raw)
+            -- Không khớp, tạo mới
             INSERT INTO cdp_master_profiles (first_name, last_name, email, phone_number, address_line1, city, state, zip_code, source_systems, first_seen_raw_profile_id)
             VALUES (
-                r_profile.first_name, -- Lấy từ raw (cần áp dụng consolidation_rule nếu muốn)
+                r_profile.first_name,
                 r_profile.last_name,
                 r_profile.email,
                 r_profile.phone_number,
@@ -700,34 +711,29 @@ BEGIN
                 r_profile.city,
                 r_profile.state,
                 r_profile.zip_code,
-                ARRAY[r_profile.source_system], -- Thêm hệ thống nguồn
-                r_profile.raw_profile_id -- Ghi lại ID thô tạo ra master này
+                ARRAY[r_profile.source_system],
+                r_profile.raw_profile_id
             )
-            RETURNING master_profile_id INTO matched_master_id; -- Lấy ID của master mới
+            RETURNING master_profile_id INTO matched_master_id;
 
-            -- Liên kết bản ghi thô với Master mới vừa tạo
-             BEGIN
+            BEGIN
                 INSERT INTO cdp_profile_links (raw_profile_id, master_profile_id, match_rule)
                 VALUES (r_profile.raw_profile_id, matched_master_id, 'NewMaster');
-             EXCEPTION WHEN unique_violation THEN
-                 RAISE NOTICE 'Raw profile % đã được liên kết trong lần chạy khác, bỏ qua.', r_profile.raw_profile_id;
-                 CONTINUE; -- Bỏ qua bản ghi thô nếu nó đã được xử lý và liên kết
-             END;
+            EXCEPTION WHEN unique_violation THEN
+                CONTINUE;
+            END;
+        END IF;
 
-        END IF; -- Kết thúc xử lý kết quả khớp
-
-        -- 6. Đánh dấu bản ghi thô đã được xử lý thành công
+        -- 6. Đánh dấu đã xử lý
         UPDATE cdp_raw_profiles_stage
         SET processed_at = NOW()
         WHERE raw_profile_id = r_profile.raw_profile_id;
 
-    END LOOP; -- Kết thúc lặp qua từng bản ghi thô theo lô
-
-    -- THÊM BƯỚC TÙY CHỌN: Hợp nhất các Master trùng lặp nội bộ trong cùng một lô xử lý
-    -- Logic này rất phức tạp và cần phát triển riêng.
+    END LOOP;
 
 END;
 $$ LANGUAGE plpgsql;
+
 ```
 
 
