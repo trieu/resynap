@@ -17,8 +17,8 @@ from rs_model.language_utils import remove_similar_keywords, split_string_to_key
 from rs_agent.ai_core import GeminiClient
 
 # Embedding model for text transformation
-MODEL_NAME = 'BAAI/bge-m3'
-embedding_model = SentenceTransformer(MODEL_NAME)
+EMBEDDING_MODEL_NAME = os.getenv('EMBEDDING_MODEL_NAME', 'intfloat/multilingual-e5-small')
+embedding_model = SentenceTransformer(EMBEDDING_MODEL_NAME)
 VECTOR_DIM_SIZE = embedding_model.get_sentence_embedding_dimension()
 
 # AI model
