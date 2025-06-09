@@ -1,37 +1,35 @@
 # ReSynap
 
-**ReSynap: Knowledge Graph AI Agent for MindMap Generation, Data Personalization and Data Automation**
+**Open Source AI-first Customer 360 Framework**
 
-Welcome to **ReSynap**—an advanced Knowledge-RAG agent designed to generate dynamic mind maps from text, transform text chats into visual knowledge graphs, build a personalization engine, and automate a range of tasks that integrate with customer data platforms (CDPs) and more.
+![Alt text](flow.png "ReSynap Flow")
 
-![Alt text](flow.png "RESynap Flow")
 
-## Features
+## 🔑 Core Features of ReSynap Framework
 
-1.  **Dynamic Mind Map Generation**: Easily convert text into comprehensive mind maps that visually organize information and relationships.
-  
-2.  **Text-to-Knowledge Graphs**: Transform unstructured text chats into interactive knowledge graphs, uncovering insights and making connections intuitive.
+* **Unified Customer Profile:** Combines customer data from all sources into one clear profile.
+* **Smart Identity Matching:** Uses AI to merge duplicate profiles and link anonymous users to known ones.
+* **Real-Time Data Handling:** Tracks and processes customer actions instantly.
+* **Built-in AI/ML Tools:** Supports predictive models like churn risk, lifetime value, and customer segments.
+* **Customer Knowledge Graph:** Maps relationships between people, products, and behaviors for deeper insights.
+* **Generative AI Integration:** Connects with ChatGPT, Gemini, and others to power chatbots, summaries, and content.
+* **Modular & Open Source:** Easy to customize, extend, and plug in different tools or databases.
+* **Scalable Infrastructure:** Handles big data and AI workloads with distributed storage and compute.
+* **APIs for Activation:** Offers APIs to pull insights and trigger actions in tools like CRMs and marketing platforms.
+* **Data Privacy & Security:** Built-in features for consent, data protection, and compliance (e.g., GDPR, CCPA).
 
-3.  **Customer Profile Classification**: Automatically classify customer profiles within CDPs, allowing for personalized segmentation and enhanced targeting.
+## 🚀 Real-World Use Cases
 
-4.  **Data Reports and Insights**: Generate detailed data reports with ease, helping teams stay informed with up-to-date insights.
-
-5.  **Customer Segmentation**: Segment customer data effectively based on behavior, demographics, or any custom metric that fits your business needs.
-
-6.  **Real-Time Product Recommendations**: Get tailored product recommendations for specific user profiles, enabling targeted marketing and enhancing user experience.
-
-7.  **Automated Tasks**:
-    1. Send personalized emails at scale.
-    2. Trigger Zalo notifications to keep customers engaged.
-    3. Automate various customer-related workflows with seamless integration.
-
-## Use Cases
-
-- **Marketing Automation**: Automate segmentation and customer communications.
-- **Customer Data Analysis**: Deepen your insights into customer behavior and preferences.
-- **Product Recommendations**: Serve real-time, relevant recommendations to improve engagement and conversion.
-- **Knowledge Management**: Use knowledge graphs for easy data retrieval and management.
-- **Workflow Automation**: Set up triggers for automating tasks across multiple platforms.
+* **Personalization at Scale:** Tailors content and offers across all channels in real-time.
+* **Smarter Customer Support:** Gives agents full context and predicts issues before they happen.
+* **Dynamic Segmentation:** Builds live customer groups based on behavior and predictions.
+* **Churn Prevention:** Spots customers likely to leave and auto-triggers retention offers.
+* **CLV Growth:** Predicts customer value and helps focus on high-potential relationships.
+* **AI Chatbots:** Delivers personalized, context-aware conversations powered by C360 data.
+* **Journey Automation:** Builds smart customer flows that adapt in real-time.
+* **Next Best Action:** Recommends the most relevant content, offer, or step for each user.
+* **Fraud Detection:** Flags unusual behavior using AI and behavior analytics.
+* **Voice of Customer Insights:** Analyzes feedback with AI to uncover trends and sentiments.
 
 ## Getting Started
 
@@ -54,7 +52,7 @@ With ReSynap, transform data and text into actionable, visual insights and autom
 - Pydantic
 - Qdrant Vector Database. Refer to the Qdrant documentation for instructions: https://qdrant.tech/documentation/quick-start/
 - Qdrant client library (install with `pip install qdrant-client`)
-- ArangoDB for graph database
+- PostgreSQL for customer 360 database
 - Redis or Apache Kafka for data processing on queue
 - Large language models (LLMs) likes Google Gemini or OpenAI   
 
@@ -84,26 +82,63 @@ With ReSynap, transform data and text into actionable, visual insights and autom
 
 5. Next, create a .env file by coping the file sample.env or create your own file with content:
 ```
+    # Customer 360 configuration
+
+    # Chatbot configuration
+    CHATBOT_NAME=AI Buddy
+    CHATBOT_DEV_MODE=true
+    CHATBOT_HOSTNAME=chatbot.example.com
+    DEFAULT_AUTHORIZATION_KEY=personalization_test
+    EMBEDDING_MODEL_NAME=intfloat/multilingual-e5-small
+
+    # GOOGLE cloud configuration
+    GOOGLE_APPLICATION_CREDENTIALS=
+    GOOGLE_SERVICE_ACCOUNT_JSON=
+
+    # GEMINI model configuration
+    GEMINI_TEXT_MODEL_ID=gemini-2.0-flash-lite
+    GEMINI_IMAGE_MODEL_ID=imagen-3.0-generate-002
+    GEMINI_API_KEY=
+
+    # Google 
+    GOOGLE_SEARCH_ENGINE_ID=
+    GOOGLE_SEARCH_API_KEY=
+
+    # AWS configuration
+    AWS_ACCESS_KEY_ID=
+    AWS_SECRET_ACCESS_KEY=
+    AWS_REGION=
+    AWS_S3_BUCKET_PUBLIC=
+
+    # Qdrant dev configuration
     QDRANT_HOST=localhost
     QDRANT_PORT=6333
 
+    # Qdrant cloud configuration
     QDRANT_CLOUD_HOST=
     QDRANT_CLOUD_API_KEY=
 
+    # API configuration
     API_HOST=0.0.0.0
     API_PORT=8000
 
-    REDIS_HOST=
-    REDIS_PORT=0
-    DEFAULT_AUTHORIZATION_KEY=personalization_test
+    # Redis configuration
+    REDIS_HOST=localhost
+    REDIS_PORT=6380
+
+    # PostgreSQL configuration
+    PG_HOST=localhost 
+    PG_PORT=5433 
+    PG_DATABASE=customer360
+    PG_USER=
+    PG_PASSWORD=
+
+    # Airflow configuration
+    AIRFLOW_BASE_URL=http://localhost:8080/api/v1
+    AIRFLOW_USERNAME=
+    AIRFLOW_PASSWORD=
 ```
 
-## Running the API
-
-```bash
-uvicorn main:api_personalization --reload 
-```
-This will start the API server. You can access the API documentation at `http://localhost:8000/docs`
 
 ## API Endpoints
 
