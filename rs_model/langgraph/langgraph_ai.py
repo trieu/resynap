@@ -17,8 +17,8 @@ from rs_model.language_utils import remove_similar_keywords, split_string_to_key
 from rs_agent.ai_core import GeminiClient
 
 # Embedding model for text transformation
-MODEL_NAME = 'BAAI/bge-m3'
-embedding_model = SentenceTransformer(MODEL_NAME)
+MODEL_NAME = 'sentence-transformers/LaBSE'
+embedding_model = SentenceTransformer(MODEL_NAME, device='cpu')
 VECTOR_DIM_SIZE = embedding_model.get_sentence_embedding_dimension()
 
 # AI model
@@ -109,6 +109,7 @@ class DatabaseManager:
             cl_name (str): The name of the collection to check/create.
             vector_size (int, optional): The size of the vectors in the collection. Defaults to VECTOR_DIM_SIZE.
         """
+        
         if vector_size is None:
             vector_size = VECTOR_DIM_SIZE
 

@@ -31,8 +31,8 @@ class ChatbotService:
         self.dev_mode = os.getenv("CHATBOT_DEV_MODE") == "true"
         self.hostname = os.getenv("CHATBOT_HOSTNAME")
         self.name = os.getenv("CHATBOT_NAME")
-        self.redis_host = os.getenv("REDIS_HOST")
-        self.redis_port = os.getenv("REDIS_PORT")
+        self.redis_host = os.getenv("REDIS_HOST","localhost")
+        self.redis_port = int(os.getenv("REDIS_PORT","6379"))
         
         # Initialize Redis client
         self.redis_client = Redis(host=self.redis_host, port=self.redis_port, decode_responses=True)

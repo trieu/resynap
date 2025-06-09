@@ -1,7 +1,7 @@
 import json
 
 
-def read_json_from_file(file_path):
+def read_json_from_file(file_path: str):
     """
     Đọc dữ liệu JSON từ một tệp.
 
@@ -24,3 +24,4 @@ def read_json_from_file(file_path):
     except Exception as e:
         print(f"Lỗi không xác định khi đọc tệp '{file_path}': {e}")
         return None
+    return []
