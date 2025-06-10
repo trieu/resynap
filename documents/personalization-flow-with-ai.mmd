@@ -1,0 +1,48 @@
+flowchart TD
+  subgraph Personalization_Flow["Personalization_Flow"]
+        DB["🛢️ PostgreSQL DB"]
+        A1["📣 Campaign Trigger or 🧍User Action"]
+        A2["🎛️ AI Agent Orchestrator"]
+        A3["🗃️ Fetch Profile"]
+        A4["🧠 RAG Module"]
+        A5["🔎 Query Vector DB for Relevant Context"]
+        A6["🤖 GenAI"]
+        A7["📝 Personalized Content"]
+  end
+
+  subgraph Communication_Flow["Communication_Flow"]
+        B1["📊 Analyze Channel Preferences"]
+        B2{"Which Channel?"}
+        C1["📲 Send via Real-Time API"]
+        C2["📧 Send via Mail API"]
+        C3["🎯 Send Audience to Ads Platform"]
+        D1["✅ Delivered to Customer"]
+        D2["📥 Engagement Feedback"]
+        E1["🛠️ Update Customer Profile in PostgreSQL"]
+        F1["📤 Feedback Agent"]
+  end
+
+    A1 --> A2
+    A2 --> DB
+    DB --> A3
+    A3 --> A4
+    A4 --> A5
+    A5 --> A6
+    A6 --> A7
+    A7 --> A2
+    A2 --> B1
+
+    B1 --> B2
+    B2 -- PushNotification --> C1
+    B2 -- Email/SMS --> C2
+    B2 -- Ads --> C3
+    C1 --> D1
+    C2 --> D1
+    C3 --> D1
+    D1 --> D2
+    D2 --> E1
+    E1 --> F1
+    F1 --> DB
+
+    classDef blue fill:#e0f7fa,stroke:#0288d1,stroke-width:1px
+    classDef green fill:#e8f5e9,stroke:#2e7d32,stroke-width:1px
