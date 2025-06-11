@@ -1,5 +1,9 @@
 #!/bin/bash
 
+./shell-script/start_qdrant.sh start
+
+sleep 1
+
 # Activate your virtual environment if necessary
 SOURCE_PATH="env/bin/activate"
 source $SOURCE_PATH

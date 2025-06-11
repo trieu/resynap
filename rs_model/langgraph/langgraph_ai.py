@@ -16,10 +16,36 @@ from rs_model.language_utils import remove_similar_keywords, split_string_to_key
 
 from rs_agent.ai_core import GeminiClient
 
+import logging
+
+# Set up logging (use logging for production-level control)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 # Embedding model for text transformation
-MODEL_NAME = 'sentence-transformers/LaBSE'
-embedding_model = SentenceTransformer(MODEL_NAME, device='cpu')
-VECTOR_DIM_SIZE = embedding_model.get_sentence_embedding_dimension()
+# Step 1: Determine model name and device
+DEFAULT_MODEL_NAME = 'paraphrase-multilingual-MiniLM-L12-v2' # intfloat/multilingual-e5-small for better 
+EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", DEFAULT_MODEL_NAME)
+TRANSFORMER_DEVICE = os.getenv("TRANSFORMER_DEVICE", "cpu")
+
+logger.info(f"Loading embedding model: {EMBEDDING_MODEL_NAME} on device: {TRANSFORMER_DEVICE}")
+
+# Step 2: Load model
+try:
+    embedding_model = SentenceTransformer(EMBEDDING_MODEL_NAME, device=TRANSFORMER_DEVICE)
+    logger.info("Model loaded successfully.")
+except Exception as e:
+    logger.error(f"Error loading model: {e}")
+    raise
+
+# Step 3: Get vector dimension
+try:
+    VECTOR_DIM_SIZE = embedding_model.get_sentence_embedding_dimension()
+    logger.info(f"Embedding vector dimension: {VECTOR_DIM_SIZE}")
+except Exception as e:
+    logger.error(f"Error getting vector dimension: {e}")
+    raise
+
 
 # AI model
 DEFAULT_ERROR = "I'm sorry, I am unable to generate a response at this time."
