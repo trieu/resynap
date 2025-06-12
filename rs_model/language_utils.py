@@ -19,11 +19,24 @@ LANGUAGE_MAPPING = {
     "ru": "Russian"
 }
 
-def detect_language(text):
-    """Detects the language code of the given text."""
+def detect_language(text: str) -> str:
+    """
+    Detects the language code of the given text using the langdetect library.
+
+    Args:
+        text (str): The input text for language detection.
+
+    Returns:
+        str: The detected language code (e.g., 'en', 'vi').
+             Returns 'en' (English) by default if the input is empty, None,
+             or if language detection fails.
+    """
+    if not text:  # Handle empty or None input explicitly
+        return 'en'
     try:
         return detect(text)
     except LangDetectException:
+        # Default to English if detection fails
         return 'en'
 
 
@@ -34,8 +47,21 @@ def get_language_name(text):
 
 
 def remove_similar_keywords(keywords: list[str], threshold: int = 80) -> list[str]:
+    """Removes similar keywords from a list based on a similarity threshold.
+
+    This function iterates through a list of keywords, normalizes them (lowercase, strip whitespace),
+    and adds a keyword to the result list only if it's not too similar to any keyword
+    already in the result list. Similarity is determined using partial string matching.
+
+    Args:
+        keywords (list[str]): A list of strings, where each string is a keyword.
+        threshold (int, optional): The similarity threshold (0-100). If the partial ratio
+                                   similarity between two keywords is above this threshold,
+                                   they are considered similar. Defaults to 80.
+    Returns:
+        list[str]: A new list of unique keywords with similar ones removed.
+    """
     unique_keywords = []
-    
     for keyword in keywords:
         keyword_lower = keyword.lower().strip()  # Normalize case and strip spaces
         if not any(fuzz.partial_ratio(keyword_lower, existing) > threshold for existing in unique_keywords):

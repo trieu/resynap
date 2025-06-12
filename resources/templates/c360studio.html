@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReSynap - Customer 360 Studio</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom CSS for dark theme and layout adjustments -->
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow: hidden; /* Prevent body scroll */
+        }
+        .top-header {
+            height: 60px;
+            background-color: #1e1e1e;
+            border-bottom: 1px solid #333;
+            color: #e0e0e0;
+            padding: 0 1.25rem;
+        }
+        .main-container {
+            display: flex;
+            height: calc(100vh - 60px); /* Adjust height to account for header */
+            width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar, .main-content, .right-panel {
+            padding: 1.25rem;
+            height: 100%; /* Use 100% of parent .main-container height */
+            overflow-y: auto;
+        }
+        .sidebar {
+            flex: 0 0 280px;
+            background-color: #1e1e1e;
+            border-right: 1px solid #333;
+        }
+        .main-content {
+            flex-grow: 1;
+            background-color: #212121;
+        }
+        .right-panel {
+            flex: 0 0 320px;
+            background-color: #1e1e1e;
+            border-left: 1px solid #333;
+        }
+        .top-bar {
+            background-color: #1e1e1e;
+            border-bottom: 1px solid #333;
+            padding: 0.75rem 1.25rem;
+        }
+        .btn-outline-secondary {
+            color: #adb5bd;
+            border-color: #495057;
+        }
+        .btn-outline-secondary:hover {
+            background-color: #343a40;
+            color: #f8f9fa;
+        }
+        .list-group-item {
+            background-color: transparent;
+            border-color: #333;
+            color: #e0e0e0;
+        }
+        .list-group-item.active {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        .list-group-item-action:hover {
+            background-color: #2a2a2a;
+        }
+        .form-control, .form-control:focus {
+            background-color: #2a2a2a;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+        .form-control::placeholder {
+            color: #888;
+        }
+        .card {
+            background-color: #282828;
+            border: 1px solid #333;
+        }
+        .card-body, .card-header, .card-footer {
+             border-color: #333;
+        }
+        .chat-input-wrapper {
+            position: relative;
+        }
+        .chat-input-wrapper .btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        a {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .btn-icon {
+            background: none;
+            border: none;
+            color: #adb5bd;
+        }
+        .btn-icon:hover {
+            color: #fff;
+        }
+        .chart-container {
+            height: 200px;
+            width: 100%;
+        }
+        .table {
+            --bs-table-bg: #282828;
+            --bs-table-border-color: #333;
+            --bs-table-hover-bg: #323232;
+        }
+
+    </style>
+</head>
+<body>
+    
+    <!-- Top Header -->
+    <header class="top-header d-flex align-items-center">
+        <!-- AI Agent Logo -->
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-primary">
+            <path d="M9 12C9 13.6569 10.3431 15 12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12Z" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 3V1M21 12H23M3 12H1M12 21V23" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5.63604 5.63604L4.22183 4.22183M18.364 18.364L19.7782 19.7782M5.63604 18.364L4.22183 19.7782M18.364 5.63604L19.7782 4.22183" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h1 class="h5 mb-0 ms-3">ReSynap - Customer 360 Studio</h1>
+    </header>
+
+
+    <!-- Main Flex Container -->
+    <div class="main-container">
+
+        <!-- Left Sidebar: Sources -->
+        <div class="sidebar d-flex flex-column">
+            <h5 class="mb-3">Data Sources</h5>
+            <div class="d-flex justify-content-between mb-3">
+                <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-plus"></i> Add</button>
+                <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-search"></i> Discover</button>
+            </div>
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" value="" id="selectAllSources">
+                <label class="form-check-label" for="selectAllSources">
+                    Select all sources
+                </label>
+            </div>
+            <ul class="list-group list-group-flush flex-grow-1">
+                <li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center ">
+                    Website
+                    <i class="bi bi-box-arrow-up-right"></i>
+                </li>
+                <li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center ">
+                    CRM
+                    <i class="bi bi-box-arrow-up-right"></i>
+                </li>
+                <!-- Add other sources here -->
+            </ul>
+        </div>
+
+        <!-- Center Panel: Chat -->
+        <div class="main-content d-flex flex-column">
+            <!-- Top Bar -->
+            <div class="top-bar d-flex justify-content-between align-items-center w-100 mb-3">
+                <div>
+                    <h4 class="mb-0"> Data Segmentation </h4>
+                </div>
+                <div>
+                    <button class="btn btn-icon"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+                    <button class="btn btn-icon"><i class="bi bi-three-dots"></i></button>
+                </div>
+            </div>
+            
+            <!-- Bar Chart -->
+            <div class="chart-container mb-4">
+                <canvas id="myBarChart"></canvas>
+            </div>
+            
+            <!-- Customer Profiles Table -->
+            <div class="table-responsive mb-4">
+                <table class="table table-dark table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Phone</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Last Seen</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>John Doe</td>
+                            <td>(555) 123-4567</td>
+                            <td>john.doe@example.com</td>
+                            <td>Touchpoint C</td>
+                            <td class="text-end">
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-icon" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-dark">
+                                        <li><a class="dropdown-item" href="#"><i class="bi bi-person-lines-fill me-2"></i>View Details</a></li>
+                                        <li><a class="dropdown-item" href="#"><i class="bi bi-pencil-square me-2"></i>Edit</a></li>
+                                        <li><a class="dropdown-item text-danger" href="#"><i class="bi bi-trash-fill me-2"></i>Remove</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                         <tr>
+                            <td>Jane Smith</td>
+                            <td>(555) 987-6543</td>
+                            <td>jane.smith@example.com</td>
+                            <td>Touchpoint A</td>
+                            <td class="text-end">
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-icon" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-dark">
+                                        <li><a class="dropdown-item" href="#"><i class="bi bi-person-lines-fill me-2"></i>View Details</a></li>
+                                        <li><a class="dropdown-item" href="#"><i class="bi bi-pencil-square me-2"></i>Edit</a></li>
+                                        <li><a class="dropdown-item text-danger" href="#"><i class="bi bi-trash-fill me-2"></i>Remove</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                         <tr>
+                            <td>Sam Wilson</td>
+                            <td>(555) 246-8135</td>
+                            <td>sam.wilson@example.com</td>
+                            <td>Touchpoint F</td>
+                             <td class="text-end">
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-icon" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-dark">
+                                        <li><a class="dropdown-item" href="#"><i class="bi bi-person-lines-fill me-2"></i>View Details</a></li>
+                                        <li><a class="dropdown-item" href="#"><i class="bi bi-pencil-square me-2"></i>Edit</a></li>
+                                        <li><a class="dropdown-item text-danger" href="#"><i class="bi bi-trash-fill me-2"></i>Remove</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Chat Content -->
+
+
+            <!-- Chat Input -->
+            <div class="mt-auto pt-3">
+                <div class="p-2 border rounded-3 mb-2" style="border-color: #444 !important;">
+                     <a href="#" class="d-block"><i class="bi bi-check-square-fill text-primary"></i> Bạn muốn AI Agent gửi email cho nhóm customer lead profiles này không ? </a>
+                </div>
+                <div class="chat-input-wrapper">
+                    <input type="text" class="form-control form-control-lg" placeholder="Start typing...">
+                    <button class="btn btn-primary"><i class="bi bi-arrow-up-circle-fill"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar: Studio -->
+        <div class="right-panel d-flex flex-column">
+             <!-- Top Bar -->
+            <div class="top-bar d-flex justify-content-between align-items-center w-100 mb-3">
+                <div>
+                    <h5 class="mb-0">Data Studio</h5>
+                </div>
+                <div>
+                    <button class="btn btn-icon"><i class="bi bi-aspect-ratio"></i></button>
+                    <button class="btn btn-icon"><i class="bi bi-arrows-fullscreen"></i></button>
+                </div>
+            </div>
+
+            <!-- Studio Content -->
+            <div class="flex-grow-1">
+                 <div class="card mb-3">
+                     <div class="card-header d-flex justify-content-between align-items-center">
+                         Segment Actions
+                         <i class="bi bi-info-circle"></i>
+                     </div>
+                     <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary mb-2"><i class="bi bi-person-plus-fill me-2"></i>Create new profile</button>
+                            <button class="btn btn-secondary"><i class="bi bi-upload me-2"></i>Import profiles</button>
+                        </div>
+                     </div>
+                 </div>
+                 <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                         Notes
+                         <i class="bi bi-three-dots-vertical"></i>
+                     </div>
+                     <div class="card-body">
+                        <div class="d-grid gap-2 mb-3">
+                            <button class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add note</button>
+                        </div>
+                        <div class="d-flex justify-content-around">                            
+                            <a href="#"><i class="bi bi-file-earmark-text"></i> Briefing Report</a>
+                            <a href="#"><i class="bi bi-question-circle"></i> CX Report</a>
+                        </div>
+                     </div>
+                 </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Chart.js Initialization -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const ctx = document.getElementById('myBarChart').getContext('2d');
+            const myBarChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Touchpoint A', 'Touchpoint B', 'Touchpoint C', 'Touchpoint D', 'Touchpoint E', 'Touchpoint F'],
+                    datasets: [{
+                        label: 'Engagement Score',
+                        data: [65, 59, 80, 81, 56, 55],
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(224, 224, 224, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e0e0e0'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#e0e0e0'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false // Hiding legend for a cleaner look
+                        },
+                        title: {
+                            display: true,
+                            text: 'Touchpoint Engagement Overview',
+                            color: '#e0e0e0',
+                            font: {
+                                size: 16
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

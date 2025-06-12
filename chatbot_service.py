@@ -3,7 +3,7 @@ from rs_model.chatbot_models import (
     get_selected_agent, Message, generate_report
 )
 
-from rs_agent.ai_core import GeminiClient, is_gemini_model_ready
+from rs_agent.ai_core import is_gemini_model_ready
 import os
 import time
 from dotenv import load_dotenv
