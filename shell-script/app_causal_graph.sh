@@ -4,7 +4,7 @@
 DIR_PATH="."  # Directory where app_causal_graph.py is located
 APP_MODULE_NAME="app_causal_graph"  # Python file without .py
 APP_INSTANCE_NAME="app_causal_graph"  # FastAPI instance name inside the file
-APP_ID="$APP_MODULE_NAME.py"  # Used for process search
+APP_ID="$APP_MODULE_NAME:$APP_INSTANCE_NAME"  # Used for process search
 SOURCE_PATH="env/bin/activate"  # Path to your Python virtualenv
 ENV_FILE=".env"  # Path to your .env file
 LOG_DIR="./logs"
@@ -12,7 +12,7 @@ mkdir -p "$LOG_DIR"
 
 function stop_app() {
   echo "Stopping app..."
-  PIDS=$(pgrep -f "$APP_ID")
+  PIDS=$(pgrep -f "uvicorn $APP_MODULE_NAME")
   if [ -n "$PIDS" ]; then
     kill -15 $PIDS
     sleep 2
@@ -35,7 +35,7 @@ function start_app() {
   datetoday=$(date '+%Y-%m-%d')
   log_file="$LOG_DIR/causal_graph-$datetoday.log"
 
-  uvicorn "$APP_MODULE_NAME:$APP_INSTANCE_NAME" \
+  uvicorn $APP_ID \
     --reload \
     --env-file "$ENV_FILE" \
     --host 0.0.0.0 \
