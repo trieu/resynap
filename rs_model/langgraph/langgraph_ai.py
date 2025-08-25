@@ -286,12 +286,14 @@ class LangGraphAI:
         # define agent nodes 
         self.workflow.add_node("detect_ai_persona", self.detect_ai_persona)
         self.workflow.add_node("retrieve_context", self.retrieve_context)
+        self.workflow.add_node("enrich_context", self.enrich_context)
         self.workflow.add_node("generate_response", self.generate_response)
         self.workflow.add_node("update_memory", self.update_memory)
 
         # Define workflow transitions
         self.workflow.add_edge("detect_ai_persona", "retrieve_context")
-        self.workflow.add_edge("retrieve_context", "generate_response")
+        self.workflow.add_edge("retrieve_context", "enrich_context")
+        self.workflow.add_edge("enrich_context", "generate_response")
         self.workflow.add_edge("generate_response", "update_memory")
 
         #  Set entry point for the workflow
@@ -374,6 +376,27 @@ class LangGraphAI:
         #
         state.keywords = remove_similar_keywords(final_keywords)
         state.context = ", ".join(state.keywords)
+        return state.to_dict()
+    
+    def enrich_context(self, state_dict) :
+        """enrich context with external information like google, youtube, .
+
+        Args:
+            state_dict (dict): A dictionary representing the current conversation state and context.
+
+        Returns:
+            dict: The updated conversation state dictionary, including the context enrichment.
+        """
+        
+        state = UserConversationState.from_dict(state_dict) 
+        user_message = state.user_message
+        context = state.context
+        
+        # TODO query using Search Engine or Database
+        
+        print(f"=> user_message: {user_message}")
+        print(f"=> context: {context}")
+        
         return state.to_dict()
 
     def generate_response(self, state_dict) :
