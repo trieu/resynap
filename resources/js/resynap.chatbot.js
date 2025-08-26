@@ -1,4 +1,4 @@
-var currentProfile = { };
+var currentProfile = {};
 
 window.leoBotUI = false;
 window.leoBotContext = false;
@@ -14,7 +14,7 @@ function isMobile() {
 }
 
 function isEmailValid(email) {
-  if (typeof email !== 'string') {
+  if (typeof email !== "string") {
     return false; // Handle non-string inputs
   }
 
@@ -44,22 +44,20 @@ function setActiveChatSession(id) {
 }
 
 function loadChatSessionById(sessionId, sessionName) {
-
-  if(sessionId != null && sessionName != null) {
+  if (sessionId != null && sessionName != null) {
     setActiveChatSession(sessionId);
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-  else {
-    sessionId = 'new_session'
-    sessionName = 'Tôi có thể giúp gì cho bạn?'
+  } else {
+    sessionId = "new_session";
+    sessionName = "Tôi có thể giúp gì cho bạn?";
 
-    // TODO 
-    newChatbotSession()
+    // TODO
+    newChatbotSession();
   }
 
-  $('#session_name').text( sessionName )
-  showQuestionAboutKeyword( sessionName )
-  $('#btn_close_sidebar').click()
+  $("#session_name").text(sessionName);
+  showQuestionAboutKeyword(sessionName);
+  $("#btn_close_sidebar").click();
 }
 
 function loadChatSession(context, visitorId, okCallback) {
@@ -96,7 +94,7 @@ function loadChatSession(context, visitorId, okCallback) {
 
 var newChatbotSession = function () {
   getBotUI().message.removeAll();
-  if(window.sayHelloToUser){
+  if (window.sayHelloToUser) {
     window.sayHelloToUser();
   }
 };
@@ -116,7 +114,6 @@ var leoBotPromptQuestion = function (delay) {
       sendMessageToAgent("ask", res.value);
     });
 };
-
 
 var leoBotShowAnswer = function (answerInHtml, delay) {
   getBotUI()
@@ -139,9 +136,13 @@ var leoBotShowAnswer = function (answerInHtml, delay) {
           }
           $(this).attr("href", href);
         });
+
+      if (answerInHtml.toLowerCase().indexOf("spa") > 0) {
+        $("div.chatbot_answer").last().html('<div id="spa-list"></div>');
+        showItemList();
+      }
     });
 };
-
 
 var chatbotShowError = function (error, nextAction) {
   getBotUI()
@@ -150,9 +151,9 @@ var chatbotShowError = function (error, nextAction) {
       cssClass: "chatbot-error",
       content: error,
       type: "html",
-    }).then(nextAction || function () {});
+    })
+    .then(nextAction || function () {});
 };
-
 
 var askTheEmailOfUser = function (name) {
   getBotUI()
@@ -239,14 +240,13 @@ var sendMessageToAgent = function (functionName, question, context) {
       var serverCallback = function (data) {
         getBotUI().message.remove(index);
         var error_code = data.error_code;
-        
-        // 
+
+        //
         var answer = data.answer;
 
-        // 
+        //
         var keywords = data.keywords;
         showContextKeywords(keywords);
-    
 
         if (error_code === 0) {
           currentProfile.displayName = data.name;
@@ -258,16 +258,18 @@ var sendMessageToAgent = function (functionName, question, context) {
         }
       };
 
-      var previousMessage = $('#chatbot_container').find('.chatbot_answer:last').text();
-      var payload = {'private_mode':window.inPrivateMode};
+      var previousMessage = $("#chatbot_container")
+        .find(".chatbot_answer:last")
+        .text();
+      var payload = { private_mode: window.inPrivateMode };
 
-      payload["context"] = typeof context === "string" ? context : '';
+      payload["context"] = typeof context === "string" ? context : "";
       payload["question"] = question;
       payload["previous_message"] = previousMessage;
       payload["visitor_id"] = currentProfile.visitorId;
       payload["persona_name"] = $("#selected_agent_name").text().trim();
       payload["answer_in_format"] = "text";
-      // TODO 
+      // TODO
 
       callPostApi(BASE_URL_API, payload, serverCallback);
     };
@@ -276,26 +278,25 @@ var sendMessageToAgent = function (functionName, question, context) {
 };
 
 function showContextKeywords(keywords) {
-  const container = $('#context_keywords');
+  const container = $("#context_keywords");
   if (!container.length) return; // Avoid errors if the element is missing
-  
-  if(keywords.length > 0){
-    // Clear existing content
-    container.empty(); 
 
-    // show topic's keywords 
-    keywords.forEach(keyword => {
+  if (keywords.length > 0) {
+    // Clear existing content
+    container.empty();
+
+    // show topic's keywords
+    keywords.forEach((keyword) => {
       console.log(`Keyword: ${keyword}`);
-      const safeKeyword = keyword.replace(/"/g, '&quot;'); // Escape double quotes to avoid HTML issues
+      const safeKeyword = keyword.replace(/"/g, "&quot;"); // Escape double quotes to avoid HTML issues
       const btn = `<button class="btn suggestion-btn" onclick="showQuestionAboutKeyword('${safeKeyword}')">${safeKeyword}</button>`;
       container.append(btn);
     });
-  }  
+  }
 }
 
-
-function showQuestionAboutKeyword(keyword){
-  sendMessageToAgent('ask', keyword, 'critical_thinking')
+function showQuestionAboutKeyword(keyword) {
+  sendMessageToAgent("ask", keyword, "critical_thinking");
 }
 
 var showChatBotLoader = function () {
@@ -345,33 +346,39 @@ function sendToChatbot() {
   var msg = $("#chatbot_input").val().trim();
   if (msg.length > 0) {
     sendMessageToAgent("ask", msg);
-    showChatMessage(msg);    
+    showChatMessage(msg);
   }
   $("#chatbot_input").val("");
 }
 
 function setupChatbotDone() {
-
   // the button handler
   $("#chatbot_input").keydown(function (event) {
-      if ((event.key === "Enter" || event.keyCode === 13) && !event.shiftKey && !event.ctrlKey) {
-          event.preventDefault(); // Prevent default newline behavior in textareas
-          sendToChatbot();
-      }
+    if (
+      (event.key === "Enter" || event.keyCode === 13) &&
+      !event.shiftKey &&
+      !event.ctrlKey
+    ) {
+      event.preventDefault(); // Prevent default newline behavior in textareas
+      sendToChatbot();
+    }
   });
 
-  // 
-  $("#persona_agent_list").change(function(){
+  //
+  $("#persona_agent_list").change(function () {
     var selected = $(this).find("option:selected");
-    $('#selected_agent_name').text(selected.text());
-    $('#selected_agent_avatar_url').attr( 'src', selected.data('avatar'));
-    
-  })
+    $("#selected_agent_name").text(selected.text());
+    $("#selected_agent_avatar_url").attr("src", selected.data("avatar"));
+  });
 }
 
 // ready to load tracking script for long-term memory
 $(document).ready(function () {
-  var obsjs = location.protocol + "//" + CHATBOT_HOSTNAME + "/resources/js/leocdp.observer.js";
+  var obsjs =
+    location.protocol +
+    "//" +
+    CHATBOT_HOSTNAME +
+    "/resources/js/leocdp.observer.js";
   if (CDP_TRACKING) {
     $.getScript(obsjs);
   } else {
@@ -379,5 +386,63 @@ $(document).ready(function () {
     currentProfile.visitorId = "0";
   }
 
-  setupChatbotDone()
+  setupChatbotDone();
 });
+
+function showItemList() {
+  const spaData = {
+    spas: [
+      {
+        name: "The Anam QT Spa",
+        description:
+          "A luxury spa experience with elegant Vietnamese design, often incorporating rich woods, silks, and tranquil water features, evoking a sense of natural harmony.",
+        image:
+          "https://theme.hstatic.net/200000715841/1001166346/14/share_fb_home.png?v=1935",
+        map: "https://goo.gl/maps/gKq9X1Kx2dGqB5b26",
+        location_code: "District 3, HCMC",
+        lat: 10.78201,
+        long: 106.69248,
+      },
+      {
+        name: "L'Apothiquaire Artisan Beauté & Spa (District 3)",
+        description:
+          "A serene escape housed in a stunning French colonial villa, surrounded by a lush, quiet garden. Famous for its natural, artisanal products and tranquil atmosphere.",
+        image:
+          "https://spa-lapothiquaire.vn/wp-content/uploads/2023/03/about-us-3.jpg",
+        map: "https://goo.gl/maps/bY9zJj9iJgqjV8dE7",
+        location_code: "District 3, HCMC",
+        lat: 10.78523,
+        long: 106.68931,
+      },
+      {
+        name: "Temple Leaf Spa & Massage",
+        description:
+          "Inspired by Japanese Zen principles, this spa features minimalist design with bamboo accents, pebble gardens, and soft lighting to create a peaceful sanctuary.",
+        image:
+          "https://oms.hotdeal.vn/images/editors/sources/000358300213/358300-body%20(44).jpg",
+        map: "https://goo.gl/maps/Q53RzW7F9yHh47jY8",
+        location_code: "District 1, HCMC",
+        lat: 10.77093,
+        long: 106.69562,
+      },
+      
+      {
+        name: "Golden Lotus Healing Spa World",
+        description:
+          "A large-scale Korean Jjimjilbang with various themed sauna rooms. While vast, it incorporates relaxation lounges with plants and natural materials to provide 'healing world' zones.",
+        image:
+          "https://goldenlotusspa.vn/wp-content/uploads/2025/03/goldenlotusspa-vn-31.jpg",
+        map: "https://goo.gl/maps/39Q8o59J1k4fG9469",
+        location_code: "District 7, HCMC",
+        lat: 10.73289,
+        long: 106.72124,
+      },
+    ],
+  };
+
+  // Compile Handlebars with [[ ]] delimiters
+  const source = document.getElementById("spa-template").innerHTML;
+  const template = Handlebars.compile(source);
+  const html = template(spaData);
+  $("#spa-list").html(html);
+}

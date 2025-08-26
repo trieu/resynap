@@ -1,307 +1,493 @@
 <!DOCTYPE html>
 <html lang="vi">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes, minimum-scale=1, maximum-scale=5">
-    <base href="//{{ CHATBOT_HOSTNAME }}/">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, user-scalable=yes, minimum-scale=1, maximum-scale=5"
+    />
+    <base href="//{{ CHATBOT_HOSTNAME }}/" />
 
     <!-- META FOR AI Buddy -->
-    <title> {{CHATBOT_NAME}} </title>
-    <meta name="robots" content="all">
-    <meta name="author" content="Trieu">
-    <meta name="keywords" content="AI Buddy, Chatbot, AI Agent"/>
-    <meta name="description" content="AI Buddy created by Trieu "/>
+    <title>{{CHATBOT_NAME}}</title>
+    <meta name="robots" content="all" />
+    <meta name="author" content="Trieu" />
+    <meta name="keywords" content="AI Buddy, Chatbot, AI Agent" />
+    <meta name="description" content="AI Buddy created by Trieu " />
     <!-- END META FOR AI Buddy -->
 
     <!-- icon AI Buddy -->
-    <link rel="icon" type="image/x-icon" href="resources/images/favicon-32x32.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="resources/images/android-chrome-192x192.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="resources/images/favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="resources/images/favicon-16x16.png">
-	<link rel="mask-icon" href="resources/images/favicon.ico" color="#5bbad5">
-    
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="resources/images/favicon-32x32.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="resources/images/android-chrome-192x192.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="resources/images/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="resources/images/favicon-16x16.png"
+    />
+    <link rel="mask-icon" href="resources/images/favicon.ico" color="#5bbad5" />
+
     <!-- META FOR FACEBOOK -->
-    <meta property="og:site_name" content="leobot.leocdp.com"/>
-    <meta property="og:rich_attachment" content="true"/>
-    <meta property="og:type" content="website"/>
-    <meta property="og:url" itemprop="url" content="https://leobot.leocdp.com"/>
-    <meta property="og:image" itemprop="thumbnailUrl" content="https://cdn.jsdelivr.net/gh/USPA-Technology/leo-cdp-static-files@latest/images/leo-cdp-logo.png"/>
-    <meta property="og:image:width" content="833"/>
-    <meta property="og:image:height" content="237"/>
-    <meta content="AI Buddy - The Smart ChatBot AI for daily tasks" itemprop="headline" property="og:title"/>
-    <meta content="The AI bot created by Trieu Dataism" itemprop="description" property="og:description"/>
+    <meta property="og:site_name" content="leobot.leocdp.com" />
+    <meta property="og:rich_attachment" content="true" />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      itemprop="url"
+      content="https://leobot.leocdp.com"
+    />
+    <meta
+      property="og:image"
+      itemprop="thumbnailUrl"
+      content="https://cdn.jsdelivr.net/gh/USPA-Technology/leo-cdp-static-files@latest/images/leo-cdp-logo.png"
+    />
+    <meta property="og:image:width" content="833" />
+    <meta property="og:image:height" content="237" />
+    <meta
+      content="AI Buddy - The Smart ChatBot AI for daily tasks"
+      itemprop="headline"
+      property="og:title"
+    />
+    <meta
+      content="The AI bot created by Trieu Dataism"
+      itemprop="description"
+      property="og:description"
+    />
     <!-- END META FOR FACEBOOK -->
-   
+
     <!-- bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"  crossorigin="anonymous" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" crossorigin="anonymous"  />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+      crossorigin="anonymous"
+    />
 
     <!-- ai-buddy CSS -->
-    <link rel="stylesheet" href="/resources/css/ai-buddy.css?_={{ timestamp }}"  />
+    <link
+      rel="stylesheet"
+      href="/resources/css/ai-buddy.css?_={{ timestamp }}"
+    />
 
     <!-- JQuery -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
 
     <!-- BotUI CSS -->
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/botui/0.3.9/botui.min.css" rel="stylesheet" type="text/css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/botui/0.3.9/botui-theme-default.css" rel="stylesheet" type="text/css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
-	
-    <!-- BotUI JS  -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.14/vue.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/botui/0.3.9/botui.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    
-</head>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/botui/0.3.9/botui.min.css"
+      rel="stylesheet"
+      type="text/css"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/botui/0.3.9/botui-theme-default.css"
+      rel="stylesheet"
+      type="text/css"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
 
-<body>
+    <!-- BotUI JS  -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.14/vue.min.js"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/botui/0.3.9/botui.min.js"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+
+    <!-- bootstrap JS  -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.4/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- handlebars JS  -->
+    <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.min.js"></script>
+  </head>
+
+  <body>
     <nav class="navbar navbar-expand">
-        <div class="container d-flex justify-content-center">
-            <a class="navbar-brand mx-auto text-center" href="#">
-                <i class="bi bi-robot me-2"></i> AI Buddy
+      <div class="container d-flex justify-content-center">
+        <a class="navbar-brand mx-auto text-center" href="#">
+          <i class="bi bi-robot me-2"></i> AI Buddy
+        </a>
+        <div class="position-absolute end-0 d-flex align-items-center">
+          <button
+            class="btn btn-link btn-theme-toggle me-3 pe-2"
+            id="theme-toggle-btn"
+            type="button"
+            aria-label="Toggle theme"
+          >
+            <i class="bi" id="theme-icon"></i>
+          </button>
+          <button
+            class="btn btn-link me-3 pe-2"
+            id="btn_new_session"
+            type="button"
+            onclick="loadChatSessionById()"
+            aria-label="New Session Chat"
+          >
+            <i class="bi bi-chat-right-dots"></i>
+          </button>
+          <div class="user-icon pe-3">
+            <a
+              id="btn_settings_panel"
+              href="#"
+              data-bs-toggle="offcanvas"
+              data-bs-target="#settingsPanel"
+            >
+              <i class="bi bi-toggles"></i>
             </a>
-            <div class="position-absolute end-0 d-flex align-items-center">
-                <button class="btn btn-link btn-theme-toggle me-3 pe-2" id="theme-toggle-btn" type="button"
-                    aria-label="Toggle theme">
-                    <i class="bi" id="theme-icon"></i>
-                </button>
-                <button class="btn btn-link me-3 pe-2" id="btn_new_session" type="button" onclick="loadChatSessionById()"
-                        aria-label="New Session Chat">
-                    <i class="bi bi-chat-right-dots"></i>
-                </button>
-                <div class="user-icon pe-3">
-                    <a id="btn_settings_panel" href="#" data-bs-toggle="offcanvas" data-bs-target="#settingsPanel"> 
-                        <i class="bi bi-toggles"></i>
-                    </a>
-                </div>                
-            </div>
+          </div>
         </div>
+      </div>
     </nav>
-        
 
     <main class="container-xl main-content py-4">
-        <div class="text-center" id="hello_panel" style="display: none;">
-            <h1>Xin chào, <span id="user_first_name"> người lạ </span> !</h1>
-            <h2 id="session_name">Tôi có thể giúp gì cho bạn?</h2>
-            <p class="lead">Bạn có thể hỏi tôi về bất kì lĩnh vực nào. Hoặc chúng ta có thể tâm sự dưới chế độ ẩn danh. Bắt đầu nào !</p>
+      <div class="text-center" id="hello_panel" style="display: none">
+        <h1>Xin chào, <span id="user_first_name"> người lạ </span> !</h1>
+        <h2 id="session_name">Tôi có thể giúp gì cho bạn?</h2>
+        <p class="lead">
+          Bạn có thể hỏi tôi về bất kì lĩnh vực nào. Hoặc chúng ta có thể tâm sự
+          dưới chế độ ẩn danh. Bắt đầu nào !
+        </p>
 
-            <div class="d-flex justify-content-center flex-wrap gap-2 mb-5" id="context_keywords" >
-                <button class="btn suggestion-btn" onclick="showQuestionAboutKeyword('Stress')" >Stress</button>
-                <button class="btn suggestion-btn" onclick="showQuestionAboutKeyword('Tâm sự')">Tâm sự</button>
-                <button class="btn suggestion-btn" onclick="showQuestionAboutKeyword('Cung hoàng đạo')">Cung hoàng đạo</button>
-                <button class="btn suggestion-btn" onclick="showQuestionAboutKeyword('Sức khỏe')">Sức khỏe</button>
-            </div>
-            
+        <div
+          class="d-flex justify-content-center flex-wrap gap-2 mb-5"
+          id="context_keywords"
+        >
+          <button
+            class="btn suggestion-btn"
+            onclick="showQuestionAboutKeyword('Stress')"
+          >
+            Stress
+          </button>
+          <button
+            class="btn suggestion-btn"
+            onclick="showQuestionAboutKeyword('Tâm sự')"
+          >
+            Tâm sự
+          </button>
+          <button
+            class="btn suggestion-btn"
+            onclick="showQuestionAboutKeyword('Cung hoàng đạo')"
+          >
+            Cung hoàng đạo
+          </button>
+          <button
+            class="btn suggestion-btn"
+            onclick="showQuestionAboutKeyword('Sức khỏe')"
+          >
+            Sức khỏe
+          </button>
         </div>
+      </div>
 
-        <!-- MAIN CHATBOT UI -->
-        <div class="botui-app-container flex-grow-1 d-flex flex-column overflow-auto" id="chatbot_container" style="display:none" >
-            <bot-ui></bot-ui>
-        </div>
+      <!-- MAIN CHATBOT UI -->
+      <div
+        class="botui-app-container flex-grow-1 d-flex flex-column overflow-auto"
+        id="chatbot_container"
+        style="display: none"
+      >
+        <bot-ui></bot-ui>
+      </div>
     </main>
 
     <section class="chat-input-section container">
-        <div class="input-group chat-input-group mb-3 align-items-center">
-            <!-- voice for end-user --> 
-            <button class="btn" type="button" aria-label="Record voice message" style="display: none;">
-                <i class="bi bi-mic-fill"></i>
-            </button>
-            <!-- upload files for end-user --> 
-            <button class="btn" type="button" aria-label="Attach file">
-                <i class="bi bi-paperclip"></i>
-            </button>    
-            <!-- chatbox for user -->      
-            <textarea id="chatbot_input" class="form-control" rows="2" placeholder="Hãy gửi tin nhắn cho tôi..." 
-                style="resize: none;" aria-label="Chat message input"></textarea>
-            <!-- sendToChatbot for user -->     
-            <button class="btn btn-send" type="button" aria-label="Send message" id="sendBtn" onclick="sendToChatbot()" >
-                <i class="bi bi-send-fill"></i>
-            </button>
-        </div>
+      <div class="input-group chat-input-group mb-3 align-items-center">
+        <!-- voice for end-user -->
+        <button
+          class="btn"
+          type="button"
+          aria-label="Record voice message"
+          style="display: none"
+        >
+          <i class="bi bi-mic-fill"></i>
+        </button>
+        <!-- upload files for end-user -->
+        <button class="btn" type="button" aria-label="Attach file">
+          <i class="bi bi-paperclip"></i>
+        </button>
+        <!-- chatbox for user -->
+        <textarea
+          id="chatbot_input"
+          class="form-control"
+          rows="2"
+          placeholder="Hãy gửi tin nhắn cho tôi..."
+          style="resize: none"
+          aria-label="Chat message input"
+        ></textarea>
+        <!-- sendToChatbot for user -->
+        <button
+          class="btn btn-send"
+          type="button"
+          aria-label="Send message"
+          id="sendBtn"
+          onclick="sendToChatbot()"
+        >
+          <i class="bi bi-send-fill"></i>
+        </button>
+      </div>
 
-        <div class="text-center footer-link">
-            <a href="#" onclick="gotoPublicChatMode(true)" style="display: block;" id="btn-toggle-private-chat">
-                <i class="bi bi-incognito me-1"></i> Tắt chế độ ẩn danh
-                <i class="bi bi-chevron-down ms-1"></i>
-            </a>
-            <a href="#" onclick="gotoPrivateChatMode(true)" style="display: none;" id="btn-toggle-public-chat">
-                <i class="bi bi-person-circle"></i> Bật chế độ ẩn danh
-                <i class="bi bi-chevron-up ms-1"></i>
-            </a>
-        </div>
+      <div class="text-center footer-link">
+        <a
+          href="#"
+          onclick="gotoPublicChatMode(true)"
+          style="display: block"
+          id="btn-toggle-private-chat"
+        >
+          <i class="bi bi-incognito me-1"></i> Tắt chế độ ẩn danh
+          <i class="bi bi-chevron-down ms-1"></i>
+        </a>
+        <a
+          href="#"
+          onclick="gotoPrivateChatMode(true)"
+          style="display: none"
+          id="btn-toggle-public-chat"
+        >
+          <i class="bi bi-person-circle"></i> Bật chế độ ẩn danh
+          <i class="bi bi-chevron-up ms-1"></i>
+        </a>
+      </div>
     </section>
 
     <!-- Offcanvas Sidebar for Settings -->
     <div class="offcanvas offcanvas-end" id="settingsPanel">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title">Cài đặt</h5>
-            <button id="btn_close_sidebar" type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title">Cài đặt</h5>
+        <button
+          id="btn_close_sidebar"
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="offcanvas"
+        ></button>
+      </div>
+      <div class="offcanvas-body">
+        <div class="text-center">
+          <img
+            id="selected_agent_avatar_url"
+            src="{{ selected_agent.avatar_url }}"
+            class="profile-pic"
+            alt="Profile Avatar"
+          />
+          <h6 class="mt-2" id="selected_agent_name">
+            {{ selected_agent.name }}
+          </h6>
         </div>
-        <div class="offcanvas-body">
-            <div class="text-center">
-                <img id="selected_agent_avatar_url" src="{{ selected_agent.avatar_url }}" class="profile-pic" alt="Profile Avatar" >
-                <h6 class="mt-2" id="selected_agent_name" > {{ selected_agent.name }} </h6>
-            </div>
-            <hr>
-            <div class="menu-item">
-                <i class="bi bi-person-bounding-box me-2"></i> Chọn Buddy của bạn               
-            </div>
-            <div class="menu-item">
-                <select id="persona_agent_list" class="form-select"  >
-                    {% set grouped_agents = {} %}
-                    {% for persona_agent in persona_agent_list %}
-                        {% set _ = grouped_agents.setdefault(persona_agent.domain_knowledge, []).append(persona_agent) %}
-                    {% endfor %}
-
-                    {% for domain, agents in grouped_agents.items() %}
-                        <optgroup label="{{ domain }}">
-                            {% for persona_agent in agents %}
-                                <option value="{{ persona_agent.code }}" {% if persona_agent.selected %}selected="selected"{% endif %}
-                                    data-avatar="{{ persona_agent.avatar_url }}">
-                                    {{ persona_agent.name }}
-                                </option>
-                            {% endfor %}
-                        </optgroup>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="menu-item" style="display:none">
-                <i class="bi bi-eye-slash me-2"></i> Bật chế độ ẩn danh
-                
-            </div>
-            <hr>
-            <h5> <i class="bi bi-list"></i> Đã lưu</h5>
-             
-            <div>
-                <!-- Public chat history -->
-                {% for item in menu_items %}
-                    <div class="menu-item">
-                        <a id="{{ item.id }}" class="nav-link {% if item.active %}active{% endif %}" 
-                            title="{{ item.name }}"
-                            onclick="loadChatSessionById('{{ item.id }}','{{ item.name }}')" href="#chat_session_{{ item.id }}" >
-                                <i class="bi bi-chat-right-dots"></i> 
-                                {{ item.name }}
-                        </a>
-                    </div>
-                {% endfor %}
-            </div>
-
-            <hr>
-            <div class="menu-item" >
-                <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
-            </div>
+        <hr />
+        <div class="menu-item">
+          <i class="bi bi-person-bounding-box me-2"></i> Chọn Buddy của bạn
         </div>
+        <div class="menu-item">
+          <select id="persona_agent_list" class="form-select">
+            {% set grouped_agents = {} %} {% for persona_agent in
+            persona_agent_list %} {% set _ =
+            grouped_agents.setdefault(persona_agent.domain_knowledge,
+            []).append(persona_agent) %} {% endfor %} {% for domain, agents in
+            grouped_agents.items() %}
+            <optgroup label="{{ domain }}">
+              {% for persona_agent in agents %}
+              <option
+                value="{{ persona_agent.code }}"
+                {%
+                if
+                persona_agent.selected
+                %}selected="selected"
+                {%
+                endif
+                %}
+                data-avatar="{{ persona_agent.avatar_url }}"
+              >
+                {{ persona_agent.name }}
+              </option>
+              {% endfor %}
+            </optgroup>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="menu-item" style="display: none">
+          <i class="bi bi-eye-slash me-2"></i> Bật chế độ ẩn danh
+        </div>
+        <hr />
+        <h5><i class="bi bi-list"></i> Đã lưu</h5>
+
+        <div>
+          <!-- Public chat history -->
+          {% for item in menu_items %}
+          <div class="menu-item">
+            <a
+              id="{{ item.id }}"
+              class="nav-link {% if item.active %}active{% endif %}"
+              title="{{ item.name }}"
+              onclick="loadChatSessionById('{{ item.id }}','{{ item.name }}')"
+              href="#chat_session_{{ item.id }}"
+            >
+              <i class="bi bi-chat-right-dots"></i>
+              {{ item.name }}
+            </a>
+          </div>
+          {% endfor %}
+        </div>
+
+        <hr />
+        <div class="menu-item">
+          <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
+        </div>
+      </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
     <script>
 
-        // Convert Jinja2 data to JSON using the tojson filter
-        const persona_agent_list = {{ persona_agent_list|tojson }};
-        const user_profile = {{ user_profile|tojson }};
-  
-        const themeIcon = document.getElementById("theme-icon");
-       
-        const currentTheme = localStorage.getItem("theme")? localStorage.getItem("theme"): "dark"; // Default to dark
-        window.inPrivateMode = currentTheme === 'dark';
+      // Convert Jinja2 data to JSON using the tojson filter
+      const persona_agent_list = {{ persona_agent_list|tojson }};
+      const user_profile = {{ user_profile|tojson }};
+      const themeIcon = document.getElementById("theme-icon");
 
-        var gotoPrivateChatMode = function (newSession) {
-            $( 'body' ).addClass("dark").removeClass("light");
-            $('#btn-toggle-private-chat').show();
-            $('#btn-toggle-public-chat').hide();
-            window.inPrivateMode = true;
+      const currentTheme = localStorage.getItem("theme")? localStorage.getItem("theme"): "dark"; // Default to dark
+      window.inPrivateMode = currentTheme === 'dark';
 
-            // Determine the new theme
-            let newTheme = "dark";
+      var gotoPrivateChatMode = function (newSession) {
+          $( 'body' ).addClass("dark").removeClass("light");
+          $('#btn-toggle-private-chat').show();
+          $('#btn-toggle-public-chat').hide();
+          window.inPrivateMode = true;
 
-            // Update the icon
-            themeIcon.classList.toggle("bi-sun-fill", newTheme === "dark");
-            themeIcon.classList.toggle("bi-moon-stars-fill", newTheme === "light");
+          // Determine the new theme
+          let newTheme = "dark";
 
-            // Save the preference to localStorage
-            localStorage.setItem("theme", newTheme);
+          // Update the icon
+          themeIcon.classList.toggle("bi-sun-fill", newTheme === "dark");
+          themeIcon.classList.toggle("bi-moon-stars-fill", newTheme === "light");
 
-            if(newSession){
-                // TODO reload currentProfile
-                currentProfile.displayName = "người lạ"
-                newChatbotSession()
-            }
-        }
+          // Save the preference to localStorage
+          localStorage.setItem("theme", newTheme);
 
-        var gotoPublicChatMode = function (newSession) {
-            $( 'body' ).addClass("light").removeClass("dark");
-            $('#btn-toggle-private-chat').hide();
-            $('#btn-toggle-public-chat').show();
-            window.inPrivateMode = false;
+          if(newSession){
+              // TODO reload currentProfile
+              currentProfile.displayName = "người lạ"
+              newChatbotSession()
+          }
+      }
 
-            // Determine the new theme
-            let newTheme = "light";
+      var gotoPublicChatMode = function (newSession) {
+          $( 'body' ).addClass("light").removeClass("dark");
+          $('#btn-toggle-private-chat').hide();
+          $('#btn-toggle-public-chat').show();
+          window.inPrivateMode = false;
 
-            // Update the icon
-            themeIcon.classList.toggle("bi-sun-fill", newTheme === "dark");
-            themeIcon.classList.toggle("bi-moon-stars-fill", newTheme === "light");
+          // Determine the new theme
+          let newTheme = "light";
 
-            // Save the preference to localStorage
-            localStorage.setItem("theme", newTheme);
+          // Update the icon
+          themeIcon.classList.toggle("bi-sun-fill", newTheme === "dark");
+          themeIcon.classList.toggle("bi-moon-stars-fill", newTheme === "light");
 
-            if(newSession){
-                // TODO reload currentProfile
-                currentProfile.displayName = "Triều"
-                newChatbotSession()
-            }
-        }
+          // Save the preference to localStorage
+          localStorage.setItem("theme", newTheme);
 
-       
-        window.sayHelloToUser = function(){
-            $('#hello_panel').show()
-            
-             // Apply the current theme on load
-            if (window.inPrivateMode) {
-                 // TODO reload currentProfile
-                currentProfile.displayName = "người lạ"
-                gotoPrivateChatMode()
-            } else {
-                gotoPublicChatMode()
-            }
-            $('#user_first_name').text(currentProfile.displayName)
-        }
+          if(newSession){
+              // TODO reload currentProfile
+              currentProfile.displayName = "Triều"
+              newChatbotSession()
+          }
+      }
+
+
+      window.sayHelloToUser = function(){
+          $('#hello_panel').show()
+
+           // Apply the current theme on load
+          if (window.inPrivateMode) {
+               // TODO reload currentProfile
+              currentProfile.displayName = "người lạ"
+              gotoPrivateChatMode()
+          } else {
+              gotoPublicChatMode()
+          }
+          $('#user_first_name').text(currentProfile.displayName)
+      }
     </script>
 
-     <!-- AI Buddy Chatbot CONFIGS -->
-     <script>
-        const CHATBOT_HOSTNAME = '{{ CHATBOT_HOSTNAME }}';
-        const CHATBOT_DEV_MODE = '{{ CHATBOT_DEV_MODE }}' === "True";
-        const BASE_URL_API = location.protocol + '//' + CHATBOT_HOSTNAME + '/ask';    
-        const BASE_URL_GET_VISITOR_INFO = location.protocol + '//' + CHATBOT_HOSTNAME + '/get-visitor-info';
-        const CDP_TRACKING = ! CHATBOT_DEV_MODE;
+    <!-- AI Buddy Chatbot CONFIGS -->
+    <script>
+      const CHATBOT_HOSTNAME = "{{ CHATBOT_HOSTNAME }}";
+      const CHATBOT_DEV_MODE = "{{ CHATBOT_DEV_MODE }}" === "True";
+      const BASE_URL_API = location.protocol + "//" + CHATBOT_HOSTNAME + "/ask";
+      const BASE_URL_GET_VISITOR_INFO =
+        location.protocol + "//" + CHATBOT_HOSTNAME + "/get-visitor-info";
+      const CDP_TRACKING = !CHATBOT_DEV_MODE;
 
-        // 
-        window.loadInitTracking = function(){
-           // local DEV server
-           if (CHATBOT_DEV_MODE) {
-               console.log('CHATBOT_DEV_MODE: ', CHATBOT_DEV_MODE);           
-               
-               window.leoObserverId = "3PTSSCP1IK8gPhzrWIq8hy";
-               window.leoObserverLogDomain = "obs.example.com";
-               window.leoObserverCdnDomain = "leocdp.example.com/public";
-           } 
-           // Production server
-           else if (location.host === "leobot.leocdp.com") {
-               
-               window.leoObserverId = "7OISrL5a6Jbqc0UaXYZVvQ";
-               window.leoObserverLogDomain = "datahub4uspa.leocdp.net";
-               window.leoObserverCdnDomain = "cdn.jsdelivr.net/gh/USPA-Technology/leo-cdp-static-files@v0.8.9.21";
-               return true;
-           } 
-             // skip tracking
-           else {             
-               return false;
-           }
+      //
+      window.loadInitTracking = function () {
+        // local DEV server
+        if (CHATBOT_DEV_MODE) {
+          console.log("CHATBOT_DEV_MODE: ", CHATBOT_DEV_MODE);
+
+          window.leoObserverId = "3PTSSCP1IK8gPhzrWIq8hy";
+          window.leoObserverLogDomain = "obs.example.com";
+          window.leoObserverCdnDomain = "leocdp.example.com/public";
         }
+        // Production server
+        else if (location.host === "leobot.leocdp.com") {
+          window.leoObserverId = "7OISrL5a6Jbqc0UaXYZVvQ";
+          window.leoObserverLogDomain = "datahub4uspa.leocdp.net";
+          window.leoObserverCdnDomain =
+            "cdn.jsdelivr.net/gh/USPA-Technology/leo-cdp-static-files@v0.8.9.21";
+          return true;
+        }
+        // skip tracking
+        else {
+          return false;
+        }
+      };
     </script>
 
-    <script src="/resources/js/resynap.chatbot.js?_={{ timestamp }}" async ></script>
-</body>
+    <!-- Handlebars Template with [[ ]] delimiters -->
+    {% raw %}
+    <script id="spa-template" type="text/x-handlebars-template">
+    {{#each spas}}
+        <div class="col-md-6">
+        <div class="card spa-card">
+            <img src="{{image}}" class="card-img-top"  alt="{{name}}">
+            <div class="card-body">
+            <h5 class="card-title">{{name}}</h5>
+            <p class="card-text text-muted">{{description}}</p>
+            <a href="{{map}}" target="_blank" class="btn btn-sm btn-success">📍 Xem địa chỉ</a>
+            </div>
+        </div>
+        </div>
+    {{/each}}
+    </script>
+    {% endraw %}
 
+
+    <script
+      src="/resources/js/resynap.chatbot.js?_={{ timestamp }}"
+      async
+    ></script>
+  </body>
 </html>
